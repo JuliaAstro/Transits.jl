@@ -1,0 +1,7 @@
+name = "Transits"
+uuid = "2e59a628-7bac-4d38-8059-3a73ba0928ab"
+authors = ["Miles Lucas <mdlucas@hawaii.edu> and contributors"]
+version = "0.1.0"
+
+[compat]
+julia = "1.3"
