@@ -41,7 +41,7 @@ function relative_position(orbit::SimpleOrbit, t)
     dt = (t - orbit.ref_time) % period(orbit) - orbit.half_period
     x = orbit.speed * dt
     y = orbit.b_norm
-    z = abs(dt) < 0.5 * duration(orbit) ? one(x) : -one(x)
+    z = abs(dt) < 0.5 * duration(orbit) ? one(t) : -one(t)
     return SA[x, y, z]
 end
 
@@ -54,7 +54,6 @@ end
 
 function in_transit(orbit::SimpleOrbit, t; texp=0)
     dt = (t - orbit.ref_time) % period(orbit) - orbit.half_period
-    tol = 0.5 * duration(orbit)
-    tol += 0.5 * texp
+    tol = 0.5 * (duration(orbit) + texp)
     return abs(dt) < tol
 end

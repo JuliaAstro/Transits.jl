@@ -175,12 +175,119 @@ function (ld::GreensLimbDark)(b, r)
                 st = zeros(typeof(b), ld.lmax + 1)
                 st[1] = π  - Alens
             end
-
-            end
         end
+
+        s1 = S1()
+
+        if iszero(b)
+            term = 1 - r^2
+            dtermdr = -2 * r
+            fac = sqrt(term)
+            dfacdr = -r / fac
+            st = zeros(typeof(b), ld.lmax + 1)
+            for n in 2:lmax
+                st[n + 1] = -term * r^2 * 2 * π
+                term *= fac
+            end
+            return st
+        end
+
+        r2pb2 = (r^2 + b^2)
+        η2 = 0.5 * r^2 * (r2pb2 + b^2)
+        if ksq > 1
+            four_pi_eta = 4 * pi * (η2 - 0.5)
+        else
+            four_pi_eta = 2 * (-(π - kap1) + 2 * η2 * kap0 - 0.25 * kite_area2 * (1 + 5 * r^2 + b^2))
+        end
+        st[3] = 2 * st[1] * four_pi_eta
+        
+        lmax == 2 && return st
+
+        # now onto the higher order terms
+        if ksq < 0.5 && lmax > 3
+            downwoardM()
+        else
+            upwardM()
+        end
+
+        # computer the remaining terms in the `st` AbstractVector
+        N = lmax - 2
+        @. st[4:4 + N] = -2 * r^2 * m[4:4 + N] + ndnp2[4:4 + N] * (
+            onemr2mb2 * m[4:4 + N] + sqarea * m[2:2 + N]
+        )
+
 
 
     end
+
+    return st
+end
+
+function greens_S1(b, r)
+    Λ1 = 0
+    if b ≥ 1 + r || iszero(r)
+        # no occultation (case 1)
+        Λ1 = 0
+        Eofk = 0
+        Em1mKdm = 0
+    elseif b ≤ r - 1
+        # full occultation (case 11)
+        Λ1 = 0
+        Eofk = 0
+        Em1mKdm = 0
+    else
+        if iszero(b)
+            # case 10
+            sqrt1mr2 = sqrt(1 - r^2)
+            Λ1 = -2π * sqrt1mr2^3
+            Eofk = 0.5 * π
+            Em1mKdm = 0.25 * π
+        elseif b ≈ r
+            if r ≈ 0.5
+                # case 6
+                Λ1 = π - 4 / 3
+                Eofk = 1
+                Em1mKdm = 1
+            elseif r < 0.5
+                # case 5
+                m = 4 * r^2
+                Eof = ellp(m, 1, 1, 1 - m)
+                Em1mKdm = ellip(m, 1, 1, 0)
+                Λ1 = π + 2 / 3 * ((2 * m - 3) * Eofk - m * Em1mKdm)
+            else
+                # case 7
+                m = r * r^2
+                minv = inv(m)
+                Eofk = ellip(minv, 1, 1, 1 - minv)
+                Em1mKdm = ellip(minv, 1, 1, 0)
+                Λ1 = π + inv(r) / 3 * (-m * Eofk + (2 * m - 3) * Em1mKdm)
+            end
+        else
+            if ksq < 1
+                # case 2, case 8
+                sqbrinv = 1 / sqbr
+                local Piofk
+                ellip(ksq, kc, (b - r)^2 * kcsq, 0, 1, 1, 3 * kcsq * (b - r) * (b + r), kcsq, 0, Piofk, Eofk, Em1mKdm)
+                Λ1 = (1 - mbr) * (1 + mbr) * (Piofk + (-3 + 6 * r^2 + 2 * b * r) * Em1mKdm - 4 * b * r * Eof) * sqbrinv / 3
+            elseif ksq > 1
+                # case 3, case 9 
+                bmrdbpr = (b - r) / (b + r)
+                μ = 3 * bmrdbpr * onembmr2inv
+                local Piofk
+                ellip(invksq, kc, p, 1 + μ, 1, 1, p + μ, kcsq, 0, Piofk, Eofk, Em1mKdm)
+                Λ1 = 2 * sqonembmr2 * (onembpr2 * Piof - (4 - 7 * r^2 - b^2) * Eofk) / 3
+            else
+                # case 4
+                rootr1mr = sqrt(r * (1 - r))
+                Λ1 = 2 * acos(1 - 2*r) - 4 / 3 * (3 + 2 * r - 8 * r^2) * rootr1mr - 2 * π * (r > 0.5)
+                Eofk = 1
+                Em1mKdm = 1
+        end
+
+    st = zeros(typeof(b), ld.lmax + 1)
+    st[2] = ((1 - (r > b)) * 2 * π - Λ1) / 3
+
+    return st
 end
 
 greens_M_coeffs(lmax; kwargs...) = greens_M_coeffs(Float64, lmax, kwargs...)
