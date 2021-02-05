@@ -290,6 +290,78 @@ function greens_S1(b, r)
     return st
 end
 
+function ellip()
+
+end
+
+function ellip()
+
+end
+
+function upwardM(lmax)
+    computeM0123()
+
+    for n in 4:lmax
+        M[n + 1] = (2 * (n - 1) * onemr2mb2 * m[n - 1] + (n - 2) * sqarea * M[n - 2]) * invn(n)
+    end
+
+end
+
+function downwardM(lmax)
+    invsqarea = inv(sqarea)
+    @assert ksq < 1
+    tol = eps(typeof(invsqarea)) * ksq
+    term = 0
+    fac = 1
+    for n in 0:lmax-4
+        fac *= sqonembmr2
+    end
+    fac *= k
+
+    # now, compute higher order terms until precision reached
+    for j in 0: 3
+        # add leading term to m
+        val = M[j + 1, 1]
+        k2n = 1
+
+        # compute higher order terms
+        for n in 1:size(M, 2) - 1
+            k2n *= ksq
+            term = k2n * M[j + 1, n + 1]
+            val += term
+            abs(term) < tol && break
+        end
+        M[lmax - 2 + j] = val * fac
+        fac *= sqonembmr2
+    end
+
+    # recurse downward
+    for n in lmax - 4:-1:4
+        M[n + 1] = ((n + r) * M[n + 5] - 2 * (n + 3) * onemr2mb2 * M[n + 3]) * invsqarea * invn(n + 2)
+    end
+
+    # compute lowest four exactly
+    computeM0123()
+
+
+end
+
+function computeM0123()
+    out = zeros(4)
+    if ksq < 1
+        out[1] = kap0
+        out[2] = 2 * sqbr * 2 * ksq * Em1mKdm
+        out[3] = kap0 * onemr2mb2 + kite_area2
+        out[4] = (2 * sqbr)^3 * 2 / 3 * ksq * (Eofk + (3 * ksq - 2) * Em1mKdm)
+    else
+        out[1] = π
+        out[2] = 2 * sqonembmr2 * Eofk
+        out[3] = π * onemr2mb2
+        out[4] = sqonembmr2^3 * 2 / 3 * ((3 - 2 * invksq) * Eofk + invksq * Em1mKdm)
+    end
+    return out
+end
+
 greens_M_coeffs(lmax; kwargs...) = greens_M_coeffs(Float64, lmax, kwargs...)
 greens_M_coeffs(T, lmax; maxiter=100) = greens_M_coeffs!(Array{T}(undef, 4, maxiter), lmax)
 
