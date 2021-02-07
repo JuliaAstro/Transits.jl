@@ -2,7 +2,7 @@
 """
 computes `cel(kc, p, a, b)` from Bulirsch (1969)
 """
-function ellip(ksq, kc, p, a, b)
+function ellip(ksq, kc, p, a, b; maxiter=100)
     # in some rare cases, k^2 is so close to zero that it can actually
     # go slightly negative. Let's explicitly force it to zero
     ksq = max(0, ksq)
@@ -25,7 +25,7 @@ function ellip(ksq, kc, p, a, b)
     ca = sqrt(eps() * ksq)
 
     if ca ≤ 0
-        ca = typemin()
+        ca = typemin(ca)
     end
     m = 1
     ee = kc
@@ -50,7 +50,7 @@ function ellip(ksq, kc, p, a, b)
     g = m
     m += kc
 
-    for i in 0:size(M, 2) - 1
+    for _ in 1:maxiter
         kc = sqrt(ee)
         kc += kc
         ee = kc * m
@@ -69,19 +69,20 @@ function ellip(ksq, kc, p, a, b)
     error("Elliptic integral CEL did not converge.")
 end
 
-function ellip(ksq, p, a, b)
+function ellip(ksq, p, a, b; kwargs...)
     if ksq ≉ 1
         kc = sqrt(1 - ksq)
     else
         kc = eps() * ksq
     end
-    return ellip(ksq, kc, p, a, b)
+    return ellip(ksq, kc, p, a, b; kwargs...)
 end
 
 """
 computes the function `cel(kc, p, a, b)` from Bulircsch (1969). Vectorized version to improve speed when cmoputing multiple elliptic integrals with the same value of `kc`. This assumes tfirst value of a and b uses p; the rest have p = 1.
 """
-function ellip(k2, kc, p, a1, a2, a3, b1, b2, b3, Piofk, Eofk, Em1mKdm)
+function ellip(k2, kc, p, a1, a2, a3, b1, b2, b3; maxiter=100)
+    # TODO rewrite using StaticArrays
     if k2 ≈ 1 || kc ≈ 0
         kc = eps() * k2
     elseif k2 < eps()
@@ -128,7 +129,7 @@ function ellip(k2, kc, p, a1, a2, a3, b1, b2, b3, Piofk, Eofk, Em1mKdm)
     g1 = m
     m += kc
     iter = 0
-    while (abs(g - kc) > g * ca || abs(g1 - kc) > g1 * ca) && (iter < size(M, 2))
+    while (abs(g - kc) > g * ca || abs(g1 - kc) > g1 * ca) && (iter < maxiter)
         kc = sqrt(ee)
         kc += kc
         ee = kc * m
@@ -147,13 +148,13 @@ function ellip(k2, kc, p, a1, a2, a3, b1, b2, b3, Piofk, Eofk, Em1mKdm)
         m += kc
         iter += 1
     end
-    if iter == size(M, 2)
+    if iter == maxiter
         error("Elliptic integral CEL did not converge")
     end
     Piofk = 0.5 * π * (a1 * m + b1) / (m * (m + p))
     Eofk = 0.5 * π * (a2 * m + b2) / (m * (m + p1))
     Em1mKdm = 0.5 * π * (a3 * m + b3) / (m * (m + p1))
-
+    return Piofk, Eofk, Em1mKdm
 end
 
 

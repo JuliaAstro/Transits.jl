@@ -1,15 +1,26 @@
 
-struct LimbDarkLightCurve{CT<:AbstractVector}
+struct LimbDarkLightCurve{CT<:AbstractVector,DT}
     u::CT
     c::CT
     c_norm::CT
+    driver::DT
 end
 
+@doc raw"""
+    LimbDarkLightCurve(u)
+
+Quadratically limb-darkened light curve with limb-darkening coefficients `u`. The limb-darkening profile has the quadratic form
+
+```math
+\frac{I(\mu)}{I(1)}=1-u_1(1-\mu)-u_2(1-\mu)^2
+```
+"""
 function LimbDarkLightCurve(u::AbstractVector{T}) where T
     u_ext = pushfirst!(u, -one(T))
     c = get_cl(u_ext)
     c_norm = c ./ (π * (c[1] + 2 * c[2] / 3))
-    return LimbDarkLightCurve(u, c, c_norm)
+    ld = GreensLimbDark(length(c))
+    return LimbDarkLightCurve(u, c, c_norm, ld)
 end
 
 
@@ -17,7 +28,15 @@ function (lc::LimbDarkLightCurve)(orbit::AbstractOrbit, t, r; texp=0, oversample
 
     coords = relative_position(orbit, t)
     b = sqrt(coords[1]^2 + coords[2]^2)
-    f = limbdark(lc.c_norm, b, r, coords[3])
+    if coords[3] > 0
+        b_ = abs(b)
+        r_ = abs(r)
+        if b_ < 1 + r_
+            st = lc.driver(b_, r_)
+            return st * lc.c_norm - 1 
+        end
+    end
+    return zero(b)
 end
 
 
@@ -64,19 +83,6 @@ function get_cl(u::AbstractVector{T}) where T
     return c
 end
 
-function limbdark(cl::AbstractVector{T}, b, r, los) where T
-    ld = GreensLimbDark(length(cl))
-    if los > 0
-        b_ = abs(b)
-        r_ = abs(r)
-        if b_ < 1 + r_
-            st = ld(b_, r_)
-            return st * cl - 1 
-        end
-    end
-    return zero(T)
-end
-
 struct GreensLimbDark
     lmax::Int
     b
@@ -113,9 +119,13 @@ struct GreensLimbDark
     ndnp2
 end
 
-function GreensLimbDark(lmax::Int)
-    computeMCoeff()
-    computeNCoeff()
+GreensLimbDark(lmax; kwargs...) = GreensLimbDark(Float64, lmax; kwargs...)
+
+function GreensLimbDark(T, lmax::Int; maxiter=100)
+    M = greens_M_coeffs(T, lmax; maxiter=maxiter)
+    N = greens_N_coeffs(T, lmax; maxiter=maxiter)
+    
+
     for n in 0 : lmax + 2
 
     end
@@ -135,9 +145,15 @@ function (ld::GreensLimbDark)(b, r)
     else
         # compute the kite area
         p0, p1, p2 = 1, b, r
-        p0 < p1 && (p0, p1 = p1, p0)
-        p1 < p2 && (p1, p2 = p2, p1)
-        p0 < p1 && (p0, p1 = p1, p0)
+        if p0 < p1
+            p0, p1 = p1, p0
+        end
+        if p1 < p2
+            p1, p2 = p2, p1
+        end
+        if p0 < p1
+            p0, p1 = p1, p0
+        end
         sqarea = (p0 + (p1 + p2)) * (p2 - (p0 - p1)) * (p2 + (p0 - p1)) * (p0 + (p1 - p2))
         kite_area2 = sqrt(max(0, sqarea))
 
@@ -251,7 +267,7 @@ function greens_S1(b, r)
             elseif r < 0.5
                 # case 5
                 m = 4 * r^2
-                Eof = ellp(m, 1, 1, 1 - m)
+                Eof = ellip(m, 1, 1, 1 - m)
                 Em1mKdm = ellip(m, 1, 1, 0)
                 Λ1 = π + 2 / 3 * ((2 * m - 3) * Eofk - m * Em1mKdm)
             else
@@ -266,15 +282,13 @@ function greens_S1(b, r)
             if ksq < 1
                 # case 2, case 8
                 sqbrinv = 1 / sqbr
-                local Piofk
-                ellip(ksq, kc, (b - r)^2 * kcsq, 0, 1, 1, 3 * kcsq * (b - r) * (b + r), kcsq, 0, Piofk, Eofk, Em1mKdm)
+                Piofk, Eofk, Em1mKdm = ellip(ksq, kc, (b - r)^2 * kcsq, 0, 1, 1, 3 * kcsq * (b - r) * (b + r), kcsq, 0)
                 Λ1 = (1 - mbr) * (1 + mbr) * (Piofk + (-3 + 6 * r^2 + 2 * b * r) * Em1mKdm - 4 * b * r * Eof) * sqbrinv / 3
             elseif ksq > 1
                 # case 3, case 9 
                 bmrdbpr = (b - r) / (b + r)
                 μ = 3 * bmrdbpr * onembmr2inv
-                local Piofk
-                ellip(invksq, kc, p, 1 + μ, 1, 1, p + μ, kcsq, 0, Piofk, Eofk, Em1mKdm)
+                Piofk, Eofk, Em1mKdm = ellip(invksq, kc, p, 1 + μ, 1, 1, p + μ, kcsq, 0)
                 Λ1 = 2 * sqonembmr2 * (onembpr2 * Piof - (4 - 7 * r^2 - b^2) * Eofk) / 3
             else
                 # case 4
@@ -282,20 +296,14 @@ function greens_S1(b, r)
                 Λ1 = 2 * acos(1 - 2*r) - 4 / 3 * (3 + 2 * r - 8 * r^2) * rootr1mr - 2 * π * (r > 0.5)
                 Eofk = 1
                 Em1mKdm = 1
+            end
         end
+    end
 
     st = zeros(typeof(b), ld.lmax + 1)
     st[2] = ((1 - (r > b)) * 2 * π - Λ1) / 3
 
     return st
-end
-
-function ellip()
-
-end
-
-function ellip()
-
 end
 
 function upwardM(lmax)
