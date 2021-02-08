@@ -7,6 +7,6 @@ include("orbits/Orbits.jl")
 using .Orbits: AbstractOrbit
 
 include("limbdark.jl")
-include("elliptic_integrals.jl")
+include("utils.jl")
 
 end

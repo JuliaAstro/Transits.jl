@@ -2,7 +2,7 @@
 """
 computes `cel(kc, p, a, b)` from Bulirsch (1969)
 """
-function ellip(ksq, kc, p, a, b; maxiter=100)
+function cel(ksq, kc, p, a, b; maxiter=100)
     # in some rare cases, k^2 is so close to zero that it can actually
     # go slightly negative. Let's explicitly force it to zero
     ksq = max(0, ksq)
@@ -69,19 +69,19 @@ function ellip(ksq, kc, p, a, b; maxiter=100)
     error("Elliptic integral CEL did not converge.")
 end
 
-function ellip(ksq, p, a, b; kwargs...)
+function cel(ksq, p, a, b; kwargs...)
     if ksq ≉ 1
         kc = sqrt(1 - ksq)
     else
         kc = eps() * ksq
     end
-    return ellip(ksq, kc, p, a, b; kwargs...)
+    return cel(ksq, kc, p, a, b; kwargs...)
 end
 
 """
 computes the function `cel(kc, p, a, b)` from Bulircsch (1969). Vectorized version to improve speed when cmoputing multiple elliptic integrals with the same value of `kc`. This assumes tfirst value of a and b uses p; the rest have p = 1.
 """
-function ellip(k2, kc, p, a1, a2, a3, b1, b2, b3; maxiter=100)
+function cel(k2, kc, p, a1, a2, a3, b1, b2, b3; maxiter=100)
     # TODO rewrite using StaticArrays
     if k2 ≈ 1 || kc ≈ 0
         kc = eps() * k2
@@ -95,7 +95,7 @@ function ellip(k2, kc, p, a1, a2, a3, b1, b2, b3; maxiter=100)
     # initialize values
     ee = kc
     m = 1
-    if P > 0
+    if p > 0
         p = sqrt(p)
         b1 /= p
     else
@@ -157,4 +157,33 @@ function ellip(k2, kc, p, a1, a2, a3, b1, b2, b3; maxiter=100)
     return Piofk, Eofk, Em1mKdm
 end
 
+
+"""
+    wallis(n)
+
+Compute the Wallis ratio recursively `n` times.
+
+```math
+\\Gamma(1 + n/2) / \\Gamma(3/2 + n/2)
+```
+"""
+function wallis(n)
+    if iseven(n)
+        z = 1 + n/2
+        dz = -1
+    else
+        z = 1 + (n - 1)/2
+        dz = 0
+    end
+    A = 1.0
+    B = sqrt(π)
+    for i in 1:z + dz - 1
+        A *= i + 1
+        B *= i - 0.5
+    end
+    for i in max(1, z+dz):z
+        B *= i - 0.5
+    end
+    return iseven(n) ?  A / B : B / A
+end
 

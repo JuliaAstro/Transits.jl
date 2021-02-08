@@ -1,4 +1,4 @@
-struct SimpleOrbit
+struct SimpleOrbit <: AbstractOrbit
     period
     t0
     b
