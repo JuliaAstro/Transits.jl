@@ -3,7 +3,7 @@ struct SimpleOrbit <: AbstractOrbit
     t0
     b
     duration
-    Rstar
+    r_star
 
     b_norm
     speed
@@ -12,7 +12,7 @@ struct SimpleOrbit <: AbstractOrbit
 end
 
 """
-    SimpleOrbit(; period, duration, t0=0, b=0, Rstar=1)
+    SimpleOrbit(; period, duration, t0=0, b=0, r_star=1)
 
 Circular orbit parameterized by the basic observables of a transiting system.
 
@@ -21,14 +21,14 @@ Circular orbit parameterized by the basic observables of a transiting system.
 * `duration` The duration of the transit, same units as `period`
 * `t0` - The midpoint time of the reference transit, same units as `period`
 * `b` - The impact parameter of the orbit
-* `Rstar` - The radius of the star, nominally in solar radii
+* `r_star` - The radius of the star, nominally in solar radii
 """
-function SimpleOrbit(;period, duration, t0=0.0, b=0.0, Rstar=1.0)
-    b_norm = b * Rstar
-    speed = 2 * sqrt(Rstar^2 - b_norm^2)
+function SimpleOrbit(;period, duration, t0=0.0, b=0.0, r_star=1.0)
+    b_norm = b * r_star
+    speed = 2 * sqrt(r_star^2 - b_norm^2)
     half_period = period / 2
     ref_time =  t0 - half_period
-    SimpleOrbit(period, t0, b, duration, Rstar, b_norm, speed, half_period, ref_time)
+    SimpleOrbit(period, t0, b, duration, r_star, b_norm, speed, half_period, ref_time)
 end
 
 
@@ -47,7 +47,7 @@ end
 
 function in_transit(orbit::SimpleOrbit, t, r; texp=0)
     dt = (t - orbit.ref_time) % period(orbit) - orbit.half_period
-    tol = sqrt((r + orbit.Rstar)^2 - orbit.b_norm^2) / orbit.speed
+    tol = sqrt((r + orbit.r_star)^2 - orbit.b_norm^2) / orbit.speed
     tol += 0.5 * texp
     return abs(dt) < tol
 end

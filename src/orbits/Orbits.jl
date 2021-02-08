@@ -2,7 +2,7 @@ module Orbits
 
 using StaticArrays
 
-export SimpleOrbit
+export SimpleOrbit, KeplerianOrbit
 
 abstract type AbstractOrbit end
 
@@ -15,5 +15,6 @@ relative_position(::AbstractOrbit, t)
 
 
 include("simple.jl")
+include("kepler.jl")
 
 end # module
