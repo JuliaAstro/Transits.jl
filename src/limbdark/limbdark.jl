@@ -1,5 +1,5 @@
 
-# using LinearAlgebra: dot
+abstract type AbstractLimbDark end
 
 # struct LimbDarkLightCurve{CT<:AbstractVector,DT}
 #     u::CT
@@ -26,20 +26,12 @@
 # end
 
 
-# function (lc::LimbDarkLightCurve)(orbit::AbstractOrbit, t, r)
-
-#     coords = Orbits.relative_position(orbit, t)
-#     b = sqrt(coords[1]^2 + coords[2]^2)
-#     if coords[3] > 0
-#         b_ = abs(b) / orbit.r_star
-#         r_ = abs(r) / orbit.r_star
-#         if b_ < 1 + r_
-#             sT = lc.driver(b_, r_)
-#             return dot(sT, lc.c_norm) - 1
-#         end
-#     end
-#     return zero(b)
-# end
+function (lc::AbstractLimbDark)(orbit::AbstractOrbit, t, r)
+    coords = Orbits.relative_position(orbit, t)
+    z = sqrt(coords[1]^2 + coords[2]^2)
+    b = abs(z) / orbit.r_star
+    return lc(b, r)
+end
 
 export PolynomialLimbDark
 

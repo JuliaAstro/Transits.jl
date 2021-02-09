@@ -1,6 +1,6 @@
 
 
-struct IntegratedLimbDark{LD,T}
+struct IntegratedLimbDark{LD<:AbstractLimbDark,T} <: AbstractLimbDark
     limbdark::LD
     texp::T
     order::Int

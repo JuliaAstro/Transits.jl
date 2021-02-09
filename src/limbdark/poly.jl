@@ -2,7 +2,7 @@
 using SpecialFunctions: lgamma
 using LinearAlgebra: dot
 
-struct PolynomialLimbDark
+struct PolynomialLimbDark <: AbstractLimbDark
     n_max
     u_n
     g_n
