@@ -11,3 +11,27 @@
 Flexible photometric transit curves with limb darkening
 
 **WIP**: Currently under progress by @mileslucas
+
+## Usage
+
+```julia
+using Transits
+
+orbit = SimpleOrbit(period=3, duration=0.5)
+u = [0.4, 0.26] # quad limb dark
+ld = PolynomialLimbDark(u)
+
+t = range(-1, 1, length=1000) # days from t0
+rs = range(0, 0.2, length=10) # radius ratio
+
+fluxes = @. ld(orbit, t, rs')
+```
+
+```julia
+using ColorSchemes, Plots
+plot(t, fluxes, xlabel="time - t0 [d]", ylabel="relative flux",
+     leg=false, title="Quadratic Limb Darkening (u=[0.4, 0.26])",
+     palette=palette(:inferno, size(fs, 2)*2))
+```
+
+![](limbdark.png)
