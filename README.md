@@ -30,7 +30,7 @@ fluxes = @. ld(orbit, t, rs')
 ```julia
 using ColorSchemes, Plots
 plot(t, fluxes, xlabel="time - t0 [d]", ylabel="relative flux",
-     leg=false, title="Quadratic Limb Darkening (u=[0.4, 0.26])",
+     leg=false, title="Quadratic Limb Darkening (u=$u)",
      palette=palette(:inferno, size(fluxes, 2)*2))
 ```
 
