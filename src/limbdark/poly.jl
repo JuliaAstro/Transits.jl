@@ -41,7 +41,7 @@ function PolynomialLimbDark(u::AbstractVector{T}; maxiter=100) where T
     Nn_coeff = compute_Nn_coeffs(T, n_max; maxiter=maxiter)
 
     # calculate flux normalization factor, which only depends on first two terms
-    if n_max > 0
+    if length(g_n) > 1
         norm = inv(π * (g_n[1] + 2/3 * g_n[2]))
     else
         norm = inv(π * g_n[1])
@@ -68,10 +68,11 @@ function compute(ld::PolynomialLimbDark, b::T, r) where T
 
     r2 = r^2
     b2 = b^2
-    onemr2 = 1 - r2
-    sqrt1mr2 = sqrt(onemr2)
-
+    
     if iszero(b)
+        onemr2 = 1 - r2
+        sqrt1mr2 = sqrt(onemr2)
+
         # annular ellipse
         if ld.n_max == 0
             flux = ld.g_n[1] * onemr2
@@ -120,8 +121,9 @@ function compute(ld::PolynomialLimbDark, b::T, r) where T
     ## Compute uniform term
     if b ≤ 1 - r
         ld.sT[1] = π * (1 - r2)
-        κ0 = π
+        κ0 = convert(T, π)
         kck = zero(T)
+        kite_area2 = zero(T)
     else
         kite_area2 = sqrt(sqarea)
         r2m1 = (r - 1) * (r + 1)
@@ -199,6 +201,8 @@ function compute(ld::PolynomialLimbDark, b::T, r) where T
         downwardM!(ld.Mn, ld.Mn_coeff;
                    n_max=ld.n_max,
                    sqonembmr2=sqonembmr2,
+                   sqbr=sqbr,
+                   onemr2mb2=onemr2mb2,
                    k=k,
                    k2=k2,
                    sqarea=sqarea,
@@ -210,6 +214,7 @@ function compute(ld::PolynomialLimbDark, b::T, r) where T
         upwardM!(ld.Mn;
                  sqbr=sqbr,
                  n_max=ld.n_max,
+                 sqonembmr2=sqonembmr2,
                  onemr2mb2=onemr2mb2,
                  sqarea=sqarea,
                  k2=k2,
@@ -221,7 +226,7 @@ function compute(ld::PolynomialLimbDark, b::T, r) where T
 
     # compute remaining terms
     for n in 3:ld.n_max
-        ld.sT[n + 1] = -2 * r2 * ld.Mn[n + 1] - n / (n + 2) * 
+        ld.sT[n + 1] = -2 * r2 * ld.Mn[n + 1] + n / (n + 2) * 
                        (onemr2mb2 * ld.Mn[n + 1] + sqarea * ld.Mn[n - 1])
     end
 
@@ -235,7 +240,7 @@ end
 """
 Transform the `u_n` coefficients to `g_n`, which are coefficients in Green's basis from REF.
 """
-compute_gn(u::AbstractVector) = compute_gn!(similar(u), u)
+compute_gn(u::AbstractVector) = compute_gn!(zero(u), u)
 
 function compute_gn!(g_n::AbstractVector{T}, u_n) where T
     n = length(g_n) - 1
@@ -261,7 +266,7 @@ function compute_gn!(g_n::AbstractVector{T}, u_n) where T
     end
     if n ≥ 3
         g_n[2] = a_n[2] + 3 * g_n[4]
-    elseif n > 1
+    elseif n ≥ 1
         g_n[2] = a_n[2]
     end
     if n ≥ 2
@@ -360,7 +365,7 @@ function sqarea_triangle(p0, p1, p2)
     return sqarea
 end
 
-function upwardM!(arr; sqbr, n_max, onemr2mb2, sqarea, k2, κ0, Eofk, Em1mKdm, kite_area2)
+function upwardM!(arr; sqbr, n_max, sqonembmr2, onemr2mb2, sqarea, k2, κ0, Eofk, Em1mKdm, kite_area2, )
     if k2 < 1
         arr[1] = κ0
         arr[2] = 2 * sqbr * 2 * k2 * Em1mKdm
@@ -379,11 +384,11 @@ function upwardM!(arr; sqbr, n_max, onemr2mb2, sqarea, k2, κ0, Eofk, Em1mKdm, k
     return arr
 end
 
-function downwardM!(arr, Mn_coeff; n_max, sqonembmr2, k, k2, sqarea, κ0, Eofk, Em1mKdm, kite_area2)
+function downwardM!(arr, Mn_coeff; n_max, sqbr, sqonembmr2, onemr2mb2, k, k2, sqarea, κ0, Eofk, Em1mKdm, kite_area2)
     if k2 < 1
         tol = eps(k2)
         term = zero(tol)
-        fac = k * sqonembmr2^(n_max - 3) * k
+        fac = k * sqonembmr2^(n_max - 3)
         # now, compute higher order terms until precision reached
         for j in 1:4
             # add leading term to m
@@ -429,7 +434,7 @@ function downwardM!(arr, Mn_coeff; n_max, sqonembmr2, k, k2, sqarea, κ0, Eofk, 
     if k2 < 1
         arr[1] = κ0
         arr[2] = 2 * sqbr * 2 * k2 * Em1mKdm
-        arr[3] = kap0 * onemr2mb2 + kite_area2
+        arr[3] = κ0 * onemr2mb2 + kite_area2
         arr[4] = 8 * sqbr^3 * 2 / 3 * k2 * (Eofk + (3 * k2 - 2) * Em1mKdm)
     else
         arr[1] = π
