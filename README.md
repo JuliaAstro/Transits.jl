@@ -27,16 +27,44 @@ rs = range(0, 0.2, length=10) # radius ratio
 fluxes = @. ld(orbit, t, rs')
 ```
 
-```julia
-using ColorSchemes, Plots
-plot(t, fluxes, xlabel="time - t0 [d]", ylabel="relative flux",
-     leg=false, title="Quadratic Limb Darkening (u=$u)",
-     palette=palette(:inferno, size(fluxes, 2)*2))
-```
-
 ![](limbdark.png)
 
-### Using Units
+## Integrated and Secondary Curves
+
+`IntegratedLimbDark` can be used to numerically integrate each light curve exposure in time
+
+```julia
+ld = IntegratedLimbDark([0.4, 0.26])
+orbit = SimpleOrbit(period=3, duration=1)
+t = range(-1, 1, length=1000)
+texp = [0.1 0.2 0.3]
+# no extra calculations made
+flux = @. ld(orbit, t, 0.2)
+# use quadrature to find time-averaged flux for each t
+flux_int = @. ld(orbit, t, 0.2, texp) 
+```
+
+![](integrated.png)
+
+`SecondaryLimbDark` can be used to generate secondary eclipses given a surface brightness ratio
+
+```julia
+ld = SecondaryLimbDark([0.4, 0.26], brightness_ratio=0.1)
+ld_int = IntegratedLimbDark(ld) # composition works flawlessly
+
+orbit = SimpleOrbit(period=4, duration=1)
+t = range(-1.25, 2.75, length=1000)
+rs = range(0.01, 0.1, length=6)
+
+f = @. ld(orbit, t, rs')
+f_int = @. ld_int(orbit, t, rs', texp=0.3)
+```
+
+![](secondary.png)
+
+## Using Units
+
+Units from `Unitfuljl` are a drop-in substitution for numbers
 
 ```julia
 using Unitful
