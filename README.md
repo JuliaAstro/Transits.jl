@@ -17,7 +17,7 @@ Flexible photometric transit curves with limb darkening
 ```julia
 using Transits
 
-orbit = SimpleOrbit(period=3, duration=0.5)
+orbit = SimpleOrbit(period=3, duration=1)
 u = [0.4, 0.26] # quad limb dark
 ld = PolynomialLimbDark(u)
 
