@@ -31,7 +31,7 @@ fluxes = @. ld(orbit, t, rs')
 using ColorSchemes, Plots
 plot(t, fluxes, xlabel="time - t0 [d]", ylabel="relative flux",
      leg=false, title="Quadratic Limb Darkening (u=[0.4, 0.26])",
-     palette=palette(:inferno, size(fs, 2)*2))
+     palette=palette(:inferno, size(fluxes, 2)*2))
 ```
 
 ![](limbdark.png)
