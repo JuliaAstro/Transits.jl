@@ -35,3 +35,12 @@ plot(t, fluxes, xlabel="time - t0 [d]", ylabel="relative flux",
 ```
 
 ![](limbdark.png)
+
+### Using Units
+
+```julia
+using Unitful
+orbit = SimpleOrbit(period=10u"d", duration=5u"hr")
+t = range(-6, 6, length=1000)u"hr"
+flux = @. ld(orbit, t, 0.1)
+```

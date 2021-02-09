@@ -139,8 +139,8 @@ function (ld::PolynomialLimbDark)(b::T, r) where T
         Λ1 = -2 * π * sqrt(1 - r2)^3
         Eofk = 0.5 * π
         Em1mKdm = 0.25 * π
-    elseif b ≈ r
-        if r ≈ 0.5 # case 6
+    elseif b == r
+        if r == 0.5 # case 6
             Λ1 = π - 4/3 - 2 * (b - 0.5) + 6 * (r - 0.5)
             Eofk = one(T)
             Em1mKdm = one(T)
@@ -148,7 +148,7 @@ function (ld::PolynomialLimbDark)(b::T, r) where T
             m = 4 * r2
             Eofk = cel(m, one(T), one(T), 1 - m)
             Em1mKdm = cel(m, one(T), one(T), zero(T))
-            Λ1 = π * 2/3  * ((2 * m - 3) * Eofk - m * Em1mKdm) +
+            Λ1 = π + 2/3 * ((2 * m - 3) * Eofk - m * Em1mKdm) +
                  (b - r) * 4 * r * (Eofk - 2 * Em1mKdm)
         else # case 7
             m = 4 * r^2

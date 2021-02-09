@@ -26,11 +26,11 @@ abstract type AbstractLimbDark end
 # end
 
 
-function (lc::AbstractLimbDark)(orbit::AbstractOrbit, t, r)
+function (ld::AbstractLimbDark)(orbit::AbstractOrbit, t, r)
     coords = Orbits.relative_position(orbit, t)
     z = sqrt(coords[1]^2 + coords[2]^2)
-    b = abs(z) / orbit.r_star
-    return lc(b, r)
+    b = z / orbit.r_star
+    return ld(b, r)
 end
 
 export PolynomialLimbDark

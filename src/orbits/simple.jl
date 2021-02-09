@@ -23,10 +23,11 @@ Circular orbit parameterized by the basic observables of a transiting system.
 * `b` - The impact parameter of the orbit
 * `r_star` - The radius of the star, nominally in solar radii
 """
-function SimpleOrbit(;period, duration, t0=0.0, b=0.0, r_star=1.0)
+function SimpleOrbit(;period, duration, t0=zero(period), b=0.0, r_star=1.0)
+    half_period = 0.5 * period
+    duration > half_period && error("duration cannot be longer than half the period")
     b_norm = b * r_star
-    speed = 2 * sqrt(r_star^2 - b_norm^2)
-    half_period = period / 2
+    speed = 2 * sqrt(r_star^2 - b_norm^2) / duration
     ref_time =  t0 - half_period
     SimpleOrbit(period, t0, b, duration, r_star, b_norm, speed, half_period, ref_time)
 end
@@ -41,7 +42,7 @@ function relative_position(orbit::SimpleOrbit, t)
     dt = (t - orbit.ref_time) % period(orbit) - orbit.half_period
     x = orbit.speed * dt
     y = orbit.b_norm
-    z = abs(dt) < 0.5 * duration(orbit) ? one(t) : -one(t)
+    z = abs(dt) < 0.5 * orbit.duration ? one(x) : -one(x)
     return SA[x, y, z]
 end
 
@@ -54,6 +55,6 @@ end
 
 function in_transit(orbit::SimpleOrbit, t; texp=0)
     dt = (t - orbit.ref_time) % period(orbit) - orbit.half_period
-    tol = 0.5 * (duration(orbit) + texp)
+    tol = 0.5 * (orbit.duration + texp)
     return abs(dt) < tol
 end
