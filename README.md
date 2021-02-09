@@ -64,7 +64,7 @@ f_int = @. ld_int(orbit, t, rs', texp=0.3)
 
 ## Using Units
 
-Units from `Unitfuljl` are a drop-in substitution for numbers
+Units from `Unitful.jl` are a drop-in substitution for numbers
 
 ```julia
 using Unitful
