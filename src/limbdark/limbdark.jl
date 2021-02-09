@@ -25,16 +25,17 @@ abstract type AbstractLimbDark end
 #     return LimbDarkLightCurve(u, c, c_norm, ld)
 # end
 
+(ld::AbstractLimbDark)(args...; kwargs...) = compute(ld, args...; kwargs...)
 
-function (ld::AbstractLimbDark)(orbit::AbstractOrbit, t, r)
+function compute(ld::AbstractLimbDark, orbit::AbstractOrbit, t, r)
     coords = Orbits.relative_position(orbit, t)
     z = sqrt(coords[1]^2 + coords[2]^2)
     b = z / orbit.r_star
-    return ld(b, r)
+    return compute(ld, b, r)
 end
 
-export PolynomialLimbDark
+export PolynomialLimbDark, IntegratedLimbDark
 
 include("elliptic.jl")
 include("poly.jl")
-# include("integrate.jl")
+include("integrated.jl")

@@ -2,16 +2,16 @@
 using SpecialFunctions: lgamma
 using LinearAlgebra: dot
 
-struct PolynomialLimbDark <: AbstractLimbDark
-    n_max
-    u_n
-    g_n
-    Mn_coeff
-    Nn_coeff
-    norm
-    Mn
-    Nn
-    sT
+struct PolynomialLimbDark{T,VT<:AbstractVector{T},MT<:AbstractMatrix{T},AT<:AbstractArray{T}} <: AbstractLimbDark
+    n_max::Int
+    u_n::VT
+    g_n::VT
+    Mn_coeff::AT
+    Nn_coeff::MT
+    norm::T
+    Mn::VT
+    Nn::VT
+    sT::VT
 end
 
 @doc raw"""
@@ -55,7 +55,7 @@ function PolynomialLimbDark(u::AbstractVector{T}; maxiter=100) where T
     return PolynomialLimbDark(n_max, u_n, g_n, Mn_coeff, Nn_coeff, norm, Mn, Nn, sT)
 end
 
-function (ld::PolynomialLimbDark)(b::T, r) where T
+function compute(ld::PolynomialLimbDark, b::T, r) where T
 
     ## check for trivial cases
     if b ≥ 1 + r || iszero(r)
