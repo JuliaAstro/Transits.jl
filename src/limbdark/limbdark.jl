@@ -15,3 +15,4 @@ end
 include("elliptic.jl")
 include("poly.jl")
 include("integrated.jl")
+include("secondary.jl")

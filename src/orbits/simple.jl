@@ -58,3 +58,18 @@ function in_transit(orbit::SimpleOrbit, t; texp=0)
     tol = 0.5 * (orbit.duration + texp)
     return abs(dt) < tol
 end
+
+function flip(orbit::SimpleOrbit, r_planet)
+    t0 = orbit.t0 + orbit.half_period
+    b = orbit.b_norm / r_planet
+    duration = 2 * sqrt(r_planet^2 + orbit.b_norm^2) / orbit.speed
+    return SimpleOrbit(orbit.period,
+                       t0,
+                       b,
+                       duration,
+                       r_planet,
+                       orbit.b_norm,
+                       orbit.speed,
+                       orbit.half_period,
+                       orbit.t0)
+end
