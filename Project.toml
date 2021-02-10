@@ -12,6 +12,7 @@ SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
+AstroLib = "0.4"
 FastGaussQuadrature = "0.4"
 Reexport = "1"
 SpecialFunctions = "1"
