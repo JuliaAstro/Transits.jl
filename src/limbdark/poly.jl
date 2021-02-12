@@ -1,5 +1,5 @@
 
-using SpecialFunctions: lgamma
+using SpecialFunctions: loggamma
 using LinearAlgebra: dot
 
 struct PolynomialLimbDark{T,VT<:AbstractVector{T},MT<:AbstractMatrix{T},AT<:AbstractArray{T}} <: AbstractLimbDark
@@ -295,7 +295,7 @@ function compute_Mn_coeffs!(Mn_coeff::AbstractArray{T,3}, n_max) where T
             m = n_max + j - 4
             mhalf = 0.5 * m
             if k2 < 1
-                coeff = sqrt(π) * exp(lgamma(mhalf + 1) - lgamma(mhalf + 1.5))
+                coeff = sqrt(π) * exp(loggamma(mhalf + 1) - loggamma(mhalf + 1.5))
                 Mn_coeff[1, j, 1] = coeff
                 # loop over higher order terms until precision is reached
                 for i in 1:size(Mn_coeff, 2) - 1
@@ -329,7 +329,7 @@ function compute_Nn_coeffs!(Nn_coeff::AbstractMatrix{T}, n_max) where T
     for j in 1:2
         m = n_max + j - 2
         mhalf = 0.5 * m
-        coeff = 0.5 * sqrt(π) * exp(lgamma(mhalf + 1) - lgamma(mhalf + 2.5))
+        coeff = 0.5 * sqrt(π) * exp(loggamma(mhalf + 1) - loggamma(mhalf + 2.5))
         Nn_coeff[j, 1] = coeff
         # now compute higher order terms until precision reached
         for i in 1:size(Nn_coeff, 2) - 1
