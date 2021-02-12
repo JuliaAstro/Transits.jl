@@ -1,8 +1,8 @@
 
-using SpecialFunctions: loggamma
-using LinearAlgebra: dot
+using SpecialFunctions:loggamma
+using LinearAlgebra:dot
 
-struct PolynomialLimbDark{T,VT<:AbstractVector{T},MT<:AbstractMatrix{T},AT<:AbstractArray{T}} <: AbstractLimbDark
+struct PolynomialLimbDark{T,VT <: AbstractVector{T},MT <: AbstractMatrix{T},AT <: AbstractArray{T}} <: AbstractLimbDark
     n_max::Int
     u_n::VT
     g_n::VT
@@ -42,14 +42,14 @@ function PolynomialLimbDark(u::AbstractVector{T}; maxiter=100) where T
 
     # calculate flux normalization factor, which only depends on first two terms
     if length(g_n) > 1
-        norm = inv(π * (g_n[1] + 2/3 * g_n[2]))
+        norm = inv(π * (g_n[1] + 2 / 3 * g_n[2]))
     else
         norm = inv(π * g_n[1])
     end
 
     # pre-allocate temp arrays
-    Mn = zero(u_n)
-    Nn = zero(u_n)
+    Mn = similar(u_n)
+    Nn = similar(u_n)
     sT = zero(u_n)
 
     return PolynomialLimbDark(n_max, u_n, g_n, Mn_coeff, Nn_coeff, norm, Mn, Nn, sT)
@@ -143,21 +143,21 @@ function compute(ld::PolynomialLimbDark, b::T, r) where T
         Em1mKdm = 0.25 * π
     elseif b == r
         if r == 0.5 # case 6
-            Λ1 = π - 4/3 - 2 * (b - 0.5) + 6 * (r - 0.5)
+            Λ1 = π - 4 / 3 - 2 * (b - 0.5) + 6 * (r - 0.5)
             Eofk = one(T)
             Em1mKdm = one(T)
         elseif r < 0.5 # case 5
             m = 4 * r2
             Eofk = cel(m, one(T), one(T), 1 - m)
             Em1mKdm = cel(m, one(T), one(T), zero(T))
-            Λ1 = π + 2/3 * ((2 * m - 3) * Eofk - m * Em1mKdm) +
+            Λ1 = π + 2 / 3 * ((2 * m - 3) * Eofk - m * Em1mKdm) +
                  (b - r) * 4 * r * (Eofk - 2 * Em1mKdm)
         else # case 7
             m = 4 * r^2
             minv = inv(m)
             Eofk = cel(minv, one(T), one(T), 1 - minv)
             Em1mKdm = cel(minv, one(T), one(T), zero(T))
-            Λ1 = π + 1/3 * ((2 * m - 3) * Em1mKdm - m * Eofk) / r -
+            Λ1 = π + 1 / 3 * ((2 * m - 3) * Em1mKdm - m * Eofk) / r -
                  (b - r) * 2 * (2 * Eofk - Em1mKdm)
         end
     else
@@ -171,13 +171,13 @@ function compute(ld::PolynomialLimbDark, b::T, r) where T
             Πofk, Eofk, Em1mKdm = cel(inv(k2), kc, p, 1 + μ, one(T), one(T), p + μ, kc2, zero(T))
             Λ1 = 2 * sqrt(onembmr2) * (onembpr2 * Πofk - (4 - 7 * r2 - b2) * Eofk) / 3
         else # case
-            Λ1 = 2 * acos(1 - 2 * r) - 2 * π * (r > 0.5) - (4/3 * (3 + 2 * r - 8 * r^2) + 8 * (r + b - 1) * r) * sqrt(r * (1 - r))
+            Λ1 = 2 * acos(1 - 2 * r) - 2 * π * (r > 0.5) - (4 / 3 * (3 + 2 * r - 8 * r^2) + 8 * (r + b - 1) * r) * sqrt(r * (1 - r))
             Eofk = one(T)
             Em1mKdm = one(T)
         end
     end
 
-    ld.sT[2] = ((1 - (r > b)) * 2 * π - Λ1) / 3
+    ld.sT[2] = ((1 - T(r > b)) * 2π - Λ1) / 3
 
     if ld.n_max == 1
         return dot(ld.g_n, ld.sT) * ld.norm
@@ -226,8 +226,9 @@ function compute(ld::PolynomialLimbDark, b::T, r) where T
 
     # compute remaining terms
     for n in 3:ld.n_max
-        ld.sT[n + 1] = -2 * r2 * ld.Mn[n + 1] + n / (n + 2) * 
+        pofgn_M = 2 * r2 * ld.Mn[n + 1] - n / (n + 2) * 
                        (onemr2mb2 * ld.Mn[n + 1] + sqarea * ld.Mn[n - 1])
+        ld.sT[n + 1] = -pofgn_M
     end
 
     return dot(ld.g_n, ld.sT) * ld.norm
@@ -275,7 +276,6 @@ function compute_gn!(g_n::AbstractVector{T}, u_n) where T
         g_n[1] = a_n[1]
     end
 
-    # @show g_n
     return g_n
 end
 
@@ -365,7 +365,7 @@ function sqarea_triangle(p0, p1, p2)
     return sqarea
 end
 
-function upwardM!(arr; sqbr, n_max, sqonembmr2, onemr2mb2, sqarea, k2, κ0, Eofk, Em1mKdm, kite_area2, )
+function upwardM!(arr; sqbr, n_max, sqonembmr2, onemr2mb2, sqarea, k2, κ0, Eofk, Em1mKdm, kite_area2,)
     if k2 < 1
         arr[1] = κ0
         arr[2] = 2 * sqbr * 2 * k2 * Em1mKdm
@@ -384,48 +384,13 @@ function upwardM!(arr; sqbr, n_max, sqonembmr2, onemr2mb2, sqarea, k2, κ0, Eofk
     return arr
 end
 
-function downwardM!(arr, Mn_coeff; n_max, sqbr, sqonembmr2, onemr2mb2, k, k2, sqarea, κ0, Eofk, Em1mKdm, kite_area2)
-    if k2 < 1
-        tol = eps(k2)
-        term = zero(tol)
-        fac = k * sqonembmr2^(n_max - 3)
-        # now, compute higher order terms until precision reached
-        for j in 1:4
-            # add leading term to m
-            val = Mn_coeff[1, j, 1]
-            k2n = 1.0
-            # compute higher order terms
-            for n in 1:size(Mn_coeff, 2) - 1
-                k2n *= k2
-                term = k2n * Mn_coeff[1, j, n + 1]
-                val += term
-                abs(term) < tol && break
-            end
-            arr[n_max - 3 + j] = val * fac
-            fac *= sqonembmr2
-        end
-    else
-        k2inv = inv(k2)
-        tol = eps(k2inv)
-        fac = sqonembmr2^(n_max - 3)
-        for j in 1:4
-            val = Mn_coeff[2, j, 1]
-            k2n = 1
-            for n in 1:size(Mn_coeff, 2) - 1
-                k2n *= k2inv
-                term = k2n * Mn_coeff[2, j, n + 1]
-                val += term
-                abs(term) < tol && break
-            end
-            arr[n_max - 3 + j] = val * fac
-            fac *= sqonembmr2
-        end
-    end
+function downwardM!(arr::AbstractVector{T}, Mn_coeff; n_max, sqbr, sqonembmr2, onemr2mb2, k, k2, sqarea, κ0, Eofk, Em1mKdm, kite_area2) where T
+
+    Mn_series!(arr, Mn_coeff; n_max=n_max, sqonembmr2=sqonembmr2, k=k, k2=k2)
 
     invsqarea = inv(sqarea)
-
     # recurse downward
-    for n in n_max-4:-1:4
+    for n in n_max - 4:-1:4
         arr[n + 1] = ((n + 4) * arr[n + 5] - 2 * (n + 3) *
                       onemr2mb2 * arr[n + 3]) * invsqarea / (n + 2)
     end
@@ -444,4 +409,47 @@ function downwardM!(arr, Mn_coeff; n_max, sqbr, sqonembmr2, onemr2mb2, k, k2, sq
     end
 
     return arr
+end
+
+
+function Mn_series!(Mn::AbstractVector{T}, Mn_coeff; n_max, sqonembmr2, k, k2) where T
+    # Use series expansion to compute M_n:
+    # Computing leading coefficient (n=0):
+    if k2 < 1
+        tol = eps(k2)
+        term = zero(T)
+        fac = k * sqonembmr2^(n_max - 3)
+        # now, compute higher order terms until precision reached
+        @inbounds for j in axes(Mn_coeff, 2)
+            # add leading term to m
+            val = Mn_coeff[1, j, 1]
+            k2n = one(T)
+            # compute higher order terms
+            for coeff in @view Mn_coeff[1, j, 2:end]
+                k2n *= k2
+                term = k2n * coeff
+                val += term
+                abs(term) < tol && break
+            end
+            Mn[n_max - 3 + j] = val * fac
+            fac *= sqonembmr2
+        end
+    else # k^2 >= 1
+        k2inv = inv(k2)
+        tol = eps(k2inv)
+        fac = sqonembmr2^(n_max - 3)
+        @inbounds for j in axes(Mn_coeff, 2)
+            val = Mn_coeff[2, j, 1]
+            k2n = 1
+            for coeff in @view Mn_coeff[1, j, 2:end]
+                k2n *= k2inv
+                term = k2n * coeff
+                val += term
+                abs(term) < tol && break
+            end
+            Mn[n_max - 3 + j] = val * fac
+            fac *= sqonembmr2
+        end
+    end
+    return Mn
 end
