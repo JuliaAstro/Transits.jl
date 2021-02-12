@@ -68,7 +68,7 @@ function compute(ld::PolynomialLimbDark, b::T, r) where T
 
     r2 = r^2
     b2 = b^2
-    
+
     if iszero(b)
         onemr2 = 1 - r2
         sqrt1mr2 = sqrt(onemr2)
@@ -226,7 +226,7 @@ function compute(ld::PolynomialLimbDark, b::T, r) where T
 
     # compute remaining terms
     for n in 3:ld.n_max
-        pofgn_M = 2 * r2 * ld.Mn[n + 1] - n / (n + 2) * 
+        pofgn_M = 2 * r2 * ld.Mn[n + 1] - n / (n + 2) *
                        (onemr2mb2 * ld.Mn[n + 1] + sqarea * ld.Mn[n - 1])
         ld.sT[n + 1] = -pofgn_M
     end
@@ -365,18 +365,17 @@ function sqarea_triangle(p0, p1, p2)
     return sqarea
 end
 
-function upwardM!(arr; sqbr, n_max, sqonembmr2, onemr2mb2, sqarea, k2, κ0, Eofk, Em1mKdm, kite_area2,)
-    if k2 < 1
-        arr[1] = κ0
-        arr[2] = 2 * sqbr * 2 * k2 * Em1mKdm
-        arr[3] = κ0 * onemr2mb2 + kite_area2
-        arr[4] = 8 * sqbr^3 * 2 / 3 * k2 * (Eofk + (3 * k2 - 2) * Em1mKdm)
-    else
-        arr[1] = π
-        arr[2] = 2 * sqonembmr2 * Eofk
-        arr[3] = π * onemr2mb2
-        arr[4] = sqonembmr2^3 * 2 / 3 * ((3 - 2 / k2) * Eofk + Em1mKdm / k2)
-    end
+function upwardM!(arr; sqbr, n_max, sqonembmr2, onemr2mb2, sqarea, k2, κ0, Eofk, Em1mKdm, kite_area2)
+
+    Mn_four!(arr;
+        κ0=κ0,
+        sqbr=sqbr,
+        k2=k2,
+        Em1mKdm=Em1mKdm,
+        onemr2mb2=onemr2mb2,
+        kite_area2=kite_area2,
+        Eofk=Eofk,
+        sqonembmr2=sqonembmr2)
 
     for n in 4:n_max
         arr[n + 1] = (2 * (n - 1) * onemr2mb2 * arr[n - 1] + (n - 2) * sqarea * arr[n - 3]) / n
@@ -396,21 +395,33 @@ function downwardM!(arr::AbstractVector{T}, Mn_coeff; n_max, sqbr, sqonembmr2, o
     end
 
     # compute lowest four exactly
-    if k2 < 1
-        arr[1] = κ0
-        arr[2] = 2 * sqbr * 2 * k2 * Em1mKdm
-        arr[3] = κ0 * onemr2mb2 + kite_area2
-        arr[4] = 8 * sqbr^3 * 2 / 3 * k2 * (Eofk + (3 * k2 - 2) * Em1mKdm)
-    else
-        arr[1] = π
-        arr[2] = 2 * sqonembmr2 * Eofk
-        arr[3] = π * onemr2mb2
-        arr[4] = sqonembmr2^3 * 2 / 3 * ((3 - 2 / k2) * Eofk + Em1mKdm / k2)
-    end
+    Mn_four!(arr;
+        κ0=κ0,
+        sqbr=sqbr,
+        k2=k2,
+        Em1mKdm=Em1mKdm,
+        onemr2mb2=onemr2mb2,
+        kite_area2=kite_area2,
+        Eofk=Eofk,
+        sqonembmr2=sqonembmr2)
 
     return arr
 end
 
+function Mn_four!(arr::AbstractVector{T}; κ0, sqbr, k2, Em1mKdm, onemr2mb2, kite_area2, Eofk, sqonembmr2) where T
+    # compute lowest four exactly
+    if k2 < 1
+        arr[1] = κ0
+        arr[2] = 4 * sqbr * k2 * Em1mKdm
+        arr[3] = κ0 * onemr2mb2 + kite_area2
+        arr[4] = 8 * sqbr^3 * 2/3 * k2 * (Eofk + (3 * k2 - 2) * Em1mKdm)
+    else
+        arr[1] = π
+        arr[2] = 2 * sqonembmr2 * Eofk
+        arr[3] = π * onemr2mb2
+        arr[4] = sqonembmr2^3 * 2/3 * ((3 - 2 / k2) * Eofk + Em1mKdm / k2)
+    end
+end
 
 function Mn_series!(Mn::AbstractVector{T}, Mn_coeff; n_max, sqonembmr2, k, k2) where T
     # Use series expansion to compute M_n:

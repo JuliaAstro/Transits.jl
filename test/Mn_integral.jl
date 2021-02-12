@@ -1,5 +1,5 @@
 
-function Mn_num(k2::T, m::Int) where T
+function Mn_num(k2::T, m::Int64) where T
     f(x) = sqrt(k2 - sin(x)^2)^m
     if k2 < 1
         κ2 = T(asin(sqrt(big(k2))))
@@ -34,8 +34,19 @@ function test_Mn(r::T, b::T) where T
         Mnn = Mn_num(k2, m) * (2 * sqbr)^m
         Mn = ld.Mn[m + 1]
         Mn_b = Float64(ld_b.Mn[m + 1])
-        @test Mnn ≈ Mn atol=1e-15 rtol=1e-6
-        @test Mn ≈ Mn_b atol=1e-15 rtol=1e-6
+        t1 = isapprox(Mnn, Mn; atol=1e-15, rtol=1e-6)
+        t2 = isapprox(Mn, Mn_b; atol=1e-15, rtol=1e-6)
+        if !t1
+            diff = Mnn - Mn
+            @warn "Mn discrepancy" b r k2 Mnn Mn diff
+        end
+        if !t2
+            diff = Mn - Mn_b
+            @warn "Mn discrepancy" b r k2 Mn Mn_b diff
+        end
+        # @test Mnn ≈ Mn atol=1e-15 rtol=1e-6
+        # @test Mn ≈ Mn_b atol=1e-15 rtol=1e-6
+        @test t1 && t2
         prec_frac[m + 1] = Mn / Mn_b - 1
         prec_abs[m + 1] = asinh(Mn) - asinh(Mn_b)
     end
