@@ -1,6 +1,7 @@
+using StableRNGs
 using Transits
 using Test
 
-@testset "Transits.jl" begin
-    # Write your tests here.
-end
+rng = StableRNG(2752)
+
+include("elliptic.jl")
