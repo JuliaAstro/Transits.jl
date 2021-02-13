@@ -7,7 +7,7 @@
 
 ```@docs
 AbstractLimbDark
-(::AbstractLimbDark)(b, r)
+(AbstractLimbDark)(args...; kwargs...)
 PolynomialLimbDark
 QuadLimbDark
 IntegratedLimbDark
