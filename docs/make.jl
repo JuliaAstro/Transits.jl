@@ -22,7 +22,6 @@ makedocs(;
         "Getting Started" => "gettingstarted.md",
         "API/Reference" => "api.md"
     ],
-    doctest = get(ENV, "CI", "false") == "false"
 )
 
 deploydocs(;
