@@ -8,5 +8,5 @@ rng = StableRNG(2752)
 @testset "Transits" begin
     include("elliptic.jl")
     include("Mn_integral.jl")
-    include("poly_transit.jl")
+    include("poly.jl")
 end
