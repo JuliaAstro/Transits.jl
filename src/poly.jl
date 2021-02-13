@@ -28,10 +28,11 @@ I(\mu) \propto -\sum_{i=0}^N{u_i(1-\mu)^i}
 ```
 with the definition $u_0 \equiv -1$.
 """
-function PolynomialLimbDark(u::AbstractVector{T}; maxiter=100) where T
+function PolynomialLimbDark(u::AbstractVector{S}; maxiter=100) where S
+    T = float(S)
     # add constant u_0 term
     n_max = length(u)
-    u_n = pushfirst!(copy(u), -one(T))
+    u_n = pushfirst!(copy(u), -one(S))
     # get Green's basis coefficients
     g_n = compute_gn(u_n)
     # compute series expansion for M_n and N_n
@@ -97,7 +98,7 @@ function compute(ld::PolynomialLimbDark, b::S, r) where S
     sqbrinv = inv(sqbr)
     onembpr2 = (1 - r - b) * (1 + b + r)
     sqarea = sqarea_triangle(one(T), r, b)
-    k2 = max(0, onembpr2 * fourbrinv + 1)
+    k2 = max(zero(T), onembpr2 * fourbrinv + 1)
     k = sqrt(k2)
     onemr2mb2 = (1 - r) * (1 + r) - b2
     onemr2pb2 = (1 - r) * (1 + r) + b2
@@ -143,9 +144,9 @@ function compute(ld::PolynomialLimbDark, b::S, r) where S
 
     ## higher order (N > 3) terms require solving Mn and Nn integrals
     if k2 < 0.5 && ld.n_max > 3
-        downwardM!(ld.Mn, ld.Mn_coeff; ld.n_max, sqonembmr2, sqbr, onemr2mb2, k, k2, sqarea, kap0, Eofk, Em1mKdm, kite_area2)
+        downwardM!(ld.Mn, ld.Mn_coeff; n_max=ld.n_max, sqonembmr2, sqbr, onemr2mb2, k, k2, sqarea, kap0, Eofk, Em1mKdm, kite_area2)
     else
-        upwardM!(ld.Mn; sqbr, ld.n_max, sqonembmr2, onemr2mb2, sqarea, k2, kap0, Eofk, Em1mKdm, kite_area2)
+        upwardM!(ld.Mn; sqbr, n_max=ld.n_max, sqonembmr2, onemr2mb2, sqarea, k2, kap0, Eofk, Em1mKdm, kite_area2)
     end
 
     # compute remaining terms
@@ -210,7 +211,7 @@ compute_Mn_coeffs(T, n_max; maxiter=100) = compute_Mn_coeffs!(zeros(T, 2, 4, max
 Compute the series expandsion coefficients for the `M_n` integrals. Need to compute from `n_max - 3:n_max`. Also split for the cases `k^2 < 1` and `k^2 ≥ 1`.
 """
 function compute_Mn_coeffs!(Mn_coeff::AbstractArray{T,3}, n_max) where T
-    for k2 in 0:1
+    for k2 in (0, 1)
         coeff = zero(T)
         # loop over n_max to n_max - 3
         for j in 0:3
@@ -227,12 +228,12 @@ function compute_Mn_coeffs!(Mn_coeff::AbstractArray{T,3}, n_max) where T
                 end
             else
                 coeff = π
-                Mn_coeff[2, begin + j, 1] = coeff
+                Mn_coeff[begin + 1, begin + j, begin] = coeff
                 # loop over higher order terms
                 jmax = iseven(m) ? m ÷ 2 : size(Mn_coeff, 2) - 1
                 for i in 1:jmax
                     coeff *= (2 + m - 2 * i) * (1 - 2 * i) / (4 * i^2)
-                    Mn_coeff[2, begin + j, i + 1] = coeff
+                    Mn_coeff[begin + 1, begin + j, begin + i] = coeff
                 end
             end
         end
@@ -304,9 +305,9 @@ function downwardM!(arr::AbstractVector{T}, Mn_coeff; n_max, sqbr, sqonembmr2, o
 
     invsqarea = inv(sqarea)
     # recurse downward
-    for n in n_max - 4:-1:4
-        arr[begin + n] = ((n + 4) * arr[begin + n + 4] - 2 * (n + 3) *
-                      onemr2mb2 * arr[begin + n + 2]) * invsqarea / (n + 2)
+    for m in n_max-4:-1:4
+        arr[begin + m] = ((m + 4) * arr[begin + m + 4] - 2 * (m + 3) *
+                      onemr2mb2 * arr[begin + m + 2]) * invsqarea / (m + 2)
     end
 
     # compute lowest four exactly
@@ -317,12 +318,12 @@ end
 
 function Mn_four!(arr::AbstractVector{T}; kap0, sqbr, k2, Em1mKdm, onemr2mb2, kite_area2, Eofk, sqonembmr2) where T
     # compute lowest four exactly
-    if k2 < 1
+    if k2 ≤ 1 # eqn 77,79
         arr[begin] = kap0
         arr[begin + 1] = 4 * sqbr * k2 * Em1mKdm
         arr[begin + 2] = kap0 * onemr2mb2 + kite_area2
         arr[begin + 3] = 8 * sqbr^3 * 2/3 * k2 * (Eofk + (3 * k2 - 2) * Em1mKdm)
-    else
+    else # eqn 78,80
         arr[begin] = π
         arr[begin + 1] = 2 * sqonembmr2 * Eofk
         arr[begin + 2] = π * onemr2mb2
@@ -436,7 +437,7 @@ function compute_linear(b::T, r; k2, kc, kc2, onembmr2, onembpr2, onembmr2inv, r
     return flux, Eofk, Em1mKdm
 end
 
-function compute_quadratic(b, r;s0, r2, b2, kap0, kite_area2, k2)
+function compute_quadratic(b, r; s0, r2, b2, kap0, kite_area2, k2)
     η2 = r2 * (r2 + 2 * b2)
     if k2 ≥ 1
         four_pi_eta = 2 * π * (η2 - 1)

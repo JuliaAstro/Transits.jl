@@ -1,4 +1,5 @@
 
+# numerically integrate Mₙ(k²)/(4br)ᵐ
 function Mn_num(k2::T, m::Int64) where T
     f(x) = sqrt(k2 - sin(x)^2)^m
     if k2 < 1
@@ -20,13 +21,11 @@ function test_Mn(r::T, b::T) where T
     ld_b = PolynomialLimbDark(big.(u))
 
     t = ld(b, r)
-    t_b = ld_b(b, r)
+    t_b = ld_b(big(b), big(r))
 
 
     onembpr2 = (1 - r - b) * (1 + b + r)
-    k2 = onembpr2 * inv(4 * b * r) + 1
-
-    k2 < 0 && return prec_frac, prec_abs
+    k2 = max(0, onembpr2 / (4 * b * r) + 1)
     
     sqbr = sqrt(b * r)
 
@@ -44,12 +43,10 @@ function test_Mn(r::T, b::T) where T
             diff = Mn - Mn_b
             @warn "Mn discrepancy" b r k2 Mn Mn_b diff
         end
-        # @test Mnn ≈ Mn atol=1e-15 rtol=1e-6
-        # @test Mn ≈ Mn_b atol=1e-15 rtol=1e-6
-        @test t1 
-        @test t2
-        prec_frac[m + 1] = Mn / Mn_b - 1
-        prec_abs[m + 1] = asinh(Mn) - asinh(Mn_b)
+        @test Mnn ≈ Mn atol=1e-15 rtol=1e-6
+        @test Mn ≈ Mn_b atol=1e-15 rtol=1e-6
+        prec_frac[begin + m] = abs(Mn / Mn_b - 1)
+        prec_abs[begin + m] = abs(asinh(Mn) - asinh(Mn_b))
     end
 
     return prec_frac, prec_abs
@@ -80,4 +77,8 @@ end
         k2 = (1-b+r)*(1+b-r)/(4*b*r)
         prec_frac, prec_abs = test_Mn(r, b)
     end
+end
+
+@testset "Mn raise" begin
+    nothing
 end
