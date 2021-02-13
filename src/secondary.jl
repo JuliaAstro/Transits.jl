@@ -12,14 +12,14 @@ end
                       brightness_ratio=1)
     SecondaryLimbDark(u_p::AbstractVector, u_s=u_p; kwargs...)
 
-Compose two limb darkening laws together to add a secondary eclipse. If vectors of coefficients are provided, laws will automatically be constructed using [`PolynomialLimbDark`](@ref). The surface brightness ratio is given in terms of the companion; e.g., if the companion is half as bright, the ratio would be 0.5.
+Compose two limb darkening laws together to add a secondary eclipse. If vectors of coefficients are provided, laws will automatically be constructed using [`PolynomialLimbDark`](@ref). The surface brightness ratio is given in terms of the host; e.g., if the companion is half as bright as the host, the ratio would be 0.5.
 
 !!! note "Interface"
     [`SecondaryLimbDark`](@ref) only works with an orbit, since the companion's reference frame needs to be calculated. This means you can't call it using an impact parameter like `ld(b, r)` directly.
 
 # Mathematical form
 ```math
-f(t, r) = \frac{f_p(t, r) + f_p(t, r) + \eta r^2 f_s(t', r')}{1 + f_p(t, r) + \eta r^2 f_s(t', r')}
+f(t, r) = \frac{2f_p(t, r) + \eta r^2 f_s(t', r')}{1 + f_p(t, r) + \eta r^2 f_s(t', r')}
 ```
 where $f_p$ is to the primary flux, $f_s$ is to the secondary flux, and $\eta$ is the surface brightness ratio. $t'$ and $r'$ correspond to the time and radius ratio from the companion's reference frame.
 
@@ -35,7 +35,7 @@ orbit = SimpleOrbit(period=2, duration=0.5)
 fp = ld(orbit, 0, r) # primary egress
 fs = ld(orbit, 1, r) # secondary egress
 
-fp ≈ fs * 0.1
+fp ≈ brightness_ratio * fs
 
 # output
 true
