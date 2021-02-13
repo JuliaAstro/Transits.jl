@@ -1,14 +1,14 @@
-struct SimpleOrbit <: AbstractOrbit
-    period
-    t0
-    b
-    duration
-    r_star
+struct SimpleOrbit{T,S,V,R} <: AbstractOrbit
+    period::T
+    t0::T
+    b::S
+    duration::T
+    r_star::V
 
-    b_norm
-    speed
-    half_period
-    ref_time
+    b_norm::V
+    speed::R
+    half_period::T
+    ref_time::T
 end
 
 """
@@ -29,6 +29,10 @@ function SimpleOrbit(;period, duration, t0=zero(period), b=0.0, r_star=1.0)
     b_norm = b * r_star
     speed = 2 * sqrt(r_star^2 - b_norm^2) / duration
     ref_time =  t0 - half_period
+    # normalize time types
+    period, t0, duration, half_period, ref_time = promote(period, t0, duration, half_period, ref_time)
+    # normalize unitless types
+    r_star, b_norm = promote(r_star, b_norm)
     SimpleOrbit(period, t0, b, duration, r_star, b_norm, speed, half_period, ref_time)
 end
 
