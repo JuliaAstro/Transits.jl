@@ -18,7 +18,7 @@ end
 
 Polynomial limb darkening using analytical integrals. The length of the `u` vector is equivalent to the order of polynomial used; e.g., `[0.2, 0.3]` corresponds to quadratic limb darkening.
 
-**Mathematical form**
+# Mathematical form
 ```math
 I(\mu) \propto 1 - u_1(1-\mu) - u_2(1-\mu)^2 - \dots - u_N(1-\mu)^N
 ```

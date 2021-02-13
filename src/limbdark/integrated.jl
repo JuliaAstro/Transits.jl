@@ -17,7 +17,7 @@ Computes the time-averaged flux in the middle of an exposure by wrapping a limb 
 
 If a set of limb darkening coefficients, `u`, is provided, a [`PolynomialLimbDark`](@ref) law will be used by default.
 
-**Mathematical form**
+# Mathematical form
 ```math
 \bar{F}(t) = \frac{1}{\Delta t}\int_{t-\Delta t / 2}^{t+\Delta t / 2}{F(t')dt'}
 ```

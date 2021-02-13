@@ -13,7 +13,7 @@ end
 
 A specialized implementation of [`PolynomialLimbDark`](@ref) with a maximum of two terms (quadratic form). This has a completely closed-form solution without any numerical integration. This means there are no intermediate allocations and reduced numerical error.
 
-**Mathematical form**
+# Mathematical form
 ```math
 I(\mu) \propto 1 - u_1(1-\mu) - u_2(1-\mu)^2
 ```

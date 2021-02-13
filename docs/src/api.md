@@ -5,6 +5,11 @@
 ```
 
 ## API/Reference
-```@autodocs
-Modules = [Transits, Transits.Orbits]
+```@docs
+SimpleOrbit
+PolynomialLimbDark
+QuadLimbDark
+IntegratedLimbDark
+SecondaryLimbDark
+compute
 ```
