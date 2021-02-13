@@ -10,6 +10,47 @@ end
 
 @doc raw"""
     QuadLimbDark(u::AbstractVector)
+
+A specialized implementation of [`PolynomialLimbDark`](@ref) with a maximum of two terms (quadratic form). This has a completely closed-form solution without any numerical integration. This means there are no intermediate allocations and reduced numerical error.
+
+**Mathematical form**
+```math
+I(\mu) \propto 1 - u_1(1-\mu) - u_2(1-\mu)^2
+```
+
+!!! note "Higher-order terms"
+    Higher-order terms will be *ignored*; no error will be thrown
+
+# Examples
+
+```jldoctest quad
+ld = QuadLimbDark(Float64[]) # constant term only
+
+b = [0, 1, 2] # impact parameter
+r = 0.01 # radius ratio
+ld.(b, r)
+
+# output
+3-element Vector{Real}:
+ 0.9999
+ 0.9999501061035608
+ 1
+```
+
+```jldoctest quad
+ld = QuadLimbDark([0.4, 0.26]) # max two terms
+ld.(b, r)
+
+# output
+3-element Vector{Real}:
+ 0.9998785437247428
+ 0.999974726693709
+ 1
+```
+
+# References
+
+See references for [`PolynomialLimbDark`](@ref)
 """
 function QuadLimbDark(u::AbstractVector{T}) where T
     n_max = length(u)
@@ -17,10 +58,12 @@ function QuadLimbDark(u::AbstractVector{T}) where T
     if n_max == 0
         u_n = SA[-one(T), zero(T), zero(T)]
     elseif n_max == 1
-        u_n = SA[-one(T), only(u), zero(T)]
+        u_n = SA[-one(T), u[begin], zero(T)]
     else
         u_n = SA[-one(T), u[begin], u[begin + 1]]
     end
+    n_max > 2 && @warn "Higher-order terms will be ignored"
+    n_max = min(2, n_max)
 
     # get Green's basis coefficients
     g_n = compute_gn(u_n)
@@ -32,7 +75,6 @@ function QuadLimbDark(u::AbstractVector{T}) where T
 end
 
 function compute(ld::QuadLimbDark, b::T, r) where T
-
     ## check for trivial cases
     if b ≥ 1 + r || iszero(r)
         # completely unobscured

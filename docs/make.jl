@@ -1,6 +1,12 @@
 using Transits
 using Documenter
 
+setup = quote
+    using Transits
+end
+
+DocMeta.setdocmeta!(Transits, :DocTestSetup, setup; recursive = true)
+
 makedocs(;
     modules=[Transits],
     authors="Miles Lucas <mdlucas@hawaii.edu> and contributors",

@@ -4,6 +4,7 @@ using Reexport
 
 export AbstractLimbDark,
        PolynomialLimbDark,
+       QuadLimbDark,
        IntegratedLimbDark,
        SecondaryLimbDark,
        compute,
