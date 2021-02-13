@@ -2,11 +2,11 @@
 function Mn_num(k2::T, m::Int64) where T
     f(x) = sqrt(k2 - sin(x)^2)^m
     if k2 < 1
-        κ2 = T(asin(sqrt(big(k2))))
+        kap2 = T(asin(sqrt(big(k2))))
     else
-        κ2 = 0.5 * π
+        kap2 = 0.5 * π
     end
-    Mn, err = quadgk(f, -κ2, κ2, rtol=1e-15)
+    Mn, err = quadgk(f, -kap2, kap2, rtol=1e-15)
     return Mn
 end
 
