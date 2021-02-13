@@ -61,6 +61,11 @@ end
     @info "Maximum difference of lightcurve for N=$N: $(maximum(abs,flux-f_num)))"
     @test flux ≈ f_num atol=1e-5
 
+    # test vs. quad limb dark
+    ld_ = PolynomialLimbDark(u[1:2])
+    ld_q = QuadLimbDark(u[1:2])
+    @test ld_.(b0, r0) == ld_q.(b0, r0)
+
     npts = 1000
     iu = 30
     u_n = ones(iu) / iu
@@ -71,4 +76,15 @@ end
 
     @info "Maximum difference of lightcurve for N=$iu: $(maximum(abs,lc_ana-lc_num)))"
     @test lc_ana ≈ lc_num atol=1e-5
+
+    
+
+end
+
+
+@testset "QuadLimbDark interface" begin
+    # test truncation
+    ld = (@test_logs (:warn, "Higher-order terms will be ignored") QuadLimbDark(ones(10)))
+    @test ld.n_max == 2
+    @test ld.g_n == QuadLimbDark(ones(2)).g_n
 end
