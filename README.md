@@ -8,11 +8,17 @@
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliaastro.github.io/Transits.jl/stable)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://juliaastro.github.io/Transits.jl/dev)
 
-Flexible photometric transit curves with limb darkening
+Flexible photometric transit curves with limb darkening. The goals of this package are, in this order
+
+* have a simple interface with high *compasibility*
+* be flexible with respect to numeric types and application
+* be fully compatible with [ChainRules.jl](https://github.com/juliadiff/ChainRules.jl) automatic differentiation (AD) system to leverage the derived analytical gradients
+* provide a codebase that is well-organized, instructive, and easy to extend
+* maintain high performance: at least as fast as similar tools
 
 **WIP**: Currently under progress by @mileslucas
 
-Current TODO list before v0.1.0
+### Current TODO list before v0.1.0
 
 - [ ] finish writing unit tests
 - [ ] fix numerical errors in Mn integral (help wanted)
@@ -28,7 +34,7 @@ Current TODOs that are further down the horizon, in some order of importance
 - [ ] benchmarks (recreate ALFM 20 plots)
 - [ ] look at simpson integrated light curve (ALFM 20)
 
-If you would like to contribute, feel free to open a [pull request](https://github.com/JuliaAstro/Transits.jl/pulls) or start a [discussion](https://github.com/JuliaAstro/Transits.jl/discussions) if you want to open discourse.
+If you would like to contribute, feel free to open a [pull request](https://github.com/JuliaAstro/Transits.jl/pulls). If you want to discuss something before contributing, head over to [discussions](https://github.com/JuliaAstro/Transits.jl/discussions) and join or open a new topic.
 
 ## Usage
 
@@ -59,7 +65,7 @@ texp = [0.1 0.2 0.3]
 # no extra calculations made
 flux = @. ld(orbit, t, 0.2)
 # use quadrature to find time-averaged flux for each t
-flux_int = @. ld(orbit, t, 0.2, texp) 
+flux_int = @. ld(orbit, t, 0.2, texp)
 ```
 
 ![](integrated.png)

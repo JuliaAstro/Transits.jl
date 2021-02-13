@@ -11,9 +11,9 @@ CurrentModule = Transits
 
 Transits.jl provides flexible and powerful occultation curves with limb darkening. The goals of this package are, in this order
 * have a simple interface with high *compasibility*
-* be as flexible with respect to numeric types and application
+* be flexible with respect to numeric types and application
 * be fully compatible with [ChainRules.jl](https://github.com/juliadiff/ChainRules.jl) automatic differentiation (AD) system to leverage the derived analytical gradients
-* provide a code-base that is well-organized, instructive, and easy to extend
+* provide a codebase that is well-organized, instructive, and easy to extend
 * maintain high performance: at least as fast as similar tools
 
 In particular, [`PolynomialLimbDark`](@ref) implements the "starry" limb darkening method, which solves the flux integral analytically. This provides floating-point errors and runtimes that are best in class.
