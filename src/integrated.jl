@@ -1,6 +1,5 @@
 
 using FastGaussQuadrature
-using LinearAlgebra: dot
 
 struct IntegratedLimbDark{LD<:AbstractLimbDark,WT,NT} <: AbstractLimbDark
     driver::LD
@@ -66,8 +65,11 @@ function compute(ld::IntegratedLimbDark, orbit::AbstractOrbit, t, r, texp)
     # perform change of interval
     half_texp = 0.5 * texp
     # perform quadrature
-    fluxes = @. ld.driver(orbit, half_texp * ld.nodes + t, r)
-    return 0.5 * dot(ld.weights, fluxes)
+    flux = sum(zip(ld.weights, ld.nodes)) do (w, ξ)
+        f = compute(ld.driver, orbit, half_texp * ξ + t, r)
+        return w * f
+    end
+    return 0.5 * flux
 end
 
 compute(ld::IntegratedLimbDark, orbit::AbstractOrbit, t, r, ::Nothing) = 
