@@ -65,9 +65,8 @@ compute(ld::IntegratedLimbDark, orbit::AbstractOrbit, t, r; texp=nothing) =
 function compute(ld::IntegratedLimbDark, orbit::AbstractOrbit, t, r, texp)
     # perform change of interval
     half_texp = 0.5 * texp
-    ts = @. half_texp * ld.nodes + t
     # perform quadrature
-    fluxes = @. ld.driver(orbit, ts, r)
+    fluxes = @. ld.driver(orbit, half_texp * ld.nodes + t, r)
     return 0.5 * dot(ld.weights, fluxes)
 end
 

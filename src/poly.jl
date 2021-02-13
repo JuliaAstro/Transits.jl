@@ -52,7 +52,8 @@ function PolynomialLimbDark(u::AbstractVector{T}; maxiter=100) where T
     return PolynomialLimbDark(n_max, u_n, g_n, Mn_coeff, Nn_coeff, norm, Mn, Nn)
 end
 
-function compute(ld::PolynomialLimbDark, b::T, r) where T
+function compute(ld::PolynomialLimbDark, b::S, r) where S
+    T = float(S)
 
     ## check for trivial cases
     if b ≥ 1 + r || iszero(r)

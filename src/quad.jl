@@ -31,10 +31,10 @@ r = 0.01 # radius ratio
 ld.(b, r)
 
 # output
-3-element Vector{Real}:
+3-element Vector{Float64}:
  0.9999
  0.9999501061035608
- 1
+ 1.0
 ```
 
 ```jldoctest quad
@@ -42,10 +42,10 @@ ld = QuadLimbDark([0.4, 0.26]) # max two terms
 ld.(b, r)
 
 # output
-3-element Vector{Real}:
+3-element Vector{Float64}:
  0.9998785437247428
  0.999974726693709
- 1
+ 1.0
 ```
 
 # References
@@ -74,7 +74,8 @@ function QuadLimbDark(u::AbstractVector{T}) where T
     return QuadLimbDark(n_max, u_n, g_n, norm)
 end
 
-function compute(ld::QuadLimbDark, b::T, r) where T
+function compute(ld::QuadLimbDark, b::S, r) where S
+    T = float(S)
     ## check for trivial cases
     if b ≥ 1 + r || iszero(r)
         # completely unobscured

@@ -46,7 +46,8 @@ function test_Mn(r::T, b::T) where T
         end
         # @test Mnn ≈ Mn atol=1e-15 rtol=1e-6
         # @test Mn ≈ Mn_b atol=1e-15 rtol=1e-6
-        @test t1 && t2
+        @test t1 
+        @test t2
         prec_frac[m + 1] = Mn / Mn_b - 1
         prec_abs[m + 1] = asinh(Mn) - asinh(Mn_b)
     end
