@@ -12,6 +12,24 @@ Flexible photometric transit curves with limb darkening
 
 **WIP**: Currently under progress by @mileslucas
 
+Current TODO list before v0.1.0
+
+- [ ] finish writing unit tests
+- [ ] fix numerical errors in Mn integral (help wanted)
+- [ ] prepare DOI and references for starry/Agol/etc.
+
+Current TODOs that are further down the horizon, in some order of importance
+
+- [ ] Finish writing `KeplerOrbit`
+- [ ] Gradients using ChainRulesCore
+- [ ] Gradient tests using ChainRulesTestUtils
+- [ ] Plotting functinos (recreate ALFM 20 plots)
+- [ ] examples (show rich composability of julia)
+- [ ] benchmarks (recreate ALFM 20 plots)
+- [ ] look at simpson integrated light curve (ALFM 20)
+
+If you would like to contribute, feel free to open a [pull request](https://github.com/JuliaAstro/Transits.jl/pulls) or start a [discussion](https://github.com/JuliaAstro/Transits.jl/discussions) if you want to open discourse.
+
 ## Usage
 
 ```julia
