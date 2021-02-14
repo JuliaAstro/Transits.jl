@@ -114,3 +114,19 @@ end
     @test sign.(f[:, 2] .- f[:, 1]) == above_or_below
 
 end
+
+@testset "secondary" begin
+    u = [0.4, 0.26]
+    d1 = PolynomialLimbDark(u)
+    d2 = PolynomialLimbDark(ones(2))
+    ld = SecondaryLimbDark(d1, d2; brightness_ratio=0.1)
+    ld2 = SecondaryLimbDark(u, ones(2))
+    @test ld.primary_driver.g_n == ld2.primary_driver.g_n == d1.g_n
+    @test ld.secondary_driver.g_n == ld2.secondary_driver.g_n == d2.g_n
+
+    orbit = SimpleOrbit(period=4, duration=1)
+    r = 0.01
+    f1 = ld(orbit, 0, r)
+    f2 = ld(orbit, 2, r)
+    @test f1 ≈ f2 rtol=1e-3
+end
