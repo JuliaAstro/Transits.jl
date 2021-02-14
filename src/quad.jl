@@ -18,7 +18,7 @@ A specialized implementation of [`PolynomialLimbDark`](@ref) with a maximum of t
 I(\mu) \propto 1 - u_1(1-\mu) - u_2(1-\mu)^2
 ```
 
-!!! note "Higher-order terms"
+!!! warning "Higher-order terms"
     Higher-order terms will be *ignored*; no error will be thrown
 
 # Examples
