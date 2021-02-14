@@ -89,10 +89,10 @@ end
     @test ld.g_n == QuadLimbDark(ones(2)).g_n
 end
 
-@testset "IntegratedLimbDark interface" begin
+@testset "IntegratedLimbDark interface" for basis in [:legendre, :radau, :lobatto]
     u = [0.4, 0.26]
     ld = PolynomialLimbDark(u)
-    ldt = IntegratedLimbDark(ld)
+    ldt = IntegratedLimbDark(ld, basis=basis)
 
     @test IntegratedLimbDark(u).driver isa PolynomialLimbDark
 
