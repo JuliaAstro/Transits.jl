@@ -18,3 +18,6 @@ Transits.jl provides flexible and powerful occultation curves with limb darkenin
 
 In particular, [`PolynomialLimbDark`](@ref) implements the "starry" limb darkening method, which solves the flux integral analytically. This provides floating-point errors and runtimes that are best in class.
 
+## Citations
+
+If you use Transits.jl or a derivative of it in your work please consider citing it (DOI to be made). If you use `PolynomialLimbDark` or `QuadLimbDark` please also cite [Agol et al. (2020)](https://ui.adsabs.harvard.edu/abs/2020AJ....159..123A/abstract) and [Luger et al. (2019)](https://ui.adsabs.harvard.edu/abs/2019AJ....157...64L/abstract).

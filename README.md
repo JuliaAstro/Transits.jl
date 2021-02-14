@@ -96,3 +96,7 @@ orbit = SimpleOrbit(period=10u"d", duration=5u"hr")
 t = range(-6, 6, length=1000)u"hr"
 flux = @. ld(orbit, t, 0.1)
 ```
+
+## Citations
+
+If you use Transits.jl or a derivative of it in your work please consider citing it (DOI to be made). If you use `PolynomialLimbDark` or `QuadLimbDark` please also cite [Agol et al. (2020)](https://ui.adsabs.harvard.edu/abs/2020AJ....159..123A/abstract) and [Luger et al. (2019)](https://ui.adsabs.harvard.edu/abs/2019AJ....157...64L/abstract).
