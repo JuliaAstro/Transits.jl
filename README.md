@@ -22,7 +22,7 @@ Flexible photometric transit curves with limb darkening. The goals of this packa
 
 - [x] ~~finish writing unit tests~~
 - [x] ~~fix numerical errors in Mn integral~~ (Thanks so much for the help @icweaver)
-- [ ] prepare DOI and references for starry/Agol/etc.
+- [ ] prepare DOI ~~and references for starry/Agol/etc.~~
 
 Current TODOs that are further down the horizon, in some order of importance
 
