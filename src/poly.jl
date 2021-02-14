@@ -223,15 +223,16 @@ function compute_Mn_coeffs!(Mn_coeff::AbstractArray{T,3}, n_max) where T
                 coeff = sqrt(π) * exp(loggamma(mhalf + 1) - loggamma(mhalf + 1.5))
                 Mn_coeff[begin, begin + j, begin] = coeff
                 # loop over higher order terms until precision is reached
-                for i in 1:size(Mn_coeff, 2) - 1
+                for i in 1:size(Mn_coeff, 3) - 1
                     coeff *= (2 * i - 1)^2 / (2 * i * (1 + m + 2 * i))
                     Mn_coeff[begin, begin + j, begin + i] = coeff
                 end
             else
                 coeff = π
                 Mn_coeff[begin + 1, begin + j, begin] = coeff
+                
                 # loop over higher order terms
-                jmax = iseven(m) ? m ÷ 2 : size(Mn_coeff, 2) - 1
+                jmax = iseven(m) ? m ÷ 2 : size(Mn_coeff, 3) - 1
                 for i in 1:jmax
                     coeff *= (2 + m - 2 * i) * (1 - 2 * i) / (4 * i^2)
                     Mn_coeff[begin + 1, begin + j, begin + i] = coeff
