@@ -130,3 +130,18 @@ end
     f2 = ld(orbit, 2, r)
     @test f1 ≈ f2 rtol=1e-3
 end
+
+@testset "reciprocity" begin
+    u = [0.4, 0.26]
+    d1 = PolynomialLimbDark(u)
+    d2 = PolynomialLimbDark(ones(2))
+    ld1 = IntegratedLimbDark(SecondaryLimbDark(d1, d2))
+    ld2 = SecondaryLimbDark(IntegratedLimbDark(d1), IntegratedLimbDark(d2))
+
+    orbit = SimpleOrbit(period=4, duration=1)
+    r = 0.01
+    t = range(-1.5, 1.5, length=1000)
+    for texp in [nothing, 0.1, 0.3]
+        @test ld1.(orbit, t, r; texp) ≈ ld2.(orbit, t, r; texp)
+    end
+end
