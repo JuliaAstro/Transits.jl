@@ -88,3 +88,29 @@ end
     @test ld.n_max == 2
     @test ld.g_n == QuadLimbDark(ones(2)).g_n
 end
+
+@testset "IntegratedLimbDark interface" begin
+    u = [0.4, 0.26]
+    ld = PolynomialLimbDark(u)
+    ldt = IntegratedLimbDark(ld)
+
+    @test IntegratedLimbDark(u).driver isa PolynomialLimbDark
+
+    orbit = SimpleOrbit(period=3, duration=1)
+    # sharp edges
+    ts = [-0.5, -0.25, 0, 0.25, 0.5]
+    above_or_below = [-1, 1, 1, 1, -1]
+
+    # test no exposure time is exactly same
+    @test ld.(orbit, ts, 0.01) == ldt.(orbit, ts, 0.01)
+
+    # test exposure "smears" signal causing it to be
+    # lower or higher then the exact signal
+    f = @. ldt(orbit, ts, 0.01, [0.3 0.5])
+    base = @. ld(orbit, ts, 0.01)
+    @test sign.(f[:, 1] .- base) == above_or_below
+    @test sign.(f[:, 2] .- base) == above_or_below
+    # test higher exposure time is more smearing
+    @test sign.(f[:, 2] .- f[:, 1]) == above_or_below
+
+end
