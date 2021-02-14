@@ -88,7 +88,7 @@ function compute(ld::PolynomialLimbDark, b::S, r) where S
 
     # take a moment to calculate values used repeatedly in the
     # numerical routines ahead
-    onembmr2 = (r + 1 - b) * (1 - r + b)
+    onembmr2 = (r - b + 1) * (1 - r + b)
     onembmr2inv = inv(onembmr2)
     sqonembmr2 = sqrt(onembmr2)
     br = b * r
@@ -98,11 +98,12 @@ function compute(ld::PolynomialLimbDark, b::S, r) where S
     sqbrinv = inv(sqbr)
     onembpr2 = (1 - r - b) * (1 + b + r)
     sqarea = sqarea_triangle(one(T), r, b)
-    k2 = max(zero(T), onembpr2 * fourbrinv + 1)
+    k2 = max(zero(T), onembmr2 * fourbrinv)
     k = sqrt(k2)
-    onemr2mb2 = (1 - r) * (1 + r) - b2
-    onemr2pb2 = (1 - r) * (1 + r) + b2
-    if k2 > 1
+    omemr2 = (1 - r) * (1 + r)
+    onemr2mb2 = omemr2 - b2
+    onemr2pb2 = omemr2 + b2
+    if k2 ≥ 1
         if k2 > 2
             kc2 = 1 - inv(k2)
         else
@@ -115,7 +116,7 @@ function compute(ld::PolynomialLimbDark, b::S, r) where S
             kc2 = 1 - k2
         end
     end
-    kc = sqrt(kc2)
+    kc = sqrt(abs(kc2))
 
     ## Compute uniform term
     s0, kap0, kite_area2, kck = compute_uniform(b, r; b2, r2, sqarea, fourbrinv)
@@ -438,8 +439,9 @@ function compute_linear(b::T, r; k2, kc, kc2, onembmr2, onembpr2, onembmr2inv, r
 end
 
 function compute_quadratic(b, r; s0, r2, b2, kap0, kite_area2, k2)
-    η2 = r2 * (r2 + 2 * b2)
-    if k2 ≥ 1
+    r2pb2 = r2 + b2
+    η2 = r2 * (r2pb2 + b2)
+    if k2 > 1
         four_pi_eta = 2 * π * (η2 - 1)
     else
         Πmkap1 = atan(kite_area2, (r - 1) * (r + 1) - b2)

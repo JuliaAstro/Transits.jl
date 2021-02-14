@@ -24,11 +24,12 @@ function test_Mn(r::T, b::T) where T
     t_b = ld_b(big(b), big(r))
 
 
-    onembpr2 = (1 - r - b) * (1 + b + r)
-    k2 = max(0, onembpr2 / (4 * b * r) + 1)
-    
+    onembmr2 = (r + 1 - b) * (1 - r + b)
+    k2 = max(0, onembmr2 / (4 * b * r))
+
     sqbr = sqrt(b * r)
 
+    color = ones(Int, n_max + 3)
     for m in 0:ld.n_max
         Mnn = Mn_num(k2, m) * (2 * sqbr)^m
         Mn = ld.Mn[m + 1]
@@ -43,29 +44,32 @@ function test_Mn(r::T, b::T) where T
             diff = Mn - Mn_b
             @warn "Mn discrepancy" b r k2 Mn Mn_b diff
         end
-        @test Mnn ≈ Mn atol=1e-15 rtol=1e-6
-        @test Mn ≈ Mn_b atol=1e-15 rtol=1e-6
+        @test t1
+        @test t2
+        t1 || t2 && (color[begin + m] = 2)
         prec_frac[begin + m] = abs(Mn / Mn_b - 1)
         prec_abs[begin + m] = abs(asinh(Mn) - asinh(Mn_b))
     end
-
-    return prec_frac, prec_abs
+    PLOT && mnerror(prec_frac, prec_abs, c=color, title="r=$r, b=$b")
+    PLOT && savefig(plotsdir("Mn_error_r=$(r)_b=$b.png"))
+    return nothing
 end
 
 
 @testset "Mn compute" begin
     r = 100.0
-    ϵ = 1e-8 
+    ϵ = 1e-8
     bs = [r - 1 + ϵ, r, r + 1 - ϵ]
-       
-    prec_frac, prec_abs = test_Mn.(r, bs)
-       
+
+    test_Mn.(r, bs)
+
 
     r = 0.01
+    # points close to boundary
     bs = [ϵ, r, 1 - r - ϵ, 1 - r + ϵ, 1, r + 1 - ϵ]
-    prec_frac, prec_abs = test_Mn.(r, bs)
+    test_Mn.(r, bs)
 
-    # test random points
+    # random points
     ntest = 10
     for i in 1:ntest
         r = 2.0
@@ -74,8 +78,7 @@ end
             r = 2 * rand(rng)
             b = 2 * rand(rng)
         end
-        k2 = (1-b+r)*(1+b-r)/(4*b*r)
-        prec_frac, prec_abs = test_Mn(r, b)
+        test_Mn(r, b)
     end
 end
 

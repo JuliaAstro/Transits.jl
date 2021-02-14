@@ -3,6 +3,9 @@ using StableRNGs
 using Transits
 using Test
 
+const PLOT = get(ENV, "TEST_PLOTS", "false") == "true"
+PLOT && include("plots.jl")
+
 rng = StableRNG(2752)
 
 @testset "Transits" begin

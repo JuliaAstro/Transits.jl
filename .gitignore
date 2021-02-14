@@ -5,3 +5,4 @@ Manifest.toml
 /docs/build/
 
 dev
+test/output
