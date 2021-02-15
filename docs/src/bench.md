@@ -11,13 +11,13 @@ The code can be found in `bench/`. You'll need to set up the environment yoursel
 
 ## Performance
 
-![](https://github.com/JuliaAstro/Transits.jl/blob/master/bench/timing.png)
+![](https://raw.githubusercontent.com/JuliaAstro/Transits.jl/master/bench/timing.png)
 
 ## Comparison with Limbdark.jl
 
-![](https://github.com/JuliaAstro/Transits.jl/blob/master/bench/relative_timing.png)
+![](https://raw.githubusercontent.com/JuliaAstro/Transits.jl/master/bench/relative_timing.png)
 
 ---
 
-![](https://github.com/JuliaAstro/Transits.jl/blob/master/bench/coeff_relative_timing.png)
+![](https://raw.githubusercontent.com/JuliaAstro/Transits.jl/master/bench/coeff_relative_timing.png)
 
