@@ -18,21 +18,28 @@ Flexible photometric transit curves with limb darkening. The goals of this packa
 
 **WIP**: Currently under progress by @mileslucas
 
-### Current TODO list before v0.1.0
+### Current TODO list
 
-- [x] ~~finish writing unit tests~~
-- [x] ~~fix numerical errors in Mn integral~~ (Thanks so much for the help @icweaver)
-- [ ] prepare DOI ~~and references for starry/Agol/etc.~~
+in some order of importance
 
-Current TODOs that are further down the horizon, in some order of importance
-
-- [ ] Finish writing `KeplerOrbit`
+- [ ] Finish writing `KeplerOrbit` (help wanted)
 - [ ] Gradients using ChainRulesCore
 - [ ] Gradient tests using ChainRulesTestUtils
+- [ ] documenation section "Introduction" describing transits and talking about science, very expository (help wanted)
 - [ ] Plotting functinos (recreate ALFM 20 plots)
+    * recipe for lightcurve which automatically makes a simple orbit and shows features
+    * similar as above but special one for SecondaryLimbDark to side-by-side plot secondary
+    * figure 3 and 6 can be written with recipe
 - [ ] examples (show rich composability of julia)
+    * We can use Pluto notebooks for examples that are *learning-oriented*
+    * For tutorials and *problem-oriented* examples prefer a Julia script that can be weaved into the docs (with Literate.jl e.g.) (or just as easily weaved into a jupyter notebook!)
 - [ ] benchmarks (recreate ALFM 20 plots)
+    * I have some code in `bench/speed.jl`. This needs modularized- the `benchmark` function can be rewritten like `benchmark(f, Nu, Npts)` and abstracted for `f` as types.
+    * once the code is reorganized (maybe even put the new `benchmark` in a module for future thinking) decide whether to save data or save images, then build the link with the documentation
+    * need to add benchmarks for the python code. PyCall has worked fine for benchmarking for me in the past, so lets write the driver in Julia. [here is a link](https://github.com/rodluger/Limbdark.jl/blob/master/tex/figures/python/compare_to_batman.py) to the plotting code from ALFM
+    * in general, the more this can be automated the better (including CI!)
 - [ ] look at simpson integrated light curve (ALFM 20)
+
 
 If you would like to contribute, feel free to open a [pull request](https://github.com/JuliaAstro/Transits.jl/pulls). If you want to discuss something before contributing, head over to [discussions](https://github.com/JuliaAstro/Transits.jl/discussions) and join or open a new topic.
 
