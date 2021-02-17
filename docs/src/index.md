@@ -7,7 +7,9 @@ CurrentModule = Transits
 [![GitHub](https://img.shields.io/badge/Code-GitHub-black.svg)](https://github.com/juliaastro/Transits.jl)
 [![Build Status](https://github.com/juliaastro/Transits.jl/workflows/CI/badge.svg)](https://github.com/juliaastro/Transits.jl/actions)
 [![Coverage](https://codecov.io/gh/juliaastro/Transits.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/juliaastro/Transits.jl)
+
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4544095.svg)](https://doi.org/10.5281/zenodo.4544095)
 
 Transits.jl provides flexible and powerful occultation curves with limb darkening. The goals of this package are, in this order
 * have a simple interface with high *compasibility*
@@ -20,4 +22,4 @@ In particular, [`PolynomialLimbDark`](@ref) implements the "starry" limb darkeni
 
 ## Citations
 
-If you use Transits.jl or a derivative of it in your work please consider citing it (DOI to be made). If you use [`PolynomialLimbDark`](@ref) or [`QuadLimbDark`](@ref) please also cite [Agol et al. (2020)](https://ui.adsabs.harvard.edu/abs/2020AJ....159..123A/abstract) and [Luger et al. (2019)](https://ui.adsabs.harvard.edu/abs/2019AJ....157...64L/abstract).
+If you use Transits.jl or a derivative of it in your work please consider citing it with the [Zenodo DOI](https://doi.org/10.5281/zenodo.4544095). If you use [`PolynomialLimbDark`](@ref) or [`QuadLimbDark`](@ref) please also cite [Agol et al. (2020)](https://ui.adsabs.harvard.edu/abs/2020AJ....159..123A/abstract) and [Luger et al. (2019)](https://ui.adsabs.harvard.edu/abs/2019AJ....157...64L/abstract).
