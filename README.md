@@ -7,6 +7,7 @@
 
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliaastro.github.io/Transits.jl/stable)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://juliaastro.github.io/Transits.jl/dev)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4544095.svg)](https://doi.org/10.5281/zenodo.4544095)
 
 Flexible photometric transit curves with limb darkening. The goals of this package are, in this order
 
@@ -106,4 +107,4 @@ flux = @. ld(orbit, t, 0.1)
 
 ## Citations
 
-If you use Transits.jl or a derivative of it in your work please consider citing it (DOI to be made). If you use `PolynomialLimbDark` or `QuadLimbDark` please also cite [Agol et al. (2020)](https://ui.adsabs.harvard.edu/abs/2020AJ....159..123A/abstract) and [Luger et al. (2019)](https://ui.adsabs.harvard.edu/abs/2019AJ....157...64L/abstract).
+If you use Transits.jl or a derivative of it in your work please consider citing it at the [Zenodo DOI](https://doi.org/10.5281/zenodo.4544095). If you use `PolynomialLimbDark` or `QuadLimbDark` please also cite [Agol et al. (2020)](https://ui.adsabs.harvard.edu/abs/2020AJ....159..123A/abstract) and [Luger et al. (2019)](https://ui.adsabs.harvard.edu/abs/2019AJ....157...64L/abstract).
