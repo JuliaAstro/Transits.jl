@@ -44,6 +44,19 @@ in some order of importance
 
 If you would like to contribute, feel free to open a [pull request](https://github.com/JuliaAstro/Transits.jl/pulls). If you want to discuss something before contributing, head over to [discussions](https://github.com/JuliaAstro/Transits.jl/discussions) and join or open a new topic.
 
+## Installation
+
+To install use [Pkg](https://julialang.github.io/Pkg.jl/v1/managing-packages/). From the REPL, press `]` to enter Pkg-mode
+
+```julia
+pkg> add Transits
+```
+If you want to use the most up-to-date version of the code, check it out from `master`
+
+```julia
+pkg> add Transits#master
+```
+
 ## Usage
 
 ```julia
