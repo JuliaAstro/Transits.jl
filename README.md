@@ -26,6 +26,7 @@ in some order of importance
 - [ ] Finish writing `KeplerOrbit` (help wanted)
 - [ ] Gradients using ChainRulesCore
 - [ ] Gradient tests using ChainRulesTestUtils
+- [ ] Kipping prior distributions (with gradients) (help wanted)
 - [ ] documenation section "Introduction" describing transits and talking about science, very expository (help wanted)
 - [ ] Plotting functinos (recreate ALFM 20 plots)
     * recipe for lightcurve which automatically makes a simple orbit and shows features
