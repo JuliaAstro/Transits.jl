@@ -11,7 +11,7 @@
 
 Flexible photometric transit curves with limb darkening. The goals of this package are, in this order
 
-* have a simple interface with high *compasibility*
+* have a simple interface with high *compatibility*
 * be flexible with respect to numeric types and application
 * be fully compatible with [ChainRules.jl](https://github.com/juliadiff/ChainRules.jl) automatic differentiation (AD) system to leverage the derived analytical gradients
 * provide a codebase that is well-organized, instructive, and easy to extend
