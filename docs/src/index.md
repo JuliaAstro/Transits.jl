@@ -13,7 +13,7 @@ CurrentModule = Transits
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4544095.svg)](https://doi.org/10.5281/zenodo.4544095)
 
 Transits.jl provides flexible and powerful occultation curves with limb darkening. The goals of this package are, in this order
-* have a simple interface with high *compasibility*
+* have a simple interface with high *composability*
 * be flexible with respect to numeric types and application
 * be fully compatible with [ChainRules.jl](https://github.com/juliadiff/ChainRules.jl) automatic differentiation (AD) system to leverage the derived analytical gradients
 * provide a codebase that is well-organized, instructive, and easy to extend
