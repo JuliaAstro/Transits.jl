@@ -77,3 +77,21 @@ function flip(orbit::SimpleOrbit, r_planet)
                        orbit.half_period,
                        orbit.t0)
 end
+
+function Base.show(io::IO, orbit::SimpleOrbit)
+    T = orbit.duration
+    P = orbit.period
+    b = orbit.b
+    t0 = orbit.t0
+    Rs = orbit.r_star
+    print(io, "SimpleOrbit(P=$P, T=$T, t0=$t0, b=$b, r_star=$Rs)")
+end
+
+function Base.show(io::IO, ::MIME"text/plain", orbit::SimpleOrbit)
+    T = orbit.duration
+    P = orbit.period
+    b = orbit.b
+    t0 = orbit.t0
+    Rs = orbit.r_star
+    print(io, "SimpleOrbit\n period: $P\n duration: $T\n t0: $t0\n b: $b\n r_star: $Rs")
+end
