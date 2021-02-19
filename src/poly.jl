@@ -189,6 +189,20 @@ function compute(ld::PolynomialLimbDark, b::S, r) where S
 end
 
 ###
+###   Type methods
+###
+
+function Base.show(io::IO, ld::PolynomialLimbDark)
+    print(io, "PolynomialLimbDark(", ld.u_n, ")")
+end
+function Base.show(io::IO, ::MIME"text/plain", ld::PolynomialLimbDark)
+    print(io, "PolynomialLimbDark\n u_n: ", ld.u_n)
+end
+function Base.show(io::IO, ::MIME"text/html", ld::PolynomialLimbDark)
+    print(io, "PolynomialLimbDark\n u<sup>n</sup>: ", ld.u_n)
+end
+
+###
 ###   Initialization helpers
 ###
 
@@ -258,7 +272,7 @@ function compute_Mn_coeffs!(Mn_coeff::AbstractArray{T,3}, n_max) where T
             else
                 coeff = π
                 Mn_coeff[begin + 1, begin + j, begin] = coeff
-                
+
                 # loop over higher order terms
                 jmax = iseven(m) ? m ÷ 2 : size(Mn_coeff, 3) - 1
                 for i in 1:jmax
