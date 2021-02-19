@@ -12,4 +12,5 @@ rng = StableRNG(2752)
     include("elliptic.jl")
     include("Mn_integral.jl")
     include("poly.jl")
+    include("show.jl")
 end

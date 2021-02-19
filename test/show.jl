@@ -4,6 +4,8 @@ u = [0.4, 0.26]
 @testset "PolynomialLimbDark" begin
     ld = PolynomialLimbDark(u)
 
+    @test sprint(show, ld) == "PolynomialLimbDark([-1.0, 0.4, 0.26])"
+
     @test repr("text/plain", ld) == """
     PolynomialLimbDark
      u_n: [-1.0, 0.4, 0.26]"""
@@ -11,25 +13,30 @@ u = [0.4, 0.26]
     @test repr("text/html", ld) == """
     PolynomialLimbDark
      u<sup>n</sup>: [-1.0, 0.4, 0.26]"""
-
-    @test sprint(show, ld) == "PolynomialLimbDark([-1.0, 0.4, 0.26])"
-
 end
 
 @testset "QuadLimbDark" begin
-    ld2 = QuadLimbDark(u)
-    @test repr("text/plain", ld2) == """
+    ld = QuadLimbDark(u)
+
+    @test sprint(show, ld) == "QuadLimbDark([-1.0, 0.4, 0.26])"
+
+    @test sprint(show, "text/plain", ld) == """
     QuadLimbDark
      u_n: [-1.0, 0.4, 0.26]"""
 
-    @test repr("text/html", ld2) == """
+    @test sprint(show, "text/html", ld) == """
     QuadLimbDark
      u<sup>n</sup>: [-1.0, 0.4, 0.26]"""
-
-    @test sprint(show, ld2) == "QuadLimbDark([-1.0, 0.4, 0.26])"
 end
 
 @testset "SecondaryLimbDark" begin
+    ld = SecondaryLimbDark(u)
 
+    @test sprint(show, ld) == "SecondaryLimbDark(PolynomialLimbDark, PolynomialLimbDark, 1.0)"
 
+    @test sprint(show, "text/plain", ld) == """
+    SecondaryLimbDark
+     primary: PolynomialLimbDark([-1.0, 0.4, 0.26])
+     secondary: PolynomialLimbDark([-1.0, 0.4, 0.26])
+     ratio: 1.0"""
 end

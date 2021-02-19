@@ -41,7 +41,7 @@ fp ≈ brightness_ratio * fs
 true
 ```
 """
-function SecondaryLimbDark(driver1::AbstractLimbDark, driver2::AbstractLimbDark; brightness_ratio=1)
+function SecondaryLimbDark(driver1::AbstractLimbDark, driver2::AbstractLimbDark; brightness_ratio=1.0)
     return SecondaryLimbDark(driver1, driver2, brightness_ratio)
 end
 
@@ -57,4 +57,18 @@ function compute(ld::SecondaryLimbDark, orbit::AbstractOrbit, t, r; kwargs...)
     f2 = ld.secondary_driver(orbit2, t, 1/r; kwargs...)
     flux_ratio = ld.brightness_ratio * r^2
     return (f1 + flux_ratio * f2) / (1 + flux_ratio)
+end
+
+function Base.show(io::IO, ld::SecondaryLimbDark{L1, L2}) where {L1, L2}
+    r = ld.brightness_ratio
+    np = L1.name.name
+    ns = L2.name.name
+    print(io, "SecondaryLimbDark($np, $ns, $r)")
+end
+
+function Base.show(io::IO, ::MIME"text/plain", ld::SecondaryLimbDark)
+    p = ld.primary_driver
+    s = ld.secondary_driver
+    r = ld.brightness_ratio
+    print(io, "SecondaryLimbDark\n primary: $p\n secondary: $s\n ratio: $r")
 end
