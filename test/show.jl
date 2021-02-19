@@ -40,3 +40,14 @@ end
      secondary: PolynomialLimbDark([-1.0, 0.4, 0.26])
      ratio: 1.0"""
 end
+
+@testset "IntegratedLimbDark" begin
+    ld = IntegratedLimbDark(u)
+
+    @test sprint(show, ld) == "IntegratedLimbDark(PolynomialLimbDark, 21)"
+
+    @test sprint(show, "text/plain", ld) == """
+    IntegratedLimbDark
+     driver: PolynomialLimbDark([-1.0, 0.4, 0.26])
+     N: 21"""
+end
