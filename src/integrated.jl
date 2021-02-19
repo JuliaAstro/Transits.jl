@@ -75,14 +75,14 @@ end
 compute(ld::IntegratedLimbDark, orbit::AbstractOrbit, t, r, ::Nothing) = 
     compute(ld.driver, orbit, t, r)
 
-    function Base.show(io::IO, ld::IntegratedLimbDark{L1}) where L1
-        N = length(ld.nodes)
-        np = L1.name.name
-        print(io, "IntegratedLimbDark($np, $N)")
-    end
-    
-    function Base.show(io::IO, ::MIME"text/plain", ld::IntegratedLimbDark)
-        p = ld.driver
-        N = length(ld.nodes)
-        print(io, "IntegratedLimbDark\n driver: $p\n N: $N")
-    end
+function Base.show(io::IO, ld::IntegratedLimbDark{L1}) where L1
+    N = length(ld.nodes)
+    np = L1.name.name
+    print(io, "IntegratedLimbDark($np, $N)")
+end
+
+function Base.show(io::IO, ::MIME"text/plain", ld::IntegratedLimbDark)
+    p = ld.driver
+    N = length(ld.nodes)
+    print(io, "IntegratedLimbDark\n driver: $p\n N: $N")
+end
