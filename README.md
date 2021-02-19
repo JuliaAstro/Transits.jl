@@ -7,10 +7,11 @@
 
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliaastro.github.io/Transits.jl/stable)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://juliaastro.github.io/Transits.jl/dev)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4544095.svg)](https://doi.org/10.5281/zenodo.4544095)
 
 Flexible photometric transit curves with limb darkening. The goals of this package are, in this order
 
-* have a simple interface with high *compasibility*
+* have a simple interface with high *composability*
 * be flexible with respect to numeric types and application
 * be fully compatible with [ChainRules.jl](https://github.com/juliadiff/ChainRules.jl) automatic differentiation (AD) system to leverage the derived analytical gradients
 * provide a codebase that is well-organized, instructive, and easy to extend
@@ -25,6 +26,7 @@ in some order of importance
 - [ ] Finish writing `KeplerOrbit` (help wanted)
 - [ ] Gradients using ChainRulesCore
 - [ ] Gradient tests using ChainRulesTestUtils
+- [ ] Kipping prior distributions (with gradients) (help wanted)
 - [ ] documenation section "Introduction" describing transits and talking about science, very expository (help wanted)
 - [ ] Plotting functinos (recreate ALFM 20 plots)
     * recipe for lightcurve which automatically makes a simple orbit and shows features
@@ -42,6 +44,19 @@ in some order of importance
 
 
 If you would like to contribute, feel free to open a [pull request](https://github.com/JuliaAstro/Transits.jl/pulls). If you want to discuss something before contributing, head over to [discussions](https://github.com/JuliaAstro/Transits.jl/discussions) and join or open a new topic.
+
+## Installation
+
+To install use [Pkg](https://julialang.github.io/Pkg.jl/v1/managing-packages/). From the REPL, press `]` to enter Pkg-mode
+
+```julia
+pkg> add Transits
+```
+If you want to use the most up-to-date version of the code, check it out from `master`
+
+```julia
+pkg> add Transits#master
+```
 
 ## Usage
 
@@ -106,4 +121,4 @@ flux = @. ld(orbit, t, 0.1)
 
 ## Citations
 
-If you use Transits.jl or a derivative of it in your work please consider citing it (DOI to be made). If you use `PolynomialLimbDark` or `QuadLimbDark` please also cite [Agol et al. (2020)](https://ui.adsabs.harvard.edu/abs/2020AJ....159..123A/abstract) and [Luger et al. (2019)](https://ui.adsabs.harvard.edu/abs/2019AJ....157...64L/abstract).
+If you use Transits.jl or a derivative of it in your work please consider citing it at the [Zenodo DOI](https://doi.org/10.5281/zenodo.4544095). If you use `PolynomialLimbDark` or `QuadLimbDark` please also cite [Agol et al. (2020)](https://ui.adsabs.harvard.edu/abs/2020AJ....159..123A/abstract) and [Luger et al. (2019)](https://ui.adsabs.harvard.edu/abs/2019AJ....157...64L/abstract).
