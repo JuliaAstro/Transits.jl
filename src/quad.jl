@@ -162,3 +162,13 @@ function compute_gn(u_n::StaticVector{3,T}) where T
     g_2 = -0.25 * u_n[begin + 2]
     return SA[g_0, g_1, g_2]
 end
+
+function Base.show(io::IO, ld::QuadLimbDark)
+    print(io, "QuadLimbDark(", ld.u_n, ")")
+end
+function Base.show(io::IO, ::MIME"text/plain", ld::QuadLimbDark)
+    print(io, "QuadLimbDark\n u_n: ", ld.u_n)
+end
+function Base.show(io::IO, ::MIME"text/html", ld::QuadLimbDark)
+    print(io, "QuadLimbDark\n u<sup>n</sup>: ", ld.u_n)
+end
