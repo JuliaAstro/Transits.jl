@@ -108,7 +108,7 @@ function compute(ld::PolynomialLimbDark, b::S, r) where S
         end
         fac = 2 * r2 * onemr2
         for i in 2:ld.n_max
-            flux -= ld.g_n[i + 1] * fac
+            flux -= ld.g_n[begin + i] * fac
             fac *= sqrt1mr2
         end
         return flux * π * ld.norm
