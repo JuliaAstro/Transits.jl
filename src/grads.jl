@@ -308,8 +308,7 @@ function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
         ∇flux = ∇flux - SA[dpdb_M, dpdr_M]
 
     end
-    norm_flux = flux * ld.norm
-    dfdg[begin] -= norm_flux * π
-    dfdg[begin + 1] -= norm_flux * π * 2/3
-    return norm_flux, dfdg * ld.norm, ∇flux * ld.norm
+    dfdg[begin] -= flux * π
+    dfdg[begin + 1] -= flux * π * 2/3
+    return flux * ld.norm, dfdg * ld.norm, ∇flux * ld.norm
 end
