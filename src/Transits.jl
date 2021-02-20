@@ -1,5 +1,6 @@
 module Transits
 
+using ChainRulesCore
 using Reexport
 
 export AbstractLimbDark,
@@ -95,6 +96,7 @@ include("quad.jl")
 include("integrated.jl")
 include("secondary.jl")
 include("distributions.jl")
+include("grads.jl")
 
 
 end
