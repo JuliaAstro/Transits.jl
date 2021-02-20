@@ -247,6 +247,7 @@ function compute_gn!(g_n::AbstractVector{T}, u_n) where T
     return g_n
 end
 
+
 compute_Mn_coeffs(n_max; kwargs...) = compute_Mn_coeffs(Float64, n_max, kwargs...)
 compute_Mn_coeffs(T, n_max; maxiter=100) = compute_Mn_coeffs!(zeros(T, 2, 4, maxiter), n_max)
 

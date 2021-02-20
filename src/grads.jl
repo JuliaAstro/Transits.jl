@@ -64,3 +64,11 @@ function compute_gn_jacobian(u_n::AbstractVector{T}) where T
 
     return g_n, dgdu
 end
+
+function compute_gn_jacobian(u_n::StaticVector{3,T}) where T
+    g_n = compute_gn(u_n)
+    Δg_n = SA[zero(T) -one(T)  -1.5
+              zero(T)  one(T)   2.0 ; 
+              zero(T)  zero(T) -0.25]
+    return g_n, Δg_n
+end
