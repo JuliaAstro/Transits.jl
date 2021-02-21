@@ -158,7 +158,7 @@ function frule((_, _, _), ::typeof(compute_linear), b, r; kwargs...)
 end
 
 
-function compute_quadratic_grad(b, r; s0, r2, b2, kap0, kite_area2, k2, ∇s1)
+function compute_quadratic_grad(b, r; s0, r2, b2, kap0, kite_area2, k2, ∇s0)
     r2pb2 = r2 + b2
     η2 = r2 * (r2pb2 + b2)
     if k2 > 1
@@ -171,7 +171,7 @@ function compute_quadratic_grad(b, r; s0, r2, b2, kap0, kite_area2, k2, ∇s1)
                 8 * r * (r2pb2 * kap0 - kite_area2)]
     end
     s2 = 2 * s0 + four_pi_eta
-    ∇s2 = 2 * ∇s1 + ∇η
+    ∇s2 = 2 * ∇s0 + ∇η
     return  s2, ∇s2
 end
 
@@ -281,7 +281,7 @@ function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
     end
 
     ## calculate quadratic term
-    s2, ∇s2 = compute_quadratic_grad(b, r; s0, r2, b2, kap0, kite_area2, k2, ∇s1)
+    s2, ∇s2 = compute_quadratic_grad(b, r; s0, r2, b2, kap0, kite_area2, k2, ∇s0)
     flux += ld.g_n[begin + 2] * s2
     ∇flux = ∇flux + ld.g_n[begin + 2] * ∇s2
     dfdg[begin + 1] = s2
