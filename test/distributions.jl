@@ -21,13 +21,13 @@ using HypothesisTests
         t = ApproximateOneSampleKSTest(q, Uniform(0, 1))
         @test t.δ < 0.05
     end
-    
+
 end
 
 @testset "Kipping13Transform" begin
-    N = 100
+    N = 1000
     @test bijector(Kipping13()) isa Kipping13Transform
-    
+
     𝔅 = Kipping13Transform()
     xs = rand(Kipping13(), N)
     for x in eachcol(xs)
@@ -36,11 +36,12 @@ end
         @test xi ≈ x
     end
 
-    ys = randn(2, N)
-    for y in eachcol(ys)
+    ys = 2 .* randn(2, N)
+    @test all(eachcol(ys)) do y
         u1, u2 = inv(𝔅)(y)
-        @test u1 + u2 < 1
-        @test u1 + 2 * u2 > 0
-        @test u1 > 0
+
+        u1 + u2 ≤ 1 &&
+        u1 + 2 * u2 ≥ 0 &&
+        u1 ≥ 0
     end
 end
