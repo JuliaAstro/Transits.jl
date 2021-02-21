@@ -374,6 +374,7 @@ function Mn_four!(arr::AbstractVector{T}; kap0, sqbr, k2, Em1mKdm, onemr2mb2, ki
         arr[begin + 2] = π * onemr2mb2
         arr[begin + 3] = sqonembmr2^3 * 2/3 * ((3 - 2 / k2) * Eofk + Em1mKdm / k2)
     end
+    return arr
 end
 
 function Mn_series!(Mn::AbstractVector{T}, Mn_coeff; n_max, sqonembmr2, k, k2) where T

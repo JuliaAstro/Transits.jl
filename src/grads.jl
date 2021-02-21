@@ -9,7 +9,7 @@ function compute_gn_jac(u_n::AbstractVector{T}) where T
     n = length(u_n) - 1
     g_n = zero(u_n)
     dgdu = fill!(similar(u_n, n + 1, n + 1), zero(T))
-    
+
     ## First: calculate the a_n terms (eqn. 10)
     a_n = zero(g_n)
     dadu = copy(dgdu)
@@ -68,7 +68,7 @@ end
 function compute_gn_jac(u_n::StaticVector{3,T}) where T
     g_n = compute_gn(u_n)
     ∇g_n = SA[zero(T) -one(T)  -1.5
-              zero(T)  one(T)   2.0  
+              zero(T)  one(T)   2.0
               zero(T)  zero(T) -0.25]
     return g_n, ∇g_n
 end
@@ -167,7 +167,7 @@ function compute_quadratic_grad(b, r; s0, r2, b2, kap0, kite_area2, k2, ∇s0)
     else
         Πmkap1 = atan(kite_area2, (r - 1) * (r + 1) - b2)
         four_pi_eta = 2 * (-Πmkap1 + η2 * kap0 - 0.25 * kite_area2 * (1 + 5 * r2 + b2))
-        ∇η = SA[2/b * (4 * b2 * r2 * kap0 - (1 + r2pb2) * kite_area2), 
+        ∇η = SA[2/b * (4 * b2 * r2 * kap0 - (1 + r2pb2) * kite_area2),
                 8 * r * (r2pb2 * kap0 - kite_area2)]
     end
     s2 = 2 * s0 + four_pi_eta
@@ -258,7 +258,7 @@ function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
     kc = sqrt(abs(kc2))
 
     ## Compute uniform term
-    
+
     (s0, kap0, kite_area2, kck), ∇s0 = compute_uniform_grad(b, r; b2, r2, sqarea, fourbrinv)
 
     flux = ld.g_n[begin] * s0
@@ -298,12 +298,12 @@ function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
     if k2 < 0.5 && ld.n_max > 3
         downwardM!(ld.Mn, ld.Mn_coeff; n_max=ld.n_max, sqonembmr2, sqbr, onemr2mb2, k, k2, sqarea, kap0, Eofk, Em1mKdm, kite_area2)
         if b < bcut
-            Nn_lower!(ld.Nn, ld.Nn_coeff; )
+            Nn_lower!(ld.Nn, ld.Nn_coeff; Mn=ld.Mn, n_max=ld.n_max, kap0, kc, k2, sqbr, k, Eofk, Em1mKdm)
         end
     else
         upwardM!(ld.Mn; sqbr, n_max=ld.n_max, sqonembmr2, onemr2mb2, sqarea, k2, kap0, Eofk, Em1mKdm, kite_area2)
         if b < bcut
-            Nn_raise!(ld.Nn; )
+            Nn_raise!(ld.Nn, ld.Mn; n_max=ld.n_max, onembpr2, kap0, kc, k2, sqbr, k, Eofk, Em1mKdm)
         end
     end
 
@@ -313,17 +313,70 @@ function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
                        (onemr2mb2 * ld.Mn[begin + n] + sqarea * ld.Mn[begin + n - 2])
         flux -= ld.g_n[begin + n] * pofgn_M
         dfdg[begin + n] = -pofgn_M
-        dpdr_M = 2 * r * ((n + 1) * ld.Mn[begin + n] - n * ld.Mn[begin + n - 2])
+        dpdr_M = 2 * r * ((n + 2) * ld.Mn[begin + n] - n * ld.Mn[begin + n - 2])
 
         if b < bcut
-            dpdb_M = n * (ld.Mn[begin + n - 2] * (2 * r^3 + b^3 - b - 3 * r2 * b) + ld.Mn[begin + n] - 4 * r^3 * ld.Nn[begin + n - 2])
+            dpdb_M = n * (ld.Mn[begin + n - 2] * (2 * r^3 + b^3 - b - 3 * r2 * b) + b * ld.Mn[begin + n] - 4 * r^3 * ld.Nn[begin + n - 2])
         else
             dpdb_M = n/b * ((ld.Mn[begin + n] - ld.Mn[begin + n - 2]) * (r2 + b2) + (b2 - r2)^2 * ld.Mn[begin + n - 2])
         end
-        ∇flux = ∇flux - SA[dpdb_M, dpdr_M]
+        ∇flux = ∇flux - ld.g_n[begin + n] * SA[dpdb_M, dpdr_M]
 
     end
     dfdg[begin] -= flux * ld.norm * π
     dfdg[begin + 1] -= flux * ld.norm * π * 2/3
     return flux * ld.norm, dfdg * ld.norm, ∇flux * ld.norm
+end
+
+function Nn_lower!(Nn::AbstractVector, Nn_coeff; Mn, onembpr2, n_max, k, k2, kwargs...)
+    Nn_series!(Nn, Nn_coeff; k2, sqonembmr2, n_max, k)
+
+    for m in n_max-2:-1:2
+        Nn[begin + m] = ((m + 4) * Nn[begin + m + 2] - Mn[begin + m + 2]) / (onembpr2 * (m + 2))
+    end
+
+    Nn_two!(Nn; k, k2, kwargs...)
+    return Nn
+end
+
+function Nn_series!(Nn::AbstractVector{T}, Nn_coeff; k2, sqonembmr2, n_max, k) where T
+    tol = eps(k2)
+    term = zero(T)
+    fac = sqonembmr2^(n_max - 1) * k * k2
+    for j in 1:2
+        Nn[begin + n_max - 2 + j] = Nn_coeff[begin + j - 1, begin]
+        k2n = one(T)
+        for n in 1:size(Nn_coeff, 3) - 1
+            k2n *= k2
+            term = k2n * Nn_coeff[begin + j - 1, begin + n]
+            Nn[begin + n_max - 2 + j] += term
+            abs(term) < tol && break
+        end
+        Nn[begin + n_max - 2 + j] *= fac
+        fac *= sqonembmr2
+    end
+
+    return Nn
+end
+
+
+function Nn_raise!(Nn::AbstractVector, Mn; n_max, onembpr2, kwargs...)
+    @show "raise"
+    Nn_two!(Nn; kwargs...)
+    for m in 2:n_max
+        Nn[begin + m] = (Mn[begin + m] + m * onembpr2 * Nn[begin + m - 2]) / (m + 2)
+    end
+    return Nn
+end
+
+function Nn_two!(Nn::AbstractVector; kap0, kc, k2, sqbr, k, Eofk, Em1mKdm)
+    if k2 ≤ 1
+        Nn[begin] = 0.5 * kap0 - k * kc
+        Nn[begin + 1] = 4/3 * sqbr * k2 * (2 * Em1mKdm - Eofk)
+    else
+        Nn[begin] = 0.5 * π
+        Nn[begin + 1] = 4/3 * sqbr * k * (2 * Eofk - Em1mKdm)
+    end
+
+    return Nn
 end
