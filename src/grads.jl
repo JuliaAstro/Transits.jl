@@ -73,14 +73,24 @@ function compute_gn_jac(u_n::StaticVector{3,T}) where T
     return g_n, ∇g_n
 end
 
-function compute_uniform_grad(b::T, r; kap0, kite_area2, kwargs...) where T
-    Ω = compute_uniform(b, r; kap0, kite_area2, kwargs...)
+function compute_uniform_grad(b::T, r; r2, b2, sqarea, fourbrinv) where T
     if b ≤ 1 - r
+        flux = π * (1 - r2)
+        kap0 = convert(T, π)
+        kck = zero(T)
+        kite_area2 = zero(T)
         ∇s0 = SA[zero(T), -2 * π * r]
     else
+        kite_area2 = sqrt(sqarea)
+        r2m1 = (r - 1) * (r + 1)
+        kap0 = atan(kite_area2, r2m1 + b2)
+        Πmkap1 = atan(kite_area2, r2m1 - b2)
+        kck = kite_area2 * fourbrinv
+        flux = Πmkap1 - r2 * kap0 + 0.5 * kite_area2
         ∇s0 = SA[kite_area2 / b, -2 * r * kap0]
     end
-    return Ω, ∇s0
+
+    return (flux, kap0, kite_area2, kck), ∇s0
 end
 
 function frule((_, _, _), ::typeof(compute_uniform), b, r; kwargs...)
@@ -88,7 +98,7 @@ function frule((_, _, _), ::typeof(compute_uniform), b, r; kwargs...)
 end
 
 
-function compute_linear_grad(b::T, r; k2, kc, kc2, onembmr2, onembpr2, onembmr2inv, r2=r^2, b2=b^2, br=b*r, fourbr=4*br, sqbr=sqrt(br)) where T
+function compute_linear_grad(b::T, r; k2, kc, kc2, onembmr2, onembpr2, onembmr2inv, sqonembmr2, r2=r^2, b2=b^2, br=b*r, fourbr=4*br, sqbr=sqrt(br)) where T
     if iszero(b) # case 10
         Λ1 = -2 * π * sqrt(1 - r2)^3
         Eofk = 0.5 * π
@@ -121,7 +131,7 @@ function compute_linear_grad(b::T, r; k2, kc, kc2, onembmr2, onembpr2, onembmr2i
         if b + r > 1 # case 2, case 8
             Πofk, Eofk, Em1mKdm = cel(k2, kc, (b - r)^2 * kc2, zero(T), one(T), one(T), 3 * kc2 * (b - r) * (b + r), kc2, zero(T))
             Λ1 = onembmr2 * (Πofk + (-3 + 6 * r2 + 2 * br) * Em1mKdm - fourbr * Eofk) / (3 * sqbr)
-            ∇s1 = SA[2 * r * onembmr2 * (-Em1mKdm + 2 * Eofk) * sqbrinv/3, -2 * r * onembmr2 * Em1mKdm * sqbrinv]
+            ∇s1 = SA[2 * r * onembmr2 * (-Em1mKdm + 2 * Eofk) / (sqbr * 3), -2 * r * onembmr2 * Em1mKdm / sqbr]
         elseif b + r < 1 # case 3 case 9
             bmrdbpr = (b - r) / (b + r)
             μ = 3 * bmrdbpr * onembmr2inv
@@ -179,10 +189,10 @@ function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
     ## check for trivial cases
     if b ≥ 1 + r || iszero(r)
         # completely unobscured
-        return one(T), Zero()
+        return one(T), dfdg, @SVector zeros(T, 2)
     elseif r ≥ 1 + b
         # completely obscured
-        return zero(T), Zero()
+        return zero(T), dfdg, @SVector zeros(T, 2)
     end
 
     r2 = r^2
@@ -260,7 +270,7 @@ function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
     end
 
     ## compute linear term
-    (s1, Eofk, Em1mKdm), ∇s1 = compute_linear_grad(b, r; k2, kc, kc2, r2, b2, br, fourbr, sqbr, onembmr2, onembpr2, onembmr2inv)
+    (s1, Eofk, Em1mKdm), ∇s1 = compute_linear_grad(b, r; k2, kc, kc2, r2, b2, br, fourbr, sqbr, onembmr2, onembpr2, onembmr2inv, sqonembmr2)
 
     flux += ld.g_n[begin + 1] * s1
     ∇flux = ∇flux + ld.g_n[begin + 1] * ∇s1
@@ -271,7 +281,7 @@ function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
     end
 
     ## calculate quadratic term
-    s2, ∇s2 = compute_quadratic(b, r; s0, r2, b2, kap0, kite_area2, k2)
+    s2, ∇s2 = compute_quadratic_grad(b, r; s0, r2, b2, kap0, kite_area2, k2, ∇s1)
     flux += ld.g_n[begin + 2] * s2
     ∇flux = ∇flux + ld.g_n[begin + 2] * ∇s2
     dfdg[begin + 1] = s2
