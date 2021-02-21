@@ -1,6 +1,9 @@
 using Random: AbstractRNG
+using Bijectors
+import Bijectors: logabsdetjac, bijector
 using Distributions: MultivariateDistribution, Continuous
 import Distributions: _rand!, _logpdf
+using StatsFuns
 
 """
     Kipping13()
@@ -44,3 +47,23 @@ end
 
 _logpdf(::Kipping13, x::AbstractArray{T}) where {T} = zero(T)
 
+struct Kipping13Transform <: Bijector{1} end
+
+function (::Kipping13Transform)(x::AbstractVector)
+    usum = sum(x)
+    q = [usum^2, 0.5 * first(x) / usum]
+    return @. log(q) - log(1 - q)
+end
+
+function (::Inverse{<:Kipping13Transform})(y::AbstractVector)
+    tmp = map(logistic, y)
+    sqrtq1 = sqrt(first(tmp))
+    twoq2 = 2 * last(tmp)
+    tmp[begin] = sqrtq1 * twoq2
+    tmp[end] = sqrtq1 * (1 - twoq2)
+    return tmp
+end
+
+logabsdetjac(::Kipping13Transform, y::Real) = -2 * softplus(-y) - y
+logabsdetjac(k::Kipping13Transform, y) = sum((yi) -> logabsdetjac(k, yi), y)
+bijector(::Kipping13) = Kipping13Transform()
