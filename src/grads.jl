@@ -222,7 +222,7 @@ function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
         dfdrb *= π * ld.norm
         dfdg[1] = (onemr2 - flux) * π * ld.norm
         dfdg[2] = 2/3 * (sqrt1mr2^3 - flux) * π * ld.norm
-        return flux * π * ld.norm, dfdg, dfdrb
+        return flux * π * ld.norm, dfdg * ld.norm, dfdrb
     end
 
     # take a moment to calculate values used repeatedly in the
@@ -266,7 +266,8 @@ function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
     dfdg[begin] = s0
 
     if ld.n_max == 0
-        return flux * ld.norm, dfdg, ∇flux * ld.norm
+        dfdg[begin] -= flux * ld.norm * π
+        return flux * ld.norm, dfdg * ld.norm, ∇flux * ld.norm
     end
 
     ## compute linear term
@@ -277,16 +278,20 @@ function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
     dfdg[begin + 1] = s1
 
     if ld.n_max == 1
-        return flux * ld.norm, dfdg, ∇flux * ld.norm
+        dfdg[begin] -= flux * ld.norm * π
+        dfdg[begin + 1] -= flux * ld.norm * π * 2/3
+        return flux * ld.norm, dfdg * ld.norm, ∇flux * ld.norm
     end
 
     ## calculate quadratic term
     s2, ∇s2 = compute_quadratic_grad(b, r; s0, r2, b2, kap0, kite_area2, k2, ∇s0)
     flux += ld.g_n[begin + 2] * s2
     ∇flux = ∇flux + ld.g_n[begin + 2] * ∇s2
-    dfdg[begin + 1] = s2
+    dfdg[begin + 2] = s2
     if ld.n_max == 2
-        return flux * ld.norm, dfdg, ∇flux * ld.norm
+        dfdg[begin] -= flux * ld.norm * π
+        dfdg[begin + 1] -= flux * ld.norm * π * 2/3
+        return flux * ld.norm, dfdg * ld.norm, ∇flux * ld.norm
     end
 
     ## higher order (N > 3) terms require solving Mn and Nn integrals
@@ -318,7 +323,7 @@ function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
         ∇flux = ∇flux - SA[dpdb_M, dpdr_M]
 
     end
-    dfdg[begin] -= flux * π
-    dfdg[begin + 1] -= flux * π * 2/3
+    dfdg[begin] -= flux * ld.norm * π
+    dfdg[begin + 1] -= flux * ld.norm * π * 2/3
     return flux * ld.norm, dfdg * ld.norm, ∇flux * ld.norm
 end
