@@ -1,8 +1,8 @@
 import ChainRulesCore: frule, rrule
 
 
-function frule((_, _), ::typeof(compute_gn), u_n::AbstractVector{T}) where T
-    compute_gn_jac(u_n)
+function frule((_, Δu_n), ::typeof(compute_gn), u_n::AbstractVector{T}) where T
+    compute_gn_jac(u_n) * Δu_n
 end
 
 function compute_gn_jac(u_n::AbstractVector{T}) where T
@@ -189,10 +189,10 @@ function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
     ## check for trivial cases
     if b ≥ 1 + r || iszero(r)
         # completely unobscured
-        return one(T), dfdg, @SVector zeros(T, 2)
+        return one(T), dfdg, Zero(), Zero()
     elseif r ≥ 1 + b
         # completely obscured
-        return zero(T), dfdg, @SVector zeros(T, 2)
+        return zero(T), dfdg, Zero(), Zero()
     end
 
     r2 = r^2
@@ -206,23 +206,23 @@ function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
         facd = -2 * r
         if ld.n_max == 0
             flux = ld.g_n[begin] * onemr2
-            dfdrb[1] = ld.g_n[begin] * facd
+            dfdr = ld.g_n[begin] * facd
         else
             flux = ld.g_n[begin] * onemr2 + 2 / 3 * ld.g_n[begin + 1] * sqrt1mr2^3
-            dfdrb[1] = ld.g_n[begin] * facd + ld.g_n[begin + 1] * facd * sqrt1mr2
+            dfdr = ld.g_n[begin] * facd + ld.g_n[begin + 1] * facd * sqrt1mr2
         end
         fac = 2 * r2 * onemr2
         for i in 2:ld.n_max
             flux -= ld.g_n[begin + i] * fac
-            dfdrb[1] += ld.g_n[begin + i] * facd * (1 * onemr2 - i * r2)
+            dfdr += ld.g_n[begin + i] * facd * (1 * onemr2 - i * r2)
             dfdg[begin + i] -= fac
             fac *= sqrt1mr2
             facd *= sqrt1mr2
         end
-        dfdrb *= π * ld.norm
+        dfdr *= π * ld.norm
         dfdg[1] = (onemr2 - flux) * π * ld.norm
         dfdg[2] = 2/3 * (sqrt1mr2^3 - flux) * π * ld.norm
-        return flux * π * ld.norm, dfdg * ld.norm, dfdrb
+        return flux * π * ld.norm, dfdg * ld.norm, Zero(), dfdr
     end
 
     # take a moment to calculate values used repeatedly in the
@@ -267,7 +267,8 @@ function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
 
     if ld.n_max == 0
         dfdg[begin] -= flux * ld.norm * π
-        return flux * ld.norm, dfdg * ld.norm, ∇flux * ld.norm
+        dfdb, dfdr = ∇flux * ld.norm
+        return flux * ld.norm, dfdg * ld.norm, dfdb, dfdr
     end
 
     ## compute linear term
@@ -280,7 +281,8 @@ function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
     if ld.n_max == 1
         dfdg[begin] -= flux * ld.norm * π
         dfdg[begin + 1] -= flux * ld.norm * π * 2/3
-        return flux * ld.norm, dfdg * ld.norm, ∇flux * ld.norm
+        dfdb, dfdr = ∇flux * ld.norm
+        return flux * ld.norm, dfdg * ld.norm, dfdb, dfdr
     end
 
     ## calculate quadratic term
@@ -291,7 +293,8 @@ function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
     if ld.n_max == 2
         dfdg[begin] -= flux * ld.norm * π
         dfdg[begin + 1] -= flux * ld.norm * π * 2/3
-        return flux * ld.norm, dfdg * ld.norm, ∇flux * ld.norm
+        dfdb, dfdr = ∇flux * ld.norm
+        return flux * ld.norm, dfdg * ld.norm, dfdb, dfdr
     end
 
     ## higher order (N > 3) terms require solving Mn and Nn integrals
@@ -325,5 +328,17 @@ function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
     end
     dfdg[begin] -= flux * ld.norm * π
     dfdg[begin + 1] -= flux * ld.norm * π * 2/3
-    return flux * ld.norm, dfdg * ld.norm, ∇flux * ld.norm
+    dfdb, dfdr = ∇flux * ld.norm
+    return flux * ld.norm, dfdg * ld.norm, dfdb, dfdr
+end
+
+function frule((_, Δld, Δb, Δr), ::typeof(compute), ld::PolynomialLimbDark, b, r)
+    f, _, dfdb, dfdr = compute_grad(ld, b, r)
+    return f, dfdb * Δb + dfdr * Δr
+end
+
+function rrule(::typeof(compute), ld::PolynomialLimbDark, b, r)
+    f, _, dfdb, dfdr = compute_grad(ld, b, r)
+    compute_pullback((_, Δb, _)) = NO_FIELDS, dfdb * Δb, dfdr * Δb
+    return f, compute_pullback
 end
