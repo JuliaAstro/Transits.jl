@@ -64,6 +64,6 @@ function (::Inverse{<:Kipping13Transform})(y::AbstractVector)
     return tmp
 end
 
-logabsdetjac(::Kipping13Transform, y::Real) = -2 * softplus(-y) - y
+logabsdetjac(::Kipping13Transform, y::Number) = -2 * softplus(-y) - y
 logabsdetjac(k::Kipping13Transform, y) = sum((yi) -> logabsdetjac(k, yi), y)
 bijector(::Kipping13) = Kipping13Transform()
