@@ -1,6 +1,7 @@
 
 @testset "Kipping13" begin
     N = 10000
+    @test length(Kipping13()) = 2
     u1, u2 = rand(rng, Kipping13(), N) |> eachrow
 
     @test all(u1 .+ u2 .< 1) # flux is always positive
