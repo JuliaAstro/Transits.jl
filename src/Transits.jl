@@ -91,6 +91,7 @@ function compute(ld::AbstractLimbDark, orbit::AbstractOrbit, t, r)
 end
 
 include("elliptic.jl")
+include("series.jl")
 include("poly.jl")
 include("quad.jl")
 include("integrated.jl")
