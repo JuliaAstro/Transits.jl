@@ -36,4 +36,4 @@ pkg> add Transits#master
 
 ## Citations
 
-If you use Transits.jl or a derivative of it in your work please consider citing it with the [Zenodo DOI](https://doi.org/10.5281/zenodo.4544095). If you use [`PolynomialLimbDark`](@ref) or [`QuadLimbDark`](@ref) please also cite [Agol et al. (2020)](https://ui.adsabs.harvard.edu/abs/2020AJ....159..123A/abstract) and [Luger et al. (2019)](https://ui.adsabs.harvard.edu/abs/2019AJ....157...64L/abstract).
+If you use Transits.jl or a derivative of it in your work please consider citing it at the [Zenodo DOI](https://doi.org/10.5281/zenodo.4544095). If you use `PolynomialLimbDark` or `QuadLimbDark` please also cite [Agol et al. (2020)](https://ui.adsabs.harvard.edu/abs/2020AJ....159..123A/abstract) and [Luger et al. (2019)](https://ui.adsabs.harvard.edu/abs/2019AJ....157...64L/abstract). If you use `Kipping13` please cite [Kipping (2013)](https://ui.adsabs.harvard.edu/abs/2013MNRAS.435.2152K/exportcitation). BibTeX for all those citations can be found in [`CITATIONS.bib`](https://github.com/JuliaAstro/Transits.jl/blob/master/CITATIONS.bib).
