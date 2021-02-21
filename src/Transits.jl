@@ -8,7 +8,9 @@ export AbstractLimbDark,
        IntegratedLimbDark,
        SecondaryLimbDark,
        compute,
-       Orbits
+       Orbits,
+       # distributions
+       Kipping13
 
 include("orbits/Orbits.jl")
 @reexport using .Orbits
@@ -88,6 +90,7 @@ include("poly.jl")
 include("quad.jl")
 include("integrated.jl")
 include("secondary.jl")
+include("distributions.jl")
 
 
 end
