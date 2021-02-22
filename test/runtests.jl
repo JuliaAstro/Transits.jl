@@ -13,4 +13,5 @@ rng = StableRNG(2752)
     include("Mn_integral.jl")
     include("poly.jl")
     include("show.jl")
+    include("distributions.jl")
 end
