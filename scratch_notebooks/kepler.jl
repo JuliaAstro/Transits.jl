@@ -46,7 +46,7 @@ end
 
 # ╔═╡ 46074bca-5f57-426a-8324-06c5450b711f
 begin
-	struct KeplerOrbit
+	struct KeplerianOrbit
 		a
 		aRₛ
 		b
@@ -64,7 +64,7 @@ begin
 		sincos_ω
 	end
 	
-	@kwdispatch KeplerOrbit(;
+	@kwdispatch KeplerianOrbit(;
 		Omega => Ω,
 		omega => ω,
 		aRs => aRₛ,
@@ -76,7 +76,7 @@ begin
 		sincos_omega => sincos_ω,
 	)
 	
-	@kwmethod function KeplerOrbit(;ρₛ, Rₛ, ecc, P, t₀, incl)
+	@kwmethod function KeplerianOrbit(;ρₛ, Rₛ, ecc, P, t₀, incl)
 		Ω = π / 2
 		ω = 0.0
 		sincos_incl = sincos(incl)
@@ -84,7 +84,7 @@ begin
 		b = get_b(ρₛ, P, sincos_incl)
 
 		
-		return KeplerOrbit(
+		return KeplerianOrbit(
 			uconvert(u"AU", a),
 			get_aRₛ(ρₛ=ρₛ, P=P) |> upreferred,
 			upreferred(b) |> upreferred,
@@ -103,13 +103,13 @@ begin
 		)
 	end
 	
-	@kwmethod function KeplerOrbit(;aRₛ, b, ecc, P, t₀)
+	@kwmethod function KeplerianOrbit(;aRₛ, b, ecc, P, t₀)
 		Ω = π / 2
 		ω = 0.0
 		sincos_ω = sincos(ω)
 		incl = get_incl(aRₛ, b, ecc, sincos_ω)
 		
-		return KeplerOrbit(
+		return KeplerianOrbit(
 			nothing,
 			aRₛ |> upreferred,
 			b |> upreferred,
@@ -132,11 +132,13 @@ end
 # ╔═╡ cf2f7320-752e-11eb-0991-1b852dfc264b
 md"""
 #### Quick test
+
+Data from: [Exoplanet Archive](https://exoplanetarchive.ipac.caltech.edu/overview/hat-p-26)
 """
 
 # ╔═╡ 75f30152-7504-11eb-0c69-236ff845c2b9
 # Stassun et al. (2017)
-HATP26_ρₛ = KeplerOrbit(
+HATP26_ρₛ = KeplerianOrbit(
 	ρₛ=2.37u"g/cm^3",
 	Rₛ=0.87u"Rsun",
 	P=4.234520u"d",
@@ -147,7 +149,7 @@ HATP26_ρₛ = KeplerOrbit(
 
 # ╔═╡ 04de6876-74ff-11eb-18f5-8312aa5218c7
 # Stassun et al. (2017)
-HATP26_aRs = KeplerOrbit(
+HATP26_aRs = KeplerianOrbit(
 	P=4.234520u"d",
 	aRₛ=13.09,
 	b=0.32, # From separate ρₛ calc. above
