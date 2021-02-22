@@ -181,6 +181,7 @@ end
 
 
 function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
+    @show "here!"
     T = float(S)
     bcut = 1e-3
     n = ld.n_max
