@@ -64,7 +64,17 @@ begin
 		sincos_ω
 	end
 	
-	@kwdispatch KeplerOrbit()
+	@kwdispatch KeplerOrbit(;
+		Omega => Ω,
+		omega => ω,
+		aRs => aRₛ,
+		rho_s => ρₛ,
+		aRs => aRₛ,
+		Rs => Rₛ,
+		t0 => t₀,
+		sincos_Omega => sincos_Ω,
+		sincos_omega => sincos_ω,
+	)
 	
 	@kwmethod function KeplerOrbit(;ρₛ, Rₛ, ecc, P, t₀, incl)
 		Ω = π / 2
@@ -119,6 +129,11 @@ begin
 	end
 end
 
+# ╔═╡ cf2f7320-752e-11eb-0991-1b852dfc264b
+md"""
+#### Quick test
+"""
+
 # ╔═╡ 75f30152-7504-11eb-0c69-236ff845c2b9
 # Stassun et al. (2017)
 HATP26_ρₛ = KeplerOrbit(
@@ -131,10 +146,11 @@ HATP26_ρₛ = KeplerOrbit(
 )
 
 # ╔═╡ 04de6876-74ff-11eb-18f5-8312aa5218c7
+# Stassun et al. (2017)
 HATP26_aRs = KeplerOrbit(
 	P=4.234520u"d",
 	aRₛ=13.09,
-	b=0.303, # Hartman et al. (2010)
+	b=0.32, # From separate ρₛ calc. above
 	t₀=0.0,
 	ecc=0.12,
 )
@@ -144,6 +160,7 @@ HATP26_aRs = KeplerOrbit(
 # ╠═d2c4bc5c-74f5-11eb-3277-9d8d3143f955
 # ╠═d50493e2-9d8c-4d44-9df7-a9dc71ea18d3
 # ╠═46074bca-5f57-426a-8324-06c5450b711f
+# ╟─cf2f7320-752e-11eb-0991-1b852dfc264b
 # ╠═75f30152-7504-11eb-0c69-236ff845c2b9
 # ╠═04de6876-74ff-11eb-18f5-8312aa5218c7
 # ╠═04491430-7520-11eb-110c-e1b4eee2f974
