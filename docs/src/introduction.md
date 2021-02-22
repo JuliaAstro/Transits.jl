@@ -15,7 +15,7 @@ been detected via the [transit
 method](https://exoplanets.nasa.gov/faq/31/whats-a-transit/):
 
 ![](https://exoplanetarchive.ipac.caltech.edu/exoplanetplots/exo_dischist_cumulative_cb.png)
-https://exoplanetarchive.ipac.caltech.edu
+[Exoplanet Archive](https://exoplanetarchive.ipac.caltech.edu)
 
 ## Transit method
 
@@ -23,8 +23,9 @@ This method works by observing the dimming in apparent brightness of a star as a
 passes in front of it from our point of view. The plot of the star's brightness as a
 function of time defines the *white light curve* as seen in the schematic below:
 
-![](https://upload.wikimedia.org/wikipedia/commons/1/10/Theoretical_Transiting_Exoplanet_Light_Curve.jpg)<br>
-[*How Do You Find an Exoplanet?* by John Asher Johnson](https://www.google.com/books/edition/How_Do_You_Find_an_Exoplanet/-DNJCgAAQBAJ?hl=en)
+![](https://upload.wikimedia.org/wikipedia/commons/1/10/Theoretical_Transiting_Exoplanet_Light_Curve.jpg)
+
+["How Do You Find an Exoplanet?" by John Asher Johnson](https://www.google.com/books/edition/How_Do_You_Find_an_Exoplanet/-DNJCgAAQBAJ?hl=en)
 
 Even just starting with a simple single planet system in a circular orbit, there is
 already a wealth of information encoded in this diagram. These observations give us
@@ -36,16 +37,16 @@ traveling, while the *transit depth* $(\delta)$ gives us a direct measure of the
 the planet relative to its star. For circular orbits, these are nicely summarized by:
 
 ```math
-\begin{align}
+\begin{aligned}
 \frac{R_\text{p}}{R_*} &= \delta^{1/2} \\
 
 b^2 &= 1 - \delta^{1/2}\frac{T}{t} \\
 
 \frac{a}{R_*} &= \frac{P\delta^{1/4}}{2\pi}
-\left(\frac{4}{T\tau}\right)^{1/2}
+\left(\frac{4}{T\tau}\right)^{1/2} \\
 
 \rho_* &= \frac{3P}{G\pi^2}\left(\frac{\delta^{1/4}}{\sqrt{T\tau}}\right)^3 \quad,
-\end{align}
+\end{aligned}
 ```
 
 where $P$ is the period of the planet's orbit and $a$ its semi-major axis, $b$ is the
@@ -56,8 +57,9 @@ density.
 Not shown above is an added dimension that `Transits.jl` excels in, [limb
 darkening](https://en.wikipedia.org/wiki/Limb_darkening#:~:text=Limb%20darkening%20is%20an%20optical,construct%20models%20with%20such%20gradients), demonstrated in the schematic below:
 
-![](https://user-images.githubusercontent.com/25312320/108404912-712f1c00-71ee-11eb-968e-b34001fe7a55.jpg)<br>
-http://www.astro.utoronto.ca/~astrolab/files/AST326_LimbDarkening_2017.pdf
+![](https://user-images.githubusercontent.com/25312320/108404912-712f1c00-71ee-11eb-968e-b34001fe7a55.jpg)
+
+[ASTR 236 class notes](http://www.astro.utoronto.ca/~astrolab/files/AST326_LimbDarkening_2017.pdf)
 
 This effect is intimately related to the shape of the light curve, and allows us to
 constrain the brightness profile of the star itself. As we will see next, the method of
