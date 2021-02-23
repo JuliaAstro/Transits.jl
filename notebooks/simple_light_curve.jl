@@ -83,46 +83,65 @@ With our orbit defined, we now turn to our second and last ingredient: the limb 
 # ╔═╡ c63edf1e-70c4-11eb-0b86-b17548325707
 md"## Limb darkening definition"
 
+# ╔═╡ e7223d2a-70c7-11eb-24e4-af0ff49d42db
+u = [0.4, 0.26]
+
 # ╔═╡ a9f8fa38-7554-11eb-36ad-a76d087d95c6
 md"""
 Limb darkening is the natural phenomenon where a star's surface brightness appears to fall off as we look from its center to off-angle towards its limbs. The rate at which it falls off is described by a given limb darkening law. For this example, we are using a polynomial limb darkening law from [Agol, Luger, Foreman-Mackey (2020)](https://ui.adsabs.harvard.edu/abs/2020AJ....159..123A/abstract). This law uses analytically derived integrals, which makes it very fast and numerically accurate. There are other limb darkening laws which share a similar `AbstractLimbDark` interface. This interface lets us create composite laws like `IntegratedLimbDark` or `SecondaryLimbDark` with almost no effort. We will explore these laws and more in further notebooks.
 
-Pulling up the documentation for our particular law, `PolynomialLimbDark`, we see that it just accepts a single parameter `u`, the vector of limb darkening coefficients. These are defined such that:
-
-```math
-I(\mu) \propto -\sum_{i=0}^N u_i(1 - \mu)^i, \quad u_0 \equiv -1\quad,
-```
-
-where ``μ`` is a dimensionless parameter that varies from ``1`` to ``0`` as we move from the center to the edge of the star, as seen projected on the sky, ``N`` is the order of the polynomial, ``I`` is the intensity of the star, and ``u_i`` are the components of `u`.
-
-For this example, we will use a quadratic limb darkening law ``(N = 2)``:
-
-```math
-\begin{align}
-I(\mu) &\propto -u_0(1 - \mu)^0 - u_1(1 - μ) - u_2(1 - μ)^2 \\
-&= 1 - u_1(1 - μ) - u_2(1 - μ)^2 \quad.
-\end{align}
-```
-
+Pulling up the documentation for our particular law, `PolynomialLimbDark`, we see that it just accepts a single parameter `u`. This defines the vector of limb darkening coefficients, and its length corresponds to the order ``(N)`` of the resulting polynomial law that will be used. For this example, we will create a quadratic limb darkening law ``(N = 2)``, where `u` = [$(u[1]), $(u[2])]:
 """
-
-# ╔═╡ ba86f45c-755b-11eb-29b3-f7e6163857d9
-md"""
-With the groundwork set, we can now return to the creation of our `PolynomialLimbDark` object, for a quadratic limb darkening law defined by ``\mathbf u = [0.4, 0.26]``:
-"""
-
-# ╔═╡ e7223d2a-70c7-11eb-24e4-af0ff49d42db
-u = [0.4, 0.26] # Quadratic limb darkening
 
 # ╔═╡ 570e5624-70b8-11eb-1767-6911283302f5
 ld = PolynomialLimbDark(u)
+
+# ╔═╡ 1f013744-75ed-11eb-398d-e7df3e90396b
+function plot_laws()
+	# Coords
+	μs = 1.0:-0.01:0.0
+	
+	# Coeffs
+	us = [
+		-1.0,
+		0.0137699,
+		0.00761214,
+		0.0187724,
+		0.0673486,
+		0.229555,
+		0.0833213,
+		0.071647,
+		0.0206797,
+		0.00886572,
+		0.03,
+	]
+			
+	# Polynomial law
+	I(μ, us) = -sum(un*(1 - μ)^(n-1) for (n, un) in enumerate(us))
+		
+	# Plot successive terms
+	p = plot(
+		xlabel = "Distance from limb",
+		ylabel = "Apparent brightness",
+		xflip = true,
+		legend = :bottomleft,
+		legendtitle = "N",
+		palette=palette(:magma, length(us))
+	)
+	
+	for N in 3:length(us)
+		plot!(p, μs, I.(μs, Ref(us[1:N])), label=N-1)
+	end
+	
+	return p
+end
 
 # ╔═╡ 10065930-70c6-11eb-1fa7-551fd12f8e75
 md"## Light curve computation"
 
 # ╔═╡ 1fff2420-70c6-11eb-1bc0-9d35bd83a36a
 md"""
-With the orbit and limb darkening law defined, we can now compute light curves over time `t` for a range of different planet-to-star ratios `rprs`, which can be controlled with the slider below. We perform the computation of each light curve by directly passing our `AbstractOrbit` object to `ld`:
+With the orbit and limb darkening law defined, we can now compute light curves over time `t` for a range of different planet-to-star radius ratios `rprs`, which can be controlled with the slider below. We perform the computation of each light curve by directly passing our `AbstractOrbit` object to `ld`:
 """
 
 # ╔═╡ b6a523e6-754b-11eb-112c-d3b1787d9818
@@ -190,7 +209,9 @@ note(text) = Markdown.MD(Markdown.Admonition("note", "Note", [text]))
 
 # ╔═╡ 27746f32-755b-11eb-2c0f-e7eea21bee93
 note(md"""
-The total number of terms is always one more than the order of the polynomial (i.e., the length of our limb darkening coefficient vector) because of the convention ``u_0 \equiv -1`` that we set. This ensures that the first term in our polynomial limb darkening law is ``1``, which corresponds to the maximum apparent brightness that the star can achieve.
+You'll notice that the limb darkening law `ld` displays our specified limb darkening coefficients, and that it includes an additional coefficient (-1) as well. This ensures that the first term in our polynomial limb darkening law (the zeroth order term) is 1, which corresponds to the maximum apparent unit brightness of the star. The additional higher order terms then decrease the apparent brightness of the star by varying amounts as we move away from its center. Below are a few example brightness curves for different orders to demonstrate this as we approach the limb of a star with unit radius:
+	
+$(plot_laws())
 """
 )
 
@@ -222,10 +243,10 @@ fluxes = @. ld(orbit, t, rprs)
 # ╟─3086d2ae-7554-11eb-3638-2f94c1011bab
 # ╟─c63edf1e-70c4-11eb-0b86-b17548325707
 # ╟─a9f8fa38-7554-11eb-36ad-a76d087d95c6
-# ╟─27746f32-755b-11eb-2c0f-e7eea21bee93
-# ╟─ba86f45c-755b-11eb-29b3-f7e6163857d9
 # ╠═e7223d2a-70c7-11eb-24e4-af0ff49d42db
 # ╠═570e5624-70b8-11eb-1767-6911283302f5
+# ╟─27746f32-755b-11eb-2c0f-e7eea21bee93
+# ╟─1f013744-75ed-11eb-398d-e7df3e90396b
 # ╟─10065930-70c6-11eb-1fa7-551fd12f8e75
 # ╟─1fff2420-70c6-11eb-1bc0-9d35bd83a36a
 # ╟─0d935990-70c7-11eb-227a-274d8776916d
