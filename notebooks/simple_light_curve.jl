@@ -126,7 +126,7 @@ function plot_laws()
 		xflip = true,
 		legend = :bottomleft,
 		legendtitle = "N",
-		palette=palette(:magma, length(us))
+		palette=palette(:magma, length(us), rev=true)
 	)
 	
 	for N in 3:length(us)
