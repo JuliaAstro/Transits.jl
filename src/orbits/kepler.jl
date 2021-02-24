@@ -1,116 +1,122 @@
-
 using AstroLib: kepler_solver, trueanom
+using KeywordDispatch
+using PhysicalConstants
+using Unitful
+using UnitfulAstro
 
-struct KeplerianOrbit <: AbstractOrbit
-    a
-    ecc
-    period
-    ρ_star
-    r_star
-    m_star
-    m_planet
-    m_total
-    n
-    a_star
-    a_planet
-    K0
-    M0
-    t_periastron
-    t0
-    tref
-    incl
-    sin_incl
-    cos_incl
-    Ω
-    sinΩ
-    cosΩ
-    ω
-    sinω
-    cosω
-
-end
-
-const G_grav = 2942.2062175044193
+const G = PhysicalConstants.CODATA2018.G
+const G_val = 6.67430e-8 # CGS
 
 """
-    KeplerOrbit(; period, duration, t0=0, b=0, r_star=1)
+    KeplerianOrbit(; kwargs...)
 Keplerian orbit parameterized by the basic observables of a transiting 2-body system.
 # Parameters
-* `period` - The orbital period of the planets, nominally in days
-* `m_planet` -  The planet mass, nominally in Jupiter masses
-* `r_star` - The star mass, nominally in solar radii
-* `m_star` - The star mass, nominally in solar masses
-* `ρ_star` - The spherical star density, nominally in g/cc
+* `a` - The semi-major axis, nominally in AU
+* `aRₛ` - The ratio of the semi-major axis to the star radius. Aliased to `aRs`
+* `b` - The impact parameter, bounded between 0 ≤ b ≤ 1
 * `ecc` - The eccentricity of the closed orbit, bounded between 0 ≤ ecc < 1
-* `t_periastron` - The time of periastron, same units as `period`
-* `t0` - The midpoint time of the reference transit, same units as `period`
-* `Ω` - The longitude of the ascending node, nominally in radians
-* `ω` - The argument of periapsis, same units as `Ω`
+* `P` - The orbital period of the planet, nominally in days
+* `ρₛ` - The spherical star density, nominally in g/cc. Aliased to `rho_s`
+* `r_star` - The star mass, nominally in solar radii. Aliased to `R_s`
+* `t₀` - The midpoint time of the reference transit, same units as `P`. Aliased to `t0`
+* `incl` - The inclination of the orbital plane relative to the axis perpendicular to the
+           reference plane, nominally in degrees
+* `Ω` - The longitude of the ascending node, nominally in radians. Aliased to `Omega`
+* `ω` - The argument of periapsis, same units as `Ω`. Aliased to `omega`
 """
-function KeplerianOrbit(;
-    period,
-    m_planet=0,
-    r_star=1,
-    m_star=1,
-    ρ_star = 3 * m_star / (4 * π * r_star^3),
-    ecc=nothing,
-    t_periastron=0,
-    t0 = 0 + t_periastron,
-    incl = 0,
-    Ω = 3*π / 2,
-    ω = π / 2,
+struct KeplerianOrbit <: AbstractOrbit
+    a
+    aRₛ
+    b
+    ecc
+    P
+    ρₛ
+    r_star
+    n
+    t₀
+    incl
+    Ω
+    ω
+end
+
+# Enable keyword dispatch and argument name aliasing
+@kwdispatch KeplerianOrbit(;
+    Omega => Ω,
+    omega => ω,
+    aRs => aRₛ,
+    rho_s => ρₛ,
+    aRs => aRₛ,
+    Rs => r_star,
+    t0 => t₀,
 )
-    a = cbrt(G_grav * (m_star + m_planet) * period^2 / (4 * π^2))
-    m_total = m_star + m_planet
-    n = 2 * π / period
-    a_star = a * m_planet / m_total
-    a_planet = -a * m_star / m_total
-    K0 = n * a / m_total
 
-    M0 = 0.5 * π
-    if ecc === nothing # Circular orbit (e == 0)
-        ecc = 0.0
-    end
-
-    # If b given, can compute i from ω
-    # ecc_factor = (1. + ecc*sin(ω))/(1. - ecc^2)
-    # inc_inv_factor = (b/a)*ecc_factor
-    # incl = acos(inc_inv_factor)
-
-    # Euler angles
-    sin_incl, cos_incl = sincos(incl)
-    sinΩ, cosΩ = sincos(Ω)
-    sinω, cosω = sincos(ω)
-
-    tref = t_periastron - t0
+@kwmethod function KeplerianOrbit(;ρₛ, r_star, ecc, P, t₀, incl)
+    Ω = π / 2
+    ω = 0.0
+    a = get_a(ρₛ, P, r_star)
+    b = get_b(ρₛ, P, sincos(incl))
 
     return KeplerianOrbit(
         a,
+        get_aRₛ(ρₛ=ρₛ, P=P) |> upreferred,
+        upreferred(b) |> upreferred,
         ecc,
-        period,
-        ρ_star,
+        P,
+        ρₛ,
         r_star,
-        m_star,
-        m_planet,
-        m_total,
-        n,
-        a_star,
-        a_planet,
-        K0,
-        M0,
-        t_periastron,
-        t0,
-        tref,
+        2 * π / P,
+        t₀,
         incl,
-        sin_incl,
-        cos_incl,
         Ω,
-        sinΩ,
-        cosΩ,
         ω,
-        sinω,
-        cosω,
     )
+end
+
+@kwmethod function KeplerianOrbit(;aRₛ, b, ecc, P, t₀)
+    Ω = π / 2
+    ω = 0.0
+    incl = get_incl(aRₛ, b, ecc, sincos(ω))
+
+    return KeplerianOrbit(
+        nothing,
+        aRₛ |> upreferred,
+        b |> upreferred,
+        ecc,
+        P,
+        nothing,
+        nothing,
+        2 * π / P,
+        t₀,
+        incl,
+        Ω,
+        ω,
+    )
+end
+
+#############
+# Orbit logic
+#############
+# Star density
+get_ρₛ(aRₛ, P) = (3 * π / (G_val * P^2)) * aRₛ^3
+get_ρₛ(a, P, r_star) = get_ρₛ(aRₛ(a, r_star), P)
+
+# Semi-major axis / star radius ratio
+@kwdispatch get_aRₛ()
+@kwmethod get_aRₛ(;ρₛ, P) = cbrt(G_val * P^2 * ρₛ / (3 * π))
+@kwmethod get_aRₛ(;a, P, r_star) = aRₛ(get_ρₛ(a, P, r_star), P)
+@kwmethod get_aRₛ(;a, r_star) = a / r_star
+
+# Semi-major axis
+get_a(ρₛ, P, r_star) = get_a(get_aRₛ(ρₛ=ρₛ, P=P), r_star)
+get_a(aRₛ, r_star) = aRₛ * r_star
+
+# Impact parameter
+get_b(ρₛ, P, sincosi) = get_b(get_aRₛ(ρₛ=ρₛ, P=P), sincosi)
+get_b(aRₛ, sincosi) = aRₛ * sincosi[2]
+
+# Inclination
+function get_incl(aRₛ, b, ecc, sincosω)
+    return acos((b/aRₛ) * (1 + ecc*sincosω[1])/(1 - ecc^2))
 end
 
 # Finds the position `r` of the planet along its orbit after rotating
@@ -119,16 +125,16 @@ end
 function relative_position(orbit::KeplerianOrbit, t)
     sinν, cosν = get_true_anomaly(orbit, t)
     if orbit.ecc === nothing
-        r = -orbit.a
+        r = orbit.a
     else
-        r = -orbit.a * (1 - orbit.ecc^2) / (1 + orbit.ecc * cosν)
+        r = orbit.a * (1 - orbit.ecc^2) / (1 + orbit.ecc * cosν)
     end
     return rotate_vector(orbit, r * cosν, r * sinν)
 end
 
 # Returns sin(ν), cos(ν)
 function get_true_anomaly(orbit::KeplerianOrbit, t)
-    M = orbit.n * ((t - orbit.t0) - orbit.tref)
+    M = orbit.n * ((t - orbit.t₀))
     E = kepler_solver(M, orbit.ecc)
     return sincos(trueanom(E, orbit.ecc))
 end
@@ -136,44 +142,71 @@ end
 
 # Transform from orbital plane to equatorial plane
 function rotate_vector(orbit::KeplerianOrbit, x, y)
+    sini, cosi = sincos(orbit.incl)
+    sinΩ, cosΩ = sincos(orbit.Ω)
+    sinω, cosω = sincos(orbit.ω)
     # rotate about z0 axis by ω
     if orbit.ecc === nothing
         x1, y1 = x, y
     else
-        #=
-        # https://en.wikipedia.org/wiki/Orbital_elements
-        mat_ω = [
-            orbit.cosω orbit.sinω 0
-           -orbit.sinω orbit.cosω 0
-                 0          0     1
-        ]
-
-        mat_incl = [
-            1       0              0
-            0  orbit.cos_incl orbit.sin_incl
-            0 -orbit.sin_incl orbit.cos_incl
-        ]
-
-        mat_Ω = [
-            orbit.cosΩ orbit.sinΩ 0
-           -orbit.sinΩ orbit.cosΩ 0
-                 0          0     1
-        ]
-        =#
-        x1 = orbit.cosω * x - orbit.sinω * y
-        y1 = orbit.sinω * x + orbit.cosω * y
+        x1 = cosω * x - sinω * y
+        y1 = sinω * x + cosω * y
     end
 
     # rotate about x1 axis by -incl
     x2 = x1
-    y2 = orbit.cos_incl * y1
-    Z = -orbit.sin_incl * y1
+    y2 = cosi * y1
+    Z = -sini * y1
 
     # rotate about z2 axis by Ω
      if orbit.Ω === nothing
          return SA[x2, y2, Z]
      end
-     X = orbit.cosΩ * x2 - orbit.sinΩ * y2
-     Y = orbit.sinΩ * x2 + orbit.cosΩ * y2
+     X = cosΩ * x2 - sinΩ * y2
+     Y = sinΩ * x2 + cosΩ * y2
      return SA[X, Y, Z]
+end
+
+function Base.show(io::IO, orbit::KeplerianOrbit)
+    a = orbit.a
+    aRₛ = orbit.aRₛ
+    b = orbit.b
+    ecc = orbit.ecc
+    P = orbit.P
+    ρₛ = orbit.ρₛ
+    r_star = orbit.r_star
+    t₀ = orbit.t₀
+    incl = orbit.incl
+    Ω = orbit.Ω
+    ω = orbit.ω
+    print(
+        io,
+        """KeplerianOrbit(
+            a=$(orbit.a), aRₛ=$(orbit.aRₛ),
+            b=$(orbit.b), ecc=$(orbit.ecc), P=$(orbit.P),
+            ρₛ=$(orbit.ρₛ), r_star=$(orbit.r_star),
+            t₀=$(orbit.t₀), incl=$(orbit.incl),
+            Ω=$(orbit.Ω), ω = $(orbit.ω)
+        )"""
+    )
+end
+
+function Base.show(io::IO, ::MIME"text/plain", orbit::KeplerianOrbit)
+    print(
+        io,
+        """
+        KeplerianOrbit
+         a: $(orbit.a)
+         aRₛ: $(orbit.aRₛ)
+         b: $(orbit.b)
+         ecc: $(orbit.ecc)
+         P: $(orbit.P)
+         ρₛ: $(orbit.ρₛ)
+         r_star: $(orbit.r_star)
+         t₀: $(orbit.t₀)
+         incl: $(orbit.incl)
+         Ω: $(orbit.Ω)
+         ω: $(orbit.ω)
+        """
+    )
 end
