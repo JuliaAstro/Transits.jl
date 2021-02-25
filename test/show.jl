@@ -12,7 +12,7 @@ u = [0.4, 0.26]
 
     @test repr("text/html", ld) == """
     PolynomialLimbDark
-     u<sup>n</sup>: [-1.0, 0.4, 0.26]"""
+     u<sub>n</sub>: [-1.0, 0.4, 0.26]"""
 end
 
 @testset "QuadLimbDark" begin
@@ -26,7 +26,7 @@ end
 
     @test sprint(show, "text/html", ld) == """
     QuadLimbDark
-     u<sup>n</sup>: [-1.0, 0.4, 0.26]"""
+     u<sub>n</sub>: [-1.0, 0.4, 0.26]"""
 end
 
 @testset "SecondaryLimbDark" begin
