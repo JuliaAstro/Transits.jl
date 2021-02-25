@@ -33,7 +33,7 @@ u = [0.4, 0.26] # quad limb dark
 ld = PolynomialLimbDark(u)
 
 # ╔═╡ afac80e2-76c8-11eb-2ddf-a7dae89ed0fb
-t = range(-1, 1, length=1000) # days from t0
+t = range(-86_400, 86_400, length=1000) # seconds from t0
 
 # ╔═╡ afadc18c-76c8-11eb-0aa2-773bc5cdccea
 rs = range(0, 0.2, length=10) # radius ratio
@@ -42,7 +42,7 @@ rs = range(0, 0.2, length=10) # radius ratio
 fluxes = @. ld(orbit, t, rs')
 
 # ╔═╡ fa3d19b6-76cb-11eb-0d80-e5e8f2760a6a
-plot(fluxes)
+plot(fluxes, label=rs', legend=:bottom, legendtitle=:rprs)
 
 # ╔═╡ cf2f7320-752e-11eb-0991-1b852dfc264b
 md"""
