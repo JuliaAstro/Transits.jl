@@ -162,26 +162,25 @@ function rotate_vector(orbit::KeplerianOrbit, x, y)
     sini, cosi = sincos(orbit.incl)
     sinΩ, cosΩ = sincos(orbit.Ω)
     sinω, cosω = sincos(orbit.ω)
-    # rotate about z0 axis by ω
-    if orbit.ecc === nothing
+
+    # Rotate about z0 axis by ω
+    if orbit.ecc == 0.0
         x1, y1 = x, y
     else
         x1 = cosω * x - sinω * y
         y1 = sinω * x + cosω * y
     end
 
-    # rotate about x1 axis by -incl
+    # Rotate about x1 axis by -incl
     x2 = x1
     y2 = cosi * y1
     Z = -sini * y1
 
-    # rotate about z2 axis by Ω
-     if orbit.Ω === nothing
-         return SA[x2, y2, Z]
-     end
-     X = cosΩ * x2 - sinΩ * y2
-     Y = sinΩ * x2 + cosΩ * y2
-     return SA[X, Y, Z]
+    # Rotate about z2 axis by Ω
+    X = cosΩ * x2 - sinΩ * y2
+    Y = sinΩ * x2 + cosΩ * y2
+
+    return SA[X, Y, Z]
 end
 
 function Base.show(io::IO, orbit::KeplerianOrbit)

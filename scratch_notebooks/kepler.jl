@@ -72,10 +72,10 @@ HATP26_ρₛ = KeplerianOrbit(
 
 # ╔═╡ c69d99b6-7714-11eb-1461-4913993fa706
 let
-	u = [0.4, 0.26] # quad limb dark
+	u = [0.4, 0.26]
 	ld = PolynomialLimbDark(u)
-	t = range(-1, 5, length=1000)u"d" # seconds from t0
-	rs = range(0, 0.2, length=10) # radius ratio
+	t = range(-1, 5, length=1000)u"d"
+	rs = range(0, 0.2, length=10)
 	fluxes = @. ld(HATP26_ρₛ, t, rs')
 	plot(t, fluxes, label=rs', legend=:right, legendtitle=:rprs)
 end
@@ -95,10 +95,10 @@ HATP26_aRs = KeplerianOrbit(
 
 # ╔═╡ a4d16b3e-7715-11eb-0cb1-c3e2348a87d5
 let
-	u = [0.4, 0.26] # quad limb dark
+	u = [0.4, 0.26]
 	ld = PolynomialLimbDark(u)
-	t = range(-1, 5, length=1000)u"d" # seconds from t0
-	rs = range(0, 0.2, length=10) # radius ratio
+	t = range(-1, 5, length=1000)u"d"
+	rs = range(0, 0.2, length=10)
 	fluxes = @. ld(HATP26_aRs, t, rs')
 	plot(t, fluxes, label=rs', legend=:right, legendtitle=:rprs)
 end
@@ -118,27 +118,18 @@ let
 		t₀ = 0u"d",
 		ecc = 0.0,
 	)
-	#@show orbit
-	u = [0.4, 0.26] # quad limb dark
+	
+	u = [0.4, 0.26]
 	ld = PolynomialLimbDark(u)
-	t = range(-8, 8, length=1000)u"d" # seconds from t0
+	t = range(-8, 8, length=1000)u"d"
 	fluxes = @. ld(orbit, t, 0.2)
 	plot(t, fluxes, label=false)
 end
 
-# ╔═╡ 7cec1570-7798-11eb-3328-7d2432ee54a7
-KeplerianOrbit(
-		P = 3u"d",
-		aRₛ = check_aRₛ(3u"d", 0.2^2, 1u"d", 1u"hr") |> upreferred,
-		b = 0.0,
-		t₀ = 0u"d",
-		ecc = 0.0,
-	)
-
 # ╔═╡ 0c34711e-7779-11eb-1286-5f9381c67d31
 let
 	orbit = SimpleOrbit(period=3, duration=1)
-	u = [0.4, 0.26] # quad limb dark
+	u = [0.4, 0.26]
 	ld = PolynomialLimbDark(u)
 	t = range(-8, 8, length=1000)
 	fluxes = @. ld(orbit, t, 0.2)
@@ -164,7 +155,6 @@ end
 # ╟─04de6876-74ff-11eb-18f5-8312aa5218c7
 # ╠═a4d16b3e-7715-11eb-0cb1-c3e2348a87d5
 # ╟─9a5edfd2-7795-11eb-39b1-f3a104ab452e
-# ╟─72c01acc-7779-11eb-09b3-e7f9e1706b3a
-# ╠═7cec1570-7798-11eb-3328-7d2432ee54a7
+# ╠═72c01acc-7779-11eb-09b3-e7f9e1706b3a
 # ╟─bd9d1a26-777d-11eb-37a3-0defc59efb4a
 # ╠═0c34711e-7779-11eb-1286-5f9381c67d31
