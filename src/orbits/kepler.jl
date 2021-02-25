@@ -17,7 +17,7 @@ Keplerian orbit parameterized by the basic observables of a transiting 2-body sy
 * `ecc` - The eccentricity of the closed orbit, bounded between 0 ≤ ecc < 1
 * `P` - The orbital period of the planet, nominally in days
 * `ρₛ` - The spherical star density, nominally in g/cc. Aliased to `rho_s`
-* `r_star` - The star mass, nominally in solar radii. Aliased to `R_s`
+* `Rₛ` - The star mass, nominally in solar radii. Aliased to `R_s`
 * `t₀` - The midpoint time of the reference transit, same units as `P`. Aliased to `t0`
 * `incl` - The inclination of the orbital plane relative to the axis perpendicular to the
            reference plane, nominally in degrees
@@ -31,7 +31,7 @@ struct KeplerianOrbit <: AbstractOrbit
     ecc
     P
     ρₛ
-    r_star
+    Rₛ
     n
     t₀
     incl
@@ -46,24 +46,24 @@ end
     aRs => aRₛ,
     rho_s => ρₛ,
     aRs => aRₛ,
-    Rs => r_star,
+    Rs => Rₛ,
     t0 => t₀,
 )
 
-@kwmethod function KeplerianOrbit(;ρₛ, r_star, ecc, P, t₀, incl)
+@kwmethod function KeplerianOrbit(;ρₛ, Rₛ, ecc, P, t₀, incl)
     Ω = π / 2
     ω = 0.0
-    a = get_a(ρₛ, P, r_star)
+    a = get_a(ρₛ, P, Rₛ)
     b = get_b(ρₛ, P, sincos(incl))
 
     return KeplerianOrbit(
         a,
-        get_aRₛ(ρₛ=ρₛ, P=P) |> upreferred,
-        upreferred(b) |> upreferred,
+        get_aRₛ(ρₛ=ρₛ, P=P),
+        b,
         ecc,
         P,
         ρₛ,
-        r_star,
+        Rₛ,
         2 * π / P,
         t₀,
         incl,
@@ -79,8 +79,8 @@ end
 
     return KeplerianOrbit(
         nothing,
-        aRₛ |> upreferred,
-        b |> upreferred,
+        aRₛ,
+        b,
         ecc,
         P,
         nothing,
@@ -98,17 +98,19 @@ end
 #############
 # Star density
 get_ρₛ(aRₛ, P) = (3 * π / (G_val * P^2)) * aRₛ^3
-get_ρₛ(a, P, r_star) = get_ρₛ(aRₛ(a, r_star), P)
+get_ρₛ(aRₛ, P::T) where {T <: Unitful.Time} = (3 * π / (G * P^2)) * aRₛ^3
+get_ρₛ(a, P, Rₛ) = get_ρₛ(aRₛ(a, Rₛ), P)
 
 # Semi-major axis / star radius ratio
 @kwdispatch get_aRₛ()
 @kwmethod get_aRₛ(;ρₛ, P) = cbrt(G_val * P^2 * ρₛ / (3 * π))
-@kwmethod get_aRₛ(;a, P, r_star) = aRₛ(get_ρₛ(a, P, r_star), P)
-@kwmethod get_aRₛ(;a, r_star) = a / r_star
+@kwmethod get_aRₛ(;ρₛ, P::T) where {T <: Unitful.Time} = cbrt(G * P^2 * ρₛ / (3 * π))
+@kwmethod get_aRₛ(;a, P, Rₛ) = aRₛ(get_ρₛ(a, P, Rₛ), P)
+@kwmethod get_aRₛ(;a, Rₛ) = a / Rₛ
 
 # Semi-major axis
-get_a(ρₛ, P, r_star) = get_a(get_aRₛ(ρₛ=ρₛ, P=P), r_star)
-get_a(aRₛ, r_star) = aRₛ * r_star
+get_a(ρₛ, P, Rₛ) = get_a(get_aRₛ(ρₛ=ρₛ, P=P), Rₛ)
+get_a(aRₛ, Rₛ) = aRₛ * Rₛ
 
 # Impact parameter
 get_b(ρₛ, P, sincosi) = get_b(get_aRₛ(ρₛ=ρₛ, P=P), sincosi)
@@ -125,9 +127,9 @@ end
 function relative_position(orbit::KeplerianOrbit, t)
     sinν, cosν = get_true_anomaly(orbit, t)
     if orbit.ecc === nothing
-        r = orbit.a
+        r = orbit.aRₛ
     else
-        r = orbit.a * (1 - orbit.ecc^2) / (1 + orbit.ecc * cosν)
+        r = orbit.aRₛ * (1 - orbit.ecc^2) / (1 + orbit.ecc * cosν)
     end
     return rotate_vector(orbit, r * cosν, r * sinν)
 end
@@ -174,7 +176,7 @@ function Base.show(io::IO, orbit::KeplerianOrbit)
     ecc = orbit.ecc
     P = orbit.P
     ρₛ = orbit.ρₛ
-    r_star = orbit.r_star
+    Rₛ = orbit.Rₛ
     t₀ = orbit.t₀
     incl = orbit.incl
     Ω = orbit.Ω
@@ -182,9 +184,9 @@ function Base.show(io::IO, orbit::KeplerianOrbit)
     print(
         io,
         """KeplerianOrbit(
-            a=$(orbit.a), aRₛ=$(orbit.aRₛ),
+            a=$(upreferred(orbit.a)), aRₛ=$(orbit.aRₛ),
             b=$(orbit.b), ecc=$(orbit.ecc), P=$(orbit.P),
-            ρₛ=$(orbit.ρₛ), r_star=$(orbit.r_star),
+            ρₛ=$(orbit.ρₛ), Rₛ=$(orbit.Rₛ),
             t₀=$(orbit.t₀), incl=$(orbit.incl),
             Ω=$(orbit.Ω), ω = $(orbit.ω)
         )"""
@@ -192,17 +194,18 @@ function Base.show(io::IO, orbit::KeplerianOrbit)
 end
 
 function Base.show(io::IO, ::MIME"text/plain", orbit::KeplerianOrbit)
+    a = orbit.a isa Nothing ? nothing : upreferred(orbit.a)
     print(
         io,
         """
         KeplerianOrbit
-         a: $(orbit.a)
-         aRₛ: $(orbit.aRₛ)
-         b: $(orbit.b)
+         a: $a
+         aRₛ: $(upreferred(orbit.aRₛ))
+         b: $(upreferred(orbit.b))
          ecc: $(orbit.ecc)
          P: $(orbit.P)
          ρₛ: $(orbit.ρₛ)
-         r_star: $(orbit.r_star)
+         Rₛ: $(orbit.Rₛ)
          t₀: $(orbit.t₀)
          incl: $(orbit.incl)
          Ω: $(orbit.Ω)
