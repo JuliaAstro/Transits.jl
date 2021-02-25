@@ -5,7 +5,8 @@ using Unitful
 using UnitfulAstro
 
 const G = PhysicalConstants.CODATA2018.G
-const G_val = 6.67430e-8 # CGS
+const G_val = ustrip(u"cm^3/g/s^2", G)
+const M₀ = π / 2.0
 
 """
     KeplerianOrbit(; kwargs...)
@@ -51,7 +52,7 @@ end
 )
 
 @kwmethod function KeplerianOrbit(;ρₛ, Rₛ, ecc, P, t₀, incl)
-    Ω = π / 2
+    Ω = π / 2.0
     ω = 0.0
     a = get_a(ρₛ, P, Rₛ)
     b = get_b(ρₛ, P, sincos(incl))
@@ -64,7 +65,7 @@ end
         P,
         ρₛ,
         Rₛ,
-        2 * π / P,
+        2.0 * π / P,
         t₀,
         incl,
         Ω,
@@ -73,7 +74,7 @@ end
 end
 
 @kwmethod function KeplerianOrbit(;aRₛ, b, ecc, P, t₀)
-    Ω = π / 2
+    Ω = π / 2.0
     ω = 0.0
     incl = get_incl(aRₛ, b, ecc, sincos(ω))
 
@@ -85,7 +86,7 @@ end
         P,
         nothing,
         nothing,
-        2 * π / P,
+        2.0 * π / P,
         t₀,
         incl,
         Ω,
@@ -97,14 +98,14 @@ end
 # Orbit logic
 #############
 # Star density
-get_ρₛ(aRₛ, P) = (3 * π / (G_val * P^2)) * aRₛ^3
-get_ρₛ(aRₛ, P::T) where {T <: Unitful.Time} = (3 * π / (G * P^2)) * aRₛ^3
+get_ρₛ(aRₛ, P) = (3.0 * π / (G_val * P^2.0)) * aRₛ^3.0
+get_ρₛ(aRₛ, P::T) where {T <: Unitful.Time} = (3.0 * π / (G * P^2.0)) * aRₛ^3.0
 get_ρₛ(a, P, Rₛ) = get_ρₛ(aRₛ(a, Rₛ), P)
 
 # Semi-major axis / star radius ratio
 @kwdispatch get_aRₛ()
-@kwmethod get_aRₛ(;ρₛ, P) = cbrt(G_val * P^2 * ρₛ / (3 * π))
-@kwmethod get_aRₛ(;ρₛ, P::T) where {T <: Unitful.Time} = cbrt(G * P^2 * ρₛ / (3 * π))
+@kwmethod get_aRₛ(;ρₛ, P) = cbrt(G_val * P^2.0 * ρₛ / (3.0 * π))
+@kwmethod get_aRₛ(;ρₛ, P::T) where {T <: Unitful.Time} = cbrt(G * P^2.0 * ρₛ / (3.0 * π))
 @kwmethod get_aRₛ(;a, P, Rₛ) = aRₛ(get_ρₛ(a, P, Rₛ), P)
 @kwmethod get_aRₛ(;a, Rₛ) = a / Rₛ
 
@@ -118,7 +119,7 @@ get_b(aRₛ, sincosi) = aRₛ * sincosi[2]
 
 # Inclination
 function get_incl(aRₛ, b, ecc, sincosω)
-    return acos((b/aRₛ) * (1 + ecc*sincosω[1])/(1 - ecc^2))
+    return acos((b/aRₛ) * (1.0 + ecc*sincosω[1])/(1.0 - ecc^2))
 end
 
 # Finds the position `r` of the planet along its orbit after rotating
@@ -136,8 +137,20 @@ end
 
 # Returns sin(ν), cos(ν)
 function get_true_anomaly(orbit::KeplerianOrbit, t)
-    M = orbit.n * ((t - orbit.t₀))
-    E = kepler_solver(M, orbit.ecc)
+    if orbit.ecc == 0.0
+        M = M₀ + orbit.n * (t - orbit.t₀) / 2.0
+        E = kepler_solver(M, orbit.ecc)
+    else
+        sinω, cosω = sincos(orbit.ω)
+        opsw = 1.0 + sinω
+        E₀ = 2.0 * atan(
+            sqrt(1.0 - orbit.ecc) * cosω,
+            sqrt(1.0 + orbit.ecc) * opsw,
+        )
+        M_yee = E₀ - orbit.ecc * sin(E₀)
+        M = M_yee + orbit.n * (t - orbit.t₀)
+        E = kepler_solver(M, orbit.ecc)
+    end
     return sincos(trueanom(E, orbit.ecc))
 end
 #(M, ::Nothing) = sincos(M)
