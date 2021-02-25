@@ -135,25 +135,27 @@ function relative_position(orbit::KeplerianOrbit, t)
     return rotate_vector(orbit, r * cosν, r * sinν)
 end
 
-# Returns sin(ν), cos(ν)
-function get_true_anomaly(orbit::KeplerianOrbit, t)
+function get_M(orbit::KeplerianOrbit, t)
     if orbit.ecc == 0.0
         M = M₀ + orbit.n * (t - orbit.t₀) / 2.0
-        E = kepler_solver(M, orbit.ecc)
     else
         sinω, cosω = sincos(orbit.ω)
-        opsw = 1.0 + sinω
         E₀ = 2.0 * atan(
             sqrt(1.0 - orbit.ecc) * cosω,
-            sqrt(1.0 + orbit.ecc) * opsw,
+            sqrt(1.0 + orbit.ecc) * (1.0 + sinω),
         )
-        M_yee = E₀ - orbit.ecc * sin(E₀)
-        M = M_yee + orbit.n * (t - orbit.t₀)
-        E = kepler_solver(M, orbit.ecc)
+        M₀_ecc = E₀ - orbit.ecc * sin(E₀)
+        M = M₀_ecc + orbit.n * (t - orbit.t₀)
     end
+    return M
+end
+
+# Returns sin(ν), cos(ν)
+function get_true_anomaly(orbit::KeplerianOrbit, t)
+    M = get_M(orbit, t)
+    E = kepler_solver(M, orbit.ecc)
     return sincos(trueanom(E, orbit.ecc))
 end
-#(M, ::Nothing) = sincos(M)
 
 # Transform from orbital plane to equatorial plane
 function rotate_vector(orbit::KeplerianOrbit, x, y)
