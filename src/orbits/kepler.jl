@@ -152,7 +152,8 @@ end
 
 # Returns sin(ν), cos(ν)
 function get_true_anomaly(orbit::KeplerianOrbit, t)
-    M = get_M(orbit, t)
+    #M = get_M(orbit, t)
+    M = M₀ + orbit.n * (t - orbit.t₀) / 2.0
     E = kepler_solver(M, orbit.ecc)
     return sincos(trueanom(E, orbit.ecc))
 end

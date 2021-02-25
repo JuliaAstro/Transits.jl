@@ -41,7 +41,7 @@ ld = PolynomialLimbDark(u)
 t = range(-86_400, 5*86_400, length=1000) # seconds from t0
 
 # ╔═╡ afadc18c-76c8-11eb-0aa2-773bc5cdccea
-rs = range(0, 0.2, length=10) # radius ratio
+rs = range(0, 0.2, length=5) # radius ratio
 
 # ╔═╡ afb2e158-76c8-11eb-13fd-8112b15851e0
 fluxes = @. ld(orbit, t, rs')
@@ -75,7 +75,7 @@ let
 	u = [0.4, 0.26]
 	ld = PolynomialLimbDark(u)
 	t = range(-1, 5, length=1000)u"d"
-	rs = range(0, 0.2, length=10)
+	rs = range(0, 0.2, length=5)
 	fluxes = @. ld(HATP26_ρₛ, t, rs')
 	plot(t, fluxes, label=rs', legend=:right, legendtitle=:rprs)
 end
@@ -98,7 +98,7 @@ let
 	u = [0.4, 0.26]
 	ld = PolynomialLimbDark(u)
 	t = range(-1, 5, length=1000)u"d"
-	rs = range(0, 0.2, length=10)
+	rs = range(0, 0.2, length=5)
 	fluxes = @. ld(HATP26_aRs, t, rs')
 	plot(t, fluxes, label=rs', legend=:right, legendtitle=:rprs)
 end
