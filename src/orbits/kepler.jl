@@ -5,7 +5,7 @@ using Unitful
 using UnitfulAstro
 
 const G = PhysicalConstants.CODATA2018.G
-const G_val = ustrip(u"cm^3/g/s^2", G)
+const G_cgs = ustrip(u"cm^3/g/s^2", G)
 const M₀ = π / 2.0
 
 """
@@ -52,14 +52,14 @@ end
 )
 
 @kwmethod function KeplerianOrbit(;ρₛ, Rₛ, ecc, P, t₀, incl)
-    Ω = π / 2.0
+    Ω = M₀
     ω = 0.0
-    a = get_a(ρₛ, P, Rₛ)
-    b = get_b(ρₛ, P, sincos(incl))
+    a = compute_a(ρₛ, P, Rₛ)
+    b = compute_b(ρₛ, P, sincos(incl))
 
     return KeplerianOrbit(
         a,
-        get_aRₛ(ρₛ=ρₛ, P=P),
+        compute_aRₛ(ρₛ=ρₛ, P=P),
         b,
         ecc,
         P,
@@ -74,9 +74,9 @@ end
 end
 
 @kwmethod function KeplerianOrbit(;aRₛ, b, ecc, P, t₀)
-    Ω = π / 2.0
+    Ω = M₀
     ω = 0.0
-    incl = get_incl(aRₛ, b, ecc, sincos(ω))
+    incl = compute_incl(aRₛ, b, ecc, sincos(ω))
 
     return KeplerianOrbit(
         nothing,
@@ -98,27 +98,27 @@ end
 # Orbit logic
 #############
 # Star density
-get_ρₛ(aRₛ, P) = (3.0 * π / (G_val * P^2.0)) * aRₛ^3.0
-get_ρₛ(aRₛ, P::T) where {T <: Unitful.Time} = (3.0 * π / (G * P^2.0)) * aRₛ^3.0
-get_ρₛ(a, P, Rₛ) = get_ρₛ(aRₛ(a, Rₛ), P)
+compute_ρₛ(aRₛ, P) = (3.0 * π / (G_cgs * P^2.0)) * aRₛ^3.0
+compute_ρₛ(aRₛ, P::T) where {T <: Unitful.Time} = (3.0 * π / (G * P^2.0)) * aRₛ^3.0
+compute_ρₛ(a, P, Rₛ) = compute_ρₛ(aRₛ(a, Rₛ), P)
 
 # Semi-major axis / star radius ratio
-@kwdispatch get_aRₛ()
-@kwmethod get_aRₛ(;ρₛ, P) = cbrt(G_val * P^2.0 * ρₛ / (3.0 * π))
-@kwmethod get_aRₛ(;ρₛ, P::T) where {T <: Unitful.Time} = cbrt(G * P^2.0 * ρₛ / (3.0 * π))
-@kwmethod get_aRₛ(;a, P, Rₛ) = aRₛ(get_ρₛ(a, P, Rₛ), P)
-@kwmethod get_aRₛ(;a, Rₛ) = a / Rₛ
+@kwdispatch compute_aRₛ()
+@kwmethod compute_aRₛ(;ρₛ, P) = cbrt(G_cgs * P^2.0 * ρₛ / (3.0 * π))
+@kwmethod compute_aRₛ(;ρₛ, P::T) where {T <: Unitful.Time} = cbrt(G * P^2.0 * ρₛ / (3.0 * π))
+@kwmethod compute_aRₛ(;a, P, Rₛ) = aRₛ(compute_ρₛ(a, P, Rₛ), P)
+@kwmethod compute_aRₛ(;a, Rₛ) = a / Rₛ
 
 # Semi-major axis
-get_a(ρₛ, P, Rₛ) = get_a(get_aRₛ(ρₛ=ρₛ, P=P), Rₛ)
-get_a(aRₛ, Rₛ) = aRₛ * Rₛ
+compute_a(ρₛ, P, Rₛ) = compute_a(compute_aRₛ(ρₛ=ρₛ, P=P), Rₛ)
+compute_a(aRₛ, Rₛ) = aRₛ * Rₛ
 
 # Impact parameter
-get_b(ρₛ, P, sincosi) = get_b(get_aRₛ(ρₛ=ρₛ, P=P), sincosi)
-get_b(aRₛ, sincosi) = aRₛ * sincosi[2]
+compute_b(ρₛ, P, sincosi) = compute_b(compute_aRₛ(ρₛ=ρₛ, P=P), sincosi)
+compute_b(aRₛ, sincosi) = aRₛ * sincosi[2]
 
 # Inclination
-function get_incl(aRₛ, b, ecc, sincosω)
+function compute_incl(aRₛ, b, ecc, sincosω)
     return acos((b/aRₛ) * (1.0 + ecc*sincosω[1])/(1.0 - ecc^2))
 end
 
@@ -126,8 +126,8 @@ end
 # through the true anomaly `ν`, then transforms this from the
 # orbital plan to the equatorial plane
 function relative_position(orbit::KeplerianOrbit, t)
-    sinν, cosν = get_true_anomaly(orbit, t)
-    if orbit.ecc === nothing
+    sinν, cosν = compute_true_anomaly(orbit, t)
+    if iszero(orbit.ecc)
         r = orbit.aRₛ
     else
         r = orbit.aRₛ * (1 - orbit.ecc^2) / (1 + orbit.ecc * cosν)
@@ -135,8 +135,8 @@ function relative_position(orbit::KeplerianOrbit, t)
     return rotate_vector(orbit, r * cosν, r * sinν)
 end
 
-function get_M(orbit::KeplerianOrbit, t)
-    if orbit.ecc == 0.0
+function compute_M(orbit::KeplerianOrbit, t)
+    if iszero(orbit.ecc)
         M = M₀ + orbit.n * (t - orbit.t₀) / 2.0
     else
         sinω, cosω = sincos(orbit.ω)
@@ -151,8 +151,8 @@ function get_M(orbit::KeplerianOrbit, t)
 end
 
 # Returns sin(ν), cos(ν)
-function get_true_anomaly(orbit::KeplerianOrbit, t)
-    #M = get_M(orbit, t)
+function compute_true_anomaly(orbit::KeplerianOrbit, t)
+    #M = compute_M(orbit, t)
     M = M₀ + orbit.n * (t - orbit.t₀) / 2.0
     E = kepler_solver(M, orbit.ecc)
     return sincos(trueanom(E, orbit.ecc))
@@ -165,7 +165,7 @@ function rotate_vector(orbit::KeplerianOrbit, x, y)
     sinω, cosω = sincos(orbit.ω)
 
     # Rotate about z0 axis by ω
-    if orbit.ecc == 0.0
+    if iszero(orbit.ecc)
         x1, y1 = x, y
     else
         x1 = cosω * x - sinω * y
@@ -185,7 +185,7 @@ function rotate_vector(orbit::KeplerianOrbit, x, y)
 end
 
 function Base.show(io::IO, orbit::KeplerianOrbit)
-    a = orbit.a
+    a = orbit.a isa Nothing ? nothing : uconvert(u"AU", orbit.a)
     aRₛ = orbit.aRₛ
     b = orbit.b
     ecc = orbit.ecc
@@ -209,7 +209,7 @@ function Base.show(io::IO, orbit::KeplerianOrbit)
 end
 
 function Base.show(io::IO, ::MIME"text/plain", orbit::KeplerianOrbit)
-    a = orbit.a isa Nothing ? nothing : upreferred(orbit.a)
+    a = orbit.a isa Nothing ? nothing : uconvert(u"AU", orbit.a)
     print(
         io,
         """
