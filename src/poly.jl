@@ -199,7 +199,7 @@ function Base.show(io::IO, ::MIME"text/plain", ld::PolynomialLimbDark)
     print(io, "PolynomialLimbDark\n u_n: ", ld.u_n)
 end
 function Base.show(io::IO, ::MIME"text/html", ld::PolynomialLimbDark)
-    print(io, "PolynomialLimbDark\n u<sup>n</sup>: ", ld.u_n)
+    print(io, "PolynomialLimbDark\n u<sub>n</sub>: ", ld.u_n)
 end
 
 ###

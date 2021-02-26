@@ -170,5 +170,5 @@ function Base.show(io::IO, ::MIME"text/plain", ld::QuadLimbDark)
     print(io, "QuadLimbDark\n u_n: ", ld.u_n)
 end
 function Base.show(io::IO, ::MIME"text/html", ld::QuadLimbDark)
-    print(io, "QuadLimbDark\n u<sup>n</sup>: ", ld.u_n)
+    print(io, "QuadLimbDark\n u<sub>n</sub>: ", ld.u_n)
 end
