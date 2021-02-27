@@ -25,19 +25,19 @@ Keplerian orbit parameterized by the basic observables of a transiting 2-body sy
 * `Ω` - The longitude of the ascending node, nominally in radians. Aliased to `Omega`
 * `ω` - The argument of periapsis, same units as `Ω`. Aliased to `omega`
 """
-struct KeplerianOrbit <: AbstractOrbit
-    a
-    aRₛ
-    b
-    ecc
-    P
-    ρₛ
-    Rₛ
-    n
-    t₀
-    incl
-    Ω
-    ω
+struct KeplerianOrbit{T,L,D,R,A,I}
+    a::L
+    aRₛ::R
+    b::R
+    ecc::R
+    P::T
+    ρₛ::D
+    Rₛ::L
+    n::I
+    t₀::T
+    incl::A
+    Ω::R
+    ω::R
 end
 
 # Enable keyword dispatch and argument name aliasing
@@ -52,20 +52,32 @@ end
 )
 
 @kwmethod function KeplerianOrbit(;ρₛ, Rₛ, ecc, P, t₀, incl)
+    # Apply relevant conversions to CGS
+    #Rₛ isa Real && (Rₛ = Rₛ * 6.957e10)
+    #P isa Real && (P = P * 86_400.0)
+    #incl isa Real && (incl = incl * π / 180.0)
     Ω = M₀
     ω = 0.0
+    aRₛ = compute_aRₛ(ρₛ=ρₛ, P=P)
     a = compute_a(ρₛ, P, Rₛ)
     b = compute_b(ρₛ, P, sincos(incl))
+    n = 2.0 * π / P
+
+    # Normalize quantities
+    a, Rₛ = promote(a, Rₛ)
+
+    # Normalize unitless types
+    aRₛ, b, ecc = promote(aRₛ, b, ecc)
 
     return KeplerianOrbit(
         a,
-        compute_aRₛ(ρₛ=ρₛ, P=P),
+        aRₛ,
         b,
         ecc,
         P,
         ρₛ,
         Rₛ,
-        2.0 * π / P,
+        n,
         t₀,
         incl,
         Ω,
@@ -73,7 +85,7 @@ end
     )
 end
 
-@kwmethod function KeplerianOrbit(;aRₛ, b, ecc, P, t₀)
+@kwmethod function KeplerianOrbit(;aRₛ, P, b, t₀, ecc)
     Ω = M₀
     ω = 0.0
     incl = compute_incl(aRₛ, b, ecc, sincos(ω))
@@ -209,7 +221,7 @@ function Base.show(io::IO, orbit::KeplerianOrbit)
 end
 
 function Base.show(io::IO, ::MIME"text/plain", orbit::KeplerianOrbit)
-    a = orbit.a isa Nothing ? nothing : uconvert(u"AU", orbit.a)
+    a = orbit.a isa Quantity ? uconvert(u"AU", orbit.a) : orbit.a
     print(
         io,
         """

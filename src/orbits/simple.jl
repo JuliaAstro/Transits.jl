@@ -47,7 +47,7 @@ function relative_position(orbit::SimpleOrbit, t)
     x = orbit.speed * dt
     y = orbit.b_norm
     z = abs(dt) < 0.5 * orbit.duration ? one(x) : -one(x)
-    return SA[x, y, z]
+    return SA[x, y, z] ./ orbit.r_star
 end
 
 function in_transit(orbit::SimpleOrbit, t, r; texp=0)
