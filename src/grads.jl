@@ -336,7 +336,7 @@ end
 
 function rrule(::typeof(compute), ld::P, b, r) where {P<:PolynomialLimbDark}
     f, dfdg, dfdb, dfdr = compute_grad(ld, b, r)
-    function compute_pullback((Δf,))
+    function compute_pullback(Δf)
         ∂ld = Composite{P}(g_n=dfdg * Δf)
         ∂b = dfdb * Δf
         ∂r = dfdr * Δf
@@ -398,7 +398,7 @@ function rrule(::typeof(PolynomialLimbDark), u::AbstractVector{S}; maxiter=100) 
 
     Ω = PolynomialLimbDark(n_max, u_n, g_n, Mn_coeff, Nn_coeff, norm, Mn, Nn)
 
-    function PolynomialLimbDark_pullback((Δld,))
+    function PolynomialLimbDark_pullback(Δld)
         ∂u = @views ∇g_n[:, begin + 1:end]' * Δld.g_n
         return NO_FIELDS, ∂u
     end

@@ -27,7 +27,7 @@ A limb dark law need only need to implement `compute(::Law, b, r)` to extend the
 """
 abstract type AbstractLimbDark end
 
-Base.broadcastable(law::AbstractLimbDark) = Ref(law)
+Base.broadcastable(law::AbstractLimbDark) = (law,)
 
 """
     (::AbstractLimbDark)(b, r)
