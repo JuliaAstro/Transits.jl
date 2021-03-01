@@ -1,9 +1,5 @@
 import ChainRulesCore: frule, rrule
-
-
-function frule((_, Δu_n), ::typeof(compute_gn), u_n::AbstractVector{T}) where T
-    compute_gn_jac(u_n) * Δu_n
-end
+using LinearAlgebra
 
 function compute_gn_jac(u_n::AbstractVector{T}) where T
     n = length(u_n) - 1
@@ -333,12 +329,79 @@ function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
 end
 
 function frule((_, Δld, Δb, Δr), ::typeof(compute), ld::PolynomialLimbDark, b, r)
-    f, _, dfdb, dfdr = compute_grad(ld, b, r)
-    return f, dfdb * Δb + dfdr * Δr
+    f, dfdg, dfdb, dfdr = compute_grad(ld, b, r)
+    ∂g_n = dot(dfdg, Δld.g_n)
+    return f, ∂g_n + dfdb * Δb + dfdr * Δr
 end
 
-function rrule(::typeof(compute), ld::PolynomialLimbDark, b, r)
-    f, _, dfdb, dfdr = compute_grad(ld, b, r)
-    compute_pullback((_, Δb, _)) = NO_FIELDS, dfdb * Δb, dfdr * Δb
+function rrule(::typeof(compute), ld::P, b, r) where {P<:PolynomialLimbDark}
+    f, dfdg, dfdb, dfdr = compute_grad(ld, b, r)
+    function compute_pullback((Δf,))
+        ∂ld = Composite{P}(g_n=dfdg * Δf)
+        ∂b = dfdb * Δf
+        ∂r = dfdr * Δf
+        NO_FIELDS, ∂ld, ∂b, ∂r
+    end
     return f, compute_pullback
 end
+
+function frule((_, Δu_n), ::typeof(PolynomialLimbDark), u::AbstractVector{S}; maxiter=100) where S
+    T = float(S)
+    # add constant u_0 term
+    n_max = length(u)
+    u_n = pushfirst!(copy(u), -one(S))
+    # get Green's basis coefficients
+    g_n, ∇g_n = compute_gn_jac(u_n)
+    # compute series expansion for M_n and N_n
+    Mn_coeff = compute_Mn_coeffs(T, n_max; maxiter=maxiter)
+    Nn_coeff = compute_Nn_coeffs(T, n_max; maxiter=maxiter)
+
+    # calculate flux normalization factor, which only depends on first two terms
+    if length(g_n) > 1
+        norm = inv(π * (g_n[1] + 2 / 3 * g_n[2]))
+    else
+        norm = inv(π * g_n[1])
+    end
+
+    # pre-allocate temp arrays
+    Mn = similar(g_n)
+    Nn = similar(g_n)
+
+    Ω = PolynomialLimbDark(n_max, u_n, g_n, Mn_coeff, Nn_coeff, norm, Mn, Nn)
+    ∂g_n = @views ∇g_n[:, begin + 1:end] * Δu_n
+    ∂Ω = Composite{typeof(Ω)}(g_n=∂g_n)
+    return Ω, ∂Ω
+end
+
+
+function rrule(::typeof(PolynomialLimbDark), u::AbstractVector{S}; maxiter=100) where S
+    T = float(S)
+    # add constant u_0 term
+    n_max = length(u)
+    u_n = pushfirst!(copy(u), -one(S))
+    # get Green's basis coefficients
+    g_n, ∇g_n = compute_gn_jac(u_n)
+    # compute series expansion for M_n and N_n
+    Mn_coeff = compute_Mn_coeffs(T, n_max; maxiter=maxiter)
+    Nn_coeff = compute_Nn_coeffs(T, n_max; maxiter=maxiter)
+
+    # calculate flux normalization factor, which only depends on first two terms
+    if length(g_n) > 1
+        norm = inv(π * (g_n[1] + 2 / 3 * g_n[2]))
+    else
+        norm = inv(π * g_n[1])
+    end
+
+    # pre-allocate temp arrays
+    Mn = similar(g_n)
+    Nn = similar(g_n)
+
+    Ω = PolynomialLimbDark(n_max, u_n, g_n, Mn_coeff, Nn_coeff, norm, Mn, Nn)
+
+    function PolynomialLimbDark_pullback((Δld,))
+        ∂u = @views ∇g_n[:, begin + 1:end]' * Δld.g_n
+        return NO_FIELDS, ∂u
+    end
+    return Ω, PolynomialLimbDark_pullback
+end
+
