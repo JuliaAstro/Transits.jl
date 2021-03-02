@@ -25,7 +25,7 @@ Keplerian orbit parameterized by the basic observables of a transiting 2-body sy
 * `Ω` - The longitude of the ascending node, nominally in radians. Aliased to `Omega`
 * `ω` - The argument of periapsis, same units as `Ω`. Aliased to `omega`
 """
-struct KeplerianOrbit{T,L,D,R,A,I}
+struct KeplerianOrbit{T,L,D,R,A,I} <: AbstractOrbit
     a::L
     aRₛ::R
     b::R
@@ -89,6 +89,27 @@ end
     Ω = M₀
     ω = 0.0
     incl = compute_incl(aRₛ, b, ecc, sincos(ω))
+
+    return KeplerianOrbit(
+        nothing,
+        aRₛ,
+        b,
+        ecc,
+        P,
+        nothing,
+        nothing,
+        2.0 * π / P,
+        t₀,
+        incl,
+        Ω,
+        ω,
+    )
+end
+
+@kwmethod function KeplerianOrbit(;aRₛ, P, t₀, ecc, ω, incl)
+    Ω = M₀
+    ω = 0.0
+    b = compute_b(aRₛ, sincos(incl))
 
     return KeplerianOrbit(
         nothing,

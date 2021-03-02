@@ -6,6 +6,7 @@ version = "0.2.0"
 [deps]
 AstroLib = "c7932e45-9af1-51e7-9da9-f004cd3a462b"
 Bijectors = "76274a88-744f-5084-9051-94815aaf08c4"
+DarkMode = "933edf66-562e-4494-9e5f-31d7e8b9849e"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 FastGaussQuadrature = "442a2c76-b920-505d-bb47-c5924d526838"
 KeywordDispatch = "5888135b-5456-5c80-a1b6-c91ef8180460"

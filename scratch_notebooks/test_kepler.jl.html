@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta name="viewport" content="width=device-width" />
+                <title>⚡ Pluto.jl ⚡</title>
+                <meta charset="utf-8" />
+
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fonsp/Pluto.jl@0.12.21/frontend/editor.css" type="text/css" />
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fonsp/Pluto.jl@0.12.21/frontend/treeview.css" type="text/css" />
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fonsp/Pluto.jl@0.12.21/frontend/hide-ui.css" type="text/css" />
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.58.1/lib/codemirror.min.css" type="text/css" />
+
+                <style id="MJX-SVG-styles">
+mjx-container[jax="SVG"] {
+  direction: ltr;
+}
+
+mjx-container[jax="SVG"] > svg {
+  overflow: visible;
+}
+
+mjx-container[jax="SVG"] > svg a {
+  fill: blue;
+  stroke: blue;
+}
+
+mjx-assistive-mml {
+  position: absolute !important;
+  top: 0px;
+  left: 0px;
+  clip: rect(1px, 1px, 1px, 1px);
+  padding: 1px 0px 0px 0px !important;
+  border: 0px !important;
+  display: block !important;
+  width: auto !important;
+  overflow: hidden !important;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+mjx-assistive-mml[display="block"] {
+  width: 100% !important;
+}
+
+mjx-container[jax="SVG"][display="true"] {
+  display: block;
+  text-align: center;
+  margin: 1em 0;
+}
+
+mjx-container[jax="SVG"][display="true"][width="full"] {
+  display: flex;
+}
+
+mjx-container[jax="SVG"][justify="left"] {
+  text-align: left;
+}
+
+mjx-container[jax="SVG"][justify="right"] {
+  text-align: right;
+}
+
+g[data-mml-node="merror"] > g {
+  fill: red;
+  stroke: red;
+}
+
+g[data-mml-node="merror"] > rect[data-background] {
+  fill: yellow;
+  stroke: none;
+}
+
+g[data-mml-node="mtable"] > line[data-line] {
+  stroke-width: 70px;
+  fill: none;
+}
+
+g[data-mml-node="mtable"] > rect[data-frame] {
+  stroke-width: 70px;
+  fill: none;
+}
+
+g[data-mml-node="mtable"] > .mjx-dashed {
+  stroke-dasharray: 140;
+}
+
+g[data-mml-node="mtable"] > .mjx-dotted {
+  stroke-linecap: round;
+  stroke-dasharray: 0,140;
+}
+
+g[data-mml-node="mtable"] > g > svg {
+  overflow: visible;
+}
+
+[jax="SVG"] mjx-tool {
+  display: inline-block;
+  position: relative;
+  width: 0;
+  height: 0;
+}
+
+[jax="SVG"] mjx-tool > mjx-tip {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+mjx-tool > mjx-tip {
+  display: inline-block;
+  padding: .2em;
+  border: 1px solid #888;
+  font-size: 70%;
+  background-color: #F8F8F8;
+  color: black;
+  box-shadow: 2px 2px 5px #AAAAAA;
+}
+
+g[data-mml-node="maction"][data-toggle] {
+  cursor: pointer;
+}
+
+mjx-status {
+  display: block;
+  position: fixed;
+  left: 1em;
+  bottom: 1em;
+  min-width: 25%;
+  padding: .2em .4em;
+  border: 1px solid #888;
+  font-size: 90%;
+  background-color: #F8F8F8;
+  color: black;
+}
+
+foreignObject[data-mjx-xml] {
+  font-family: initial;
+  line-height: normal;
+  overflow: visible;
+}
+
+.MathJax path {
+  stroke-width: 3;
+}
+</style>
+            </head>
+            <body>
+                <main><preamble><button class="runallchanged" title="Save and run all changed cells"><span></span></button></preamble><pluto-notebook id="c4fca1a2-7b23-11eb-1320-3b2146e781fa"><pluto-cell class="" id="12d523ae-7b24-11eb-3e11-5581a47e1b90"><pluto-shoulder draggable="true" title="Drag to move cell"><button class="foldcode" title="Show/hide code"><span></span></button></pluto-shoulder><pluto-trafficlight></pluto-trafficlight><button class="add_cell before" title="Add cell"><span></span></button><pluto-output class="scroll_y rich_output " mime="text/plain"><assignee></assignee><div></div></pluto-output><pluto-input><button class="delete_cell" title="Delete cell"><span></span></button><div class="CodeMirror cm-s-default CodeMirror-wrap"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 112.333px; left: 370.354px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" tabindex="0" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;"></textarea></div><div class="CodeMirror-vscrollbar" tabindex="-1" cm-not-content="true"><div style="min-width: 1px; height: 0px;"></div></div><div class="CodeMirror-hscrollbar" tabindex="-1" cm-not-content="true"><div style="height: 100%; min-height: 1px; width: 0px;"></div></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 30px; margin-bottom: -10px; border-right-width: 40px; min-height: 23px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"><pre class="CodeMirror-line-like"><span>xxxxxxxxxx</span></pre><div class="CodeMirror-linenumber CodeMirror-gutter-elt"><div>1</div></div><div class="CodeMirror-linenumber CodeMirror-gutter-elt"><div>11</div></div></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors" style="visibility: hidden;"><div class="CodeMirror-cursor" style="left: 340.354px; top: 107.333px; height: 15.3333px;">&nbsp;</div></div><div class="CodeMirror-code" role="presentation" style=""><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-keyword">begin</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">2</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-keyword">using</span> <span class="cm-variable">Revise</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">3</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-keyword">import</span> <span class="cm-variable">Pkg</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">4</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-variable">Pkg</span><span class="cm-operator">.</span><span class="cm-builtin">activate</span>(<span class="cm-string">".."</span>)</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">5</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-variable">Pkg</span><span class="cm-operator">.</span><span class="cm-builtin">instantiate</span>()</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">6</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-keyword">using</span> <span class="cm-variable">PlutoUI</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">7</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-keyword">using</span> <span class="cm-variable">StatsPlots</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">8</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-keyword">using</span> <span class="cm-variable">Transits</span><span class="cm-operator">.</span><span class="cm-variable">Orbits</span><span class="cm-operator">:</span> <span class="cm-variable">relative_position</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">9</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-keyword">using</span> <span class="cm-variable">Unitful</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">10</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-keyword">using</span> <span class="cm-variable">UnitfulAstro</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">11</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-keyword">using</span> <span class="cm-variable">PyCall</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">12</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-keyword">end</span></span></pre></div></div></div></div></div></div><div style="position: absolute; height: 40px; width: 1px; border-bottom: 0px solid transparent; top: 192px;"></div><div class="CodeMirror-gutters" style="height: 232px; left: 0px;"><div class="CodeMirror-gutter CodeMirror-linenumbers" style="width: 29px;"></div></div></div></div></pluto-input><pluto-runarea><button class="runcell" title="Run"><span></span></button><span class="runtime">8.5&nbsp;s</span></pluto-runarea><button class="add_cell after" title="Add cell"><span></span></button></pluto-cell><pluto-cell class="" id="e34d610a-7b23-11eb-0132-55ce740f8e17"><pluto-shoulder draggable="true" title="Drag to move cell"><button class="foldcode" title="Show/hide code"><span></span></button></pluto-shoulder><pluto-trafficlight></pluto-trafficlight><button class="add_cell before" title="Add cell"><span></span></button><pluto-output class="scroll_y " mime="text/plain"><assignee></assignee><div><pre><code>0</code></pre></div></pluto-output><pluto-input><button class="delete_cell" title="Delete cell"><span></span></button><div class="CodeMirror cm-s-default CodeMirror-wrap"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 5px; left: 118.083px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" tabindex="0" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;"></textarea></div><div class="CodeMirror-vscrollbar" tabindex="-1" cm-not-content="true"><div style="min-width: 1px; height: 0px;"></div></div><div class="CodeMirror-hscrollbar" tabindex="-1" cm-not-content="true"><div style="height: 100%; min-height: 1px; width: 0px;"></div></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 30px; margin-bottom: -10px; border-right-width: 40px; min-height: 23px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"><pre class="CodeMirror-line-like"><span>xxxxxxxxxx</span></pre><div class="CodeMirror-linenumber CodeMirror-gutter-elt"><div>1</div></div></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors" style=""><div class="CodeMirror-cursor" style="left: 88.0833px; top: 0px; height: 15.3333px;">&nbsp;</div></div><div class="CodeMirror-code" role="presentation"><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-builtin">pyimport</span>(<span class="cm-string">"pip"</span>)[<span class="cm-string">"main"</span>]([<span class="cm-string">"install"</span>, <span class="cm-string">"batman-package"</span>, <span class="cm-string">"numpy==1.20.1"</span>])</span></pre></div></div></div></div></div></div><div style="position: absolute; height: 40px; width: 1px; border-bottom: 0px solid transparent; top: 23px;"></div><div class="CodeMirror-gutters" style="height: 63px; left: 0px;"><div class="CodeMirror-gutter CodeMirror-linenumbers" style="width: 29px;"></div></div></div></div></pluto-input><pluto-runarea><button class="runcell" title="Run"><span></span></button><span class="runtime">630&nbsp;ms</span></pluto-runarea><button class="add_cell after" title="Add cell"><span></span></button></pluto-cell><pluto-cell class="" id="e8cf7b42-7b23-11eb-12b9-9978504654a8"><pluto-shoulder draggable="true" title="Drag to move cell"><button class="foldcode" title="Show/hide code"><span></span></button></pluto-shoulder><pluto-trafficlight></pluto-trafficlight><button class="add_cell before" title="Add cell"><span></span></button><pluto-output class="" mime="application/vnd.pluto.tree+object"><assignee></assignee><div><jltree class="">Dict<jldict class="Dict"><r><k><pre>"t0"</pre></k><v><jltree class="collapsed">Float64<jlarray class="Array"><r><k>1</k><v><pre>-5.0</pre></v></r><r><k>2</k><v><pre>-5.0</pre></v></r><r><k>3</k><v><pre>-5.0</pre></v></r><r><k>4</k><v><pre>-5.0</pre></v></r><r><k>5</k><v><pre>-5.0</pre></v></r><r><k>6</k><v><pre>-5.0</pre></v></r><r><k>7</k><v><pre>-5.0</pre></v></r><r><k>8</k><v><pre>-5.0</pre></v></r><r><k>9</k><v><pre>-5.0</pre></v></r><r><k>10</k><v><pre>-5.0</pre></v></r><r><k>11</k><v><pre>-5.0</pre></v></r><r><k>12</k><v><pre>-5.0</pre></v></r><r><k>13</k><v><pre>-5.0</pre></v></r><r><k>14</k><v><pre>-5.0</pre></v></r><r><k>15</k><v><pre>-5.0</pre></v></r><r><k>16</k><v><pre>-5.0</pre></v></r><r><k>17</k><v><pre>-5.0</pre></v></r><r><k>18</k><v><pre>-5.0</pre></v></r><r><k>19</k><v><pre>-5.0</pre></v></r><r><k>20</k><v><pre>-5.0</pre></v></r><r><jlmore class="">more</jlmore></r><r><k>711</k><v><pre>5.0</pre></v></r><r><k>712</k><v><pre>5.0</pre></v></r><r><k>713</k><v><pre>5.0</pre></v></r><r><k>714</k><v><pre>5.0</pre></v></r><r><k>715</k><v><pre>5.0</pre></v></r><r><k>716</k><v><pre>5.0</pre></v></r><r><k>717</k><v><pre>5.0</pre></v></r><r><k>718</k><v><pre>5.0</pre></v></r><r><k>719</k><v><pre>5.0</pre></v></r><r><k>720</k><v><pre>5.0</pre></v></r></jlarray></jltree></v></r><r><k><pre>"incl"</pre></k><v><jltree class="collapsed">Float64<jlarray class="Array"><r><k>1</k><v><pre>1.5708</pre></v></r><r><k>2</k><v><pre>1.31812</pre></v></r><r><k>3</k><v><pre>1.0472</pre></v></r><r><k>4</k><v><pre>0.722734</pre></v></r><r><k>5</k><v><pre>1.5708</pre></v></r><r><k>6</k><v><pre>1.31812</pre></v></r><r><k>7</k><v><pre>1.0472</pre></v></r><r><k>8</k><v><pre>0.722734</pre></v></r><r><k>9</k><v><pre>1.5708</pre></v></r><r><k>10</k><v><pre>1.31812</pre></v></r><r><k>11</k><v><pre>1.0472</pre></v></r><r><k>12</k><v><pre>0.722734</pre></v></r><r><k>13</k><v><pre>1.5708</pre></v></r><r><k>14</k><v><pre>1.31812</pre></v></r><r><k>15</k><v><pre>1.0472</pre></v></r><r><k>16</k><v><pre>0.722734</pre></v></r><r><k>17</k><v><pre>1.5708</pre></v></r><r><k>18</k><v><pre>1.31812</pre></v></r><r><k>19</k><v><pre>1.0472</pre></v></r><r><k>20</k><v><pre>0.722734</pre></v></r><r><jlmore class="">more</jlmore></r><r><k>711</k><v><pre>1.0472</pre></v></r><r><k>712</k><v><pre>0.722734</pre></v></r><r><k>713</k><v><pre>1.5708</pre></v></r><r><k>714</k><v><pre>1.31812</pre></v></r><r><k>715</k><v><pre>1.0472</pre></v></r><r><k>716</k><v><pre>0.722734</pre></v></r><r><k>717</k><v><pre>1.5708</pre></v></r><r><k>718</k><v><pre>1.31812</pre></v></r><r><k>719</k><v><pre>1.0472</pre></v></r><r><k>720</k><v><pre>0.722734</pre></v></r></jlarray></jltree></v></r><r><k><pre>"m_sum"</pre></k><v><pre>PyObject 282468</pre></v></r><r><k><pre>"m"</pre></k><v><pre>1000×720 Array{Bool,2}:
+ 1  1  1  1  1  1  1  1  1  1  1  1  1  1  …  1  1  1  1  1  0  0  0  0  1  1  1  1
+ 1  1  1  1  1  1  1  1  1  1  1  1  1  1     1  1  1  1  1  0  0  0  0  1  1  1  1
+ 1  1  1  1  1  1  1  1  1  1  1  1  1  1     1  1  1  1  1  0  0  0  0  1  1  1  1
+ 1  1  1  1  1  1  1  1  1  1  1  1  1  1     1  1  1  1  1  0  0  0  0  1  1  1  1
+ 1  1  1  1  1  1  1  1  1  1  1  1  1  1     1  1  1  1  1  0  0  0  0  1  1  1  1
+ 1  1  1  1  1  1  1  1  1  1  1  1  0  0  …  1  1  1  1  1  0  0  0  0  1  1  1  1
+ 1  1  1  1  1  1  1  1  1  1  1  1  0  0     1  1  1  1  1  0  0  0  0  1  1  1  1
+ ⋮              ⋮              ⋮           ⋱           ⋮              ⋮           
+ 1  1  1  1  1  1  1  1  1  1  1  1  1  1     0  0  0  0  0  0  0  0  0  0  0  0  0
+ 1  1  1  1  1  1  1  1  1  1  1  1  1  1  …  1  0  0  0  0  0  0  0  0  0  0  0  0
+ 1  1  1  1  1  1  1  1  1  1  1  1  1  1     1  1  1  0  0  0  0  0  0  1  1  0  0
+ 1  1  1  1  1  1  1  1  1  1  1  1  1  1     1  1  1  1  0  0  0  0  0  1  1  1  0
+ 1  1  1  1  1  1  1  1  1  1  1  1  1  1     1  1  1  1  1  0  0  0  0  1  1  1  1
+ 1  1  1  1  1  1  1  1  1  1  1  1  1  1     1  1  1  1  1  0  0  0  0  1  1  1  1</pre></v></r><r><k><pre>"r_batman_m"</pre></k><v><jltree class="collapsed">Float64<jlarray class="Array"><r><k>1</k><v><pre>0.0</pre></v></r><r><k>2</k><v><pre>12.5</pre></v></r><r><k>3</k><v><pre>25.0</pre></v></r><r><k>4</k><v><pre>37.5</pre></v></r><r><k>5</k><v><pre>0.0</pre></v></r><r><k>6</k><v><pre>12.5</pre></v></r><r><k>7</k><v><pre>25.0</pre></v></r><r><k>8</k><v><pre>37.5</pre></v></r><r><k>9</k><v><pre>0.0</pre></v></r><r><k>10</k><v><pre>12.5</pre></v></r><r><k>11</k><v><pre>25.0</pre></v></r><r><k>12</k><v><pre>37.5</pre></v></r><r><k>13</k><v><pre>0.0</pre></v></r><r><k>14</k><v><pre>11.8672</pre></v></r><r><k>15</k><v><pre>23.7344</pre></v></r><r><k>16</k><v><pre>35.6016</pre></v></r><r><k>17</k><v><pre>0.0</pre></v></r><r><k>18</k><v><pre>11.8672</pre></v></r><r><k>19</k><v><pre>23.7344</pre></v></r><r><k>20</k><v><pre>35.6016</pre></v></r><r><jlmore class="">more</jlmore></r><r><k>282459</k><v><pre>82.4694</pre></v></r><r><k>282460</k><v><pre>92.1717</pre></v></r><r><k>282461</k><v><pre>91.613</pre></v></r><r><k>282462</k><v><pre>92.2587</pre></v></r><r><k>282463</k><v><pre>94.1691</pre></v></r><r><k>282464</k><v><pre>97.2698</pre></v></r><r><k>282465</k><v><pre>91.613</pre></v></r><r><k>282466</k><v><pre>92.2587</pre></v></r><r><k>282467</k><v><pre>94.1691</pre></v></r><r><k>282468</k><v><pre>97.2698</pre></v></r></jlarray></jltree></v></r><r><k><pre>"period"</pre></k><v><jltree class="collapsed">Float64<jlarray class="Array"><r><k>1</k><v><pre>5.0</pre></v></r><r><k>2</k><v><pre>5.0</pre></v></r><r><k>3</k><v><pre>5.0</pre></v></r><r><k>4</k><v><pre>5.0</pre></v></r><r><k>5</k><v><pre>5.0</pre></v></r><r><k>6</k><v><pre>5.0</pre></v></r><r><k>7</k><v><pre>5.0</pre></v></r><r><k>8</k><v><pre>5.0</pre></v></r><r><k>9</k><v><pre>5.0</pre></v></r><r><k>10</k><v><pre>5.0</pre></v></r><r><k>11</k><v><pre>5.0</pre></v></r><r><k>12</k><v><pre>5.0</pre></v></r><r><k>13</k><v><pre>5.0</pre></v></r><r><k>14</k><v><pre>5.0</pre></v></r><r><k>15</k><v><pre>5.0</pre></v></r><r><k>16</k><v><pre>5.0</pre></v></r><r><k>17</k><v><pre>5.0</pre></v></r><r><k>18</k><v><pre>5.0</pre></v></r><r><k>19</k><v><pre>5.0</pre></v></r><r><k>20</k><v><pre>5.0</pre></v></r><r><jlmore class="">more</jlmore></r><r><k>711</k><v><pre>50.0</pre></v></r><r><k>712</k><v><pre>50.0</pre></v></r><r><k>713</k><v><pre>50.0</pre></v></r><r><k>714</k><v><pre>50.0</pre></v></r><r><k>715</k><v><pre>50.0</pre></v></r><r><k>716</k><v><pre>50.0</pre></v></r><r><k>717</k><v><pre>50.0</pre></v></r><r><k>718</k><v><pre>50.0</pre></v></r><r><k>719</k><v><pre>50.0</pre></v></r><r><k>720</k><v><pre>50.0</pre></v></r></jlarray></jltree></v></r><r><k><pre>"t"</pre></k><v><jltree class="collapsed">Float64<jlarray class="Array"><r><k>1</k><v><pre>-100.0</pre></v></r><r><k>2</k><v><pre>-99.7998</pre></v></r><r><k>3</k><v><pre>-99.5996</pre></v></r><r><k>4</k><v><pre>-99.3994</pre></v></r><r><k>5</k><v><pre>-99.1992</pre></v></r><r><k>6</k><v><pre>-98.999</pre></v></r><r><k>7</k><v><pre>-98.7988</pre></v></r><r><k>8</k><v><pre>-98.5986</pre></v></r><r><k>9</k><v><pre>-98.3984</pre></v></r><r><k>10</k><v><pre>-98.1982</pre></v></r><r><k>11</k><v><pre>-97.998</pre></v></r><r><k>12</k><v><pre>-97.7978</pre></v></r><r><k>13</k><v><pre>-97.5976</pre></v></r><r><k>14</k><v><pre>-97.3974</pre></v></r><r><k>15</k><v><pre>-97.1972</pre></v></r><r><k>16</k><v><pre>-96.997</pre></v></r><r><k>17</k><v><pre>-96.7968</pre></v></r><r><k>18</k><v><pre>-96.5966</pre></v></r><r><k>19</k><v><pre>-96.3964</pre></v></r><r><k>20</k><v><pre>-96.1962</pre></v></r><r><jlmore class="">more</jlmore></r><r><k>991</k><v><pre>98.1982</pre></v></r><r><k>992</k><v><pre>98.3984</pre></v></r><r><k>993</k><v><pre>98.5986</pre></v></r><r><k>994</k><v><pre>98.7988</pre></v></r><r><k>995</k><v><pre>98.999</pre></v></r><r><k>996</k><v><pre>99.1992</pre></v></r><r><k>997</k><v><pre>99.3994</pre></v></r><r><k>998</k><v><pre>99.5996</pre></v></r><r><k>999</k><v><pre>99.7998</pre></v></r><r><k>1000</k><v><pre>100.0</pre></v></r></jlarray></jltree></v></r><r><k><pre>"e"</pre></k><v><jltree class="collapsed">Float64<jlarray class="Array"><r><k>1</k><v><pre>0.0</pre></v></r><r><k>2</k><v><pre>0.0</pre></v></r><r><k>3</k><v><pre>0.0</pre></v></r><r><k>4</k><v><pre>0.0</pre></v></r><r><k>5</k><v><pre>0.0</pre></v></r><r><k>6</k><v><pre>0.0</pre></v></r><r><k>7</k><v><pre>0.0</pre></v></r><r><k>8</k><v><pre>0.0</pre></v></r><r><k>9</k><v><pre>0.0</pre></v></r><r><k>10</k><v><pre>0.0</pre></v></r><r><k>11</k><v><pre>0.0</pre></v></r><r><k>12</k><v><pre>0.0</pre></v></r><r><k>13</k><v><pre>0.225</pre></v></r><r><k>14</k><v><pre>0.225</pre></v></r><r><k>15</k><v><pre>0.225</pre></v></r><r><k>16</k><v><pre>0.225</pre></v></r><r><k>17</k><v><pre>0.225</pre></v></r><r><k>18</k><v><pre>0.225</pre></v></r><r><k>19</k><v><pre>0.225</pre></v></r><r><k>20</k><v><pre>0.225</pre></v></r><r><jlmore class="">more</jlmore></r><r><k>711</k><v><pre>0.9</pre></v></r><r><k>712</k><v><pre>0.9</pre></v></r><r><k>713</k><v><pre>0.9</pre></v></r><r><k>714</k><v><pre>0.9</pre></v></r><r><k>715</k><v><pre>0.9</pre></v></r><r><k>716</k><v><pre>0.9</pre></v></r><r><k>717</k><v><pre>0.9</pre></v></r><r><k>718</k><v><pre>0.9</pre></v></r><r><k>719</k><v><pre>0.9</pre></v></r><r><k>720</k><v><pre>0.9</pre></v></r></jlarray></jltree></v></r><r><k><pre>"omega"</pre></k><v><jltree class="collapsed">Float64<jlarray class="Array"><r><k>1</k><v><pre>-3.14159</pre></v></r><r><k>2</k><v><pre>-3.14159</pre></v></r><r><k>3</k><v><pre>-3.14159</pre></v></r><r><k>4</k><v><pre>-3.14159</pre></v></r><r><k>5</k><v><pre>0.0</pre></v></r><r><k>6</k><v><pre>0.0</pre></v></r><r><k>7</k><v><pre>0.0</pre></v></r><r><k>8</k><v><pre>0.0</pre></v></r><r><k>9</k><v><pre>3.14159</pre></v></r><r><k>10</k><v><pre>3.14159</pre></v></r><r><k>11</k><v><pre>3.14159</pre></v></r><r><k>12</k><v><pre>3.14159</pre></v></r><r><k>13</k><v><pre>-3.14159</pre></v></r><r><k>14</k><v><pre>-3.14159</pre></v></r><r><k>15</k><v><pre>-3.14159</pre></v></r><r><k>16</k><v><pre>-3.14159</pre></v></r><r><k>17</k><v><pre>0.0</pre></v></r><r><k>18</k><v><pre>0.0</pre></v></r><r><k>19</k><v><pre>0.0</pre></v></r><r><k>20</k><v><pre>0.0</pre></v></r><r><jlmore class="">more</jlmore></r><r><k>711</k><v><pre>-3.14159</pre></v></r><r><k>712</k><v><pre>-3.14159</pre></v></r><r><k>713</k><v><pre>0.0</pre></v></r><r><k>714</k><v><pre>0.0</pre></v></r><r><k>715</k><v><pre>0.0</pre></v></r><r><k>716</k><v><pre>0.0</pre></v></r><r><k>717</k><v><pre>3.14159</pre></v></r><r><k>718</k><v><pre>3.14159</pre></v></r><r><k>719</k><v><pre>3.14159</pre></v></r><r><k>720</k><v><pre>3.14159</pre></v></r></jlarray></jltree></v></r><r><k><pre>"a"</pre></k><v><jltree class="collapsed">Float64<jlarray class="Array"><r><k>1</k><v><pre>50.0</pre></v></r><r><k>2</k><v><pre>50.0</pre></v></r><r><k>3</k><v><pre>50.0</pre></v></r><r><k>4</k><v><pre>50.0</pre></v></r><r><k>5</k><v><pre>50.0</pre></v></r><r><k>6</k><v><pre>50.0</pre></v></r><r><k>7</k><v><pre>50.0</pre></v></r><r><k>8</k><v><pre>50.0</pre></v></r><r><k>9</k><v><pre>50.0</pre></v></r><r><k>10</k><v><pre>50.0</pre></v></r><r><k>11</k><v><pre>50.0</pre></v></r><r><k>12</k><v><pre>50.0</pre></v></r><r><k>13</k><v><pre>50.0</pre></v></r><r><k>14</k><v><pre>50.0</pre></v></r><r><k>15</k><v><pre>50.0</pre></v></r><r><k>16</k><v><pre>50.0</pre></v></r><r><k>17</k><v><pre>50.0</pre></v></r><r><k>18</k><v><pre>50.0</pre></v></r><r><k>19</k><v><pre>50.0</pre></v></r><r><k>20</k><v><pre>50.0</pre></v></r><r><jlmore class="">more</jlmore></r><r><k>711</k><v><pre>100.0</pre></v></r><r><k>712</k><v><pre>100.0</pre></v></r><r><k>713</k><v><pre>100.0</pre></v></r><r><k>714</k><v><pre>100.0</pre></v></r><r><k>715</k><v><pre>100.0</pre></v></r><r><k>716</k><v><pre>100.0</pre></v></r><r><k>717</k><v><pre>100.0</pre></v></r><r><k>718</k><v><pre>100.0</pre></v></r><r><k>719</k><v><pre>100.0</pre></v></r><r><k>720</k><v><pre>100.0</pre></v></r></jlarray></jltree></v></r></jldict></jltree></div></pluto-output><pluto-input><button class="delete_cell" title="Delete cell"><span></span></button><div class="CodeMirror cm-s-default CodeMirror-wrap"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 695px; left: 34px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" tabindex="0" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;"></textarea></div><div class="CodeMirror-vscrollbar" tabindex="-1" cm-not-content="true"><div style="min-width: 1px; height: 0px;"></div></div><div class="CodeMirror-hscrollbar" tabindex="-1" cm-not-content="true"><div style="height: 100%; min-height: 1px; width: 0px;"></div></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 30px; margin-bottom: -10px; border-right-width: 40px; min-height: 23px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"><pre class="CodeMirror-line-like">x</pre></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors" style="visibility: hidden;"><div class="CodeMirror-cursor" style="left: 4px; top: 690px; height: 15.3333px;">&nbsp;</div></div><div class="CodeMirror-code" role="presentation" style=""><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-keyword">begin</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">2</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-string">py"""</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">3</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span>import numpy as np</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">4</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span>from batman import _rsky</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">5</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span></span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">6</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span>sky_test = {}</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">7</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span></span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">8</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span>def sky_coords():</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">9</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span>t = np.linspace(-100, 100, 1_000)</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">10</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">11</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span>t0, period, a, e, omega, incl = (</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">12</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span>x.flatten()</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">13</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span>for x in np.meshgrid(</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">14</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span>np.linspace(-5.0, 5.0, 2),</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">15</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span>np.exp(np.linspace(np.log(5.0), np.log(50.0), 3)),</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">16</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span>np.linspace(50.0, 100.0, 2),</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">17</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span>np.linspace(0.0, 0.9, 5),</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">18</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span>np.linspace(-np.pi, np.pi, 3),</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">19</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span>np.arccos(np.linspace(0, 1, 5)[:-1]),</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">20</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span>)</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">21</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span>)</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">22</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span></span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">23</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span>r_batman = np.empty((len(t), len(t0)))</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">24</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span cm-text="">​</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">25</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span>for i in range(len(t0)):</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">26</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span>r_batman[:, i] = _rsky._rsky(</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">27</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span>t, t0[i], period[i], a[i], incl[i], e[i], omega[i], 1, 1</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">28</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span>)</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">29</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span></span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">30</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span>m = r_batman &lt; 100.0</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">31</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span></span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">32</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span>sky_test["m_sum"] = m.sum()</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">33</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span>sky_test["r_batman_m"] = r_batman[m]</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">34</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span>sky_test["m"] = m</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">35</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span>sky_test["t"] = t</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">36</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span>sky_test["t0"] = t0</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">37</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span>sky_test["period"] = period</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">38</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span>sky_test["a"] = a</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">39</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span>sky_test["e"] = e</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">40</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span>sky_test["omega"] = omega</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">41</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span>sky_test["incl"] = incl</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">42</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span></span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">43</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span>return sky_test</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">44</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span></span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">45</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-string"><span class="cm-tab" role="presentation" cm-text="	">    </span>"""</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">46</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-variable">sky_test</span> <span class="cm-operator">=</span> <span class="cm-string">py"sky_coords"</span>()</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">47</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-keyword">end</span></span></pre></div></div></div></div></div></div><div style="position: absolute; height: 40px; width: 1px; border-bottom: 0px solid transparent; top: 729px;"></div><div class="CodeMirror-gutters" style="height: 769px; left: 0px;"><div class="CodeMirror-gutter CodeMirror-linenumbers" style="width: 29px;"></div></div></div></div></pluto-input><pluto-runarea><button class="runcell" title="Run"><span></span></button><span class="runtime">552&nbsp;ms</span></pluto-runarea><button class="add_cell after" title="Add cell"><span></span></button></pluto-cell><pluto-cell class="" id="ec86643a-7b23-11eb-0e9f-7df7963f0452"><pluto-shoulder draggable="true" title="Drag to move cell"><button class="foldcode" title="Show/hide code"><span></span></button></pluto-shoulder><pluto-trafficlight></pluto-trafficlight><button class="add_cell before" title="Add cell"><span></span></button><pluto-output class="scroll_y " mime="text/plain"><assignee></assignee><div><pre><code>compute_r (generic function with 1 method)</code></pre></div></pluto-output><pluto-input><button class="delete_cell" title="Delete cell"><span></span></button><div class="CodeMirror cm-s-default CodeMirror-wrap"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 66.3333px; left: 87.5208px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" tabindex="0" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;"></textarea></div><div class="CodeMirror-vscrollbar" tabindex="-1" cm-not-content="true"><div style="min-width: 1px; height: 0px;"></div></div><div class="CodeMirror-hscrollbar" tabindex="-1" cm-not-content="true"><div style="height: 100%; min-height: 1px; width: 0px;"></div></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 30px; margin-bottom: -10px; border-right-width: 40px; min-height: 23px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"><pre class="CodeMirror-line-like">x</pre></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors" style=""><div class="CodeMirror-cursor" style="left: 57.5208px; top: 61.3333px; height: 15.3333px;">&nbsp;</div></div><div class="CodeMirror-code" role="presentation" style=""><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-keyword">function</span> <span class="cm-def">compute_r</span>(<span class="cm-variable">orbit</span>, <span class="cm-variable">t</span>)</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">2</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-variable">pos</span> <span class="cm-operator">=</span> <span class="cm-variable">relative_position</span><span class="cm-operator">.</span>(<span class="cm-variable">orbit</span>, <span class="cm-variable">t</span>)</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">3</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-variable">r</span> <span class="cm-operator">=</span> <span class="cm-builtin">map</span>(<span class="cm-variable">pos</span>) <span class="cm-keyword">do</span> <span class="cm-variable">arr</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">4</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-operator">√</span>(<span class="cm-variable">arr</span>[<span class="cm-number">1</span>]<span class="cm-operator">^</span><span class="cm-number">2</span> <span class="cm-operator">+</span> <span class="cm-variable">arr</span>[<span class="cm-number">2</span>]<span class="cm-operator">^</span><span class="cm-number">2</span>)</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">5</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-keyword">end</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">6</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-keyword">return</span> <span class="cm-variable">r</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">7</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-keyword">end</span></span></pre></div></div></div></div></div></div><div style="position: absolute; height: 40px; width: 1px; border-bottom: 0px solid transparent; top: 115px;"></div><div class="CodeMirror-gutters" style="height: 155px; left: 0px;"><div class="CodeMirror-gutter CodeMirror-linenumbers" style="width: 29px;"></div></div></div></div></pluto-input><pluto-runarea><button class="runcell" title="Run"><span></span></button><span class="runtime">40.7&nbsp;μs</span></pluto-runarea><button class="add_cell after" title="Add cell"><span></span></button></pluto-cell><pluto-cell class="" id="0be84e52-7b24-11eb-1368-2d1128d1564a"><pluto-shoulder draggable="true" title="Drag to move cell"><button class="foldcode" title="Show/hide code"><span></span></button></pluto-shoulder><pluto-trafficlight></pluto-trafficlight><button class="add_cell before" title="Add cell"><span></span></button><pluto-output class="" mime="application/vnd.pluto.tree+object"><assignee>orbits</assignee><div><jltree class="collapsed">Transits.Orbits.KeplerianOrbit{Float64,Nothing,Nothing,Float64,Float64,Float64}<jlarray class="Array"><r><k>1</k><v><pre>KeplerianOrbit
+ a: nothing
+ aRₛ: 50.0
+ b: 3.061616997868383e-15
+ ecc: 0.0
+ P: 4.999999999999999
+ ρₛ: nothing
+ Rₛ: nothing
+ t₀: -5.0
+ incl: 1.5707963267948966
+ Ω: 1.5707963267948966
+ ω: 0.0
+</pre></v></r><r><k>2</k><v><pre>KeplerianOrbit
+ a: nothing
+ aRₛ: 50.0
+ b: 12.5
+ ecc: 0.0
+ P: 4.999999999999999
+ ρₛ: nothing
+ Rₛ: nothing
+ t₀: -5.0
+ incl: 1.318116071652818
+ Ω: 1.5707963267948966
+ ω: 0.0
+</pre></v></r><r><k>3</k><v><pre>KeplerianOrbit
+ a: nothing
+ aRₛ: 50.0
+ b: 24.999999999999993
+ ecc: 0.0
+ P: 4.999999999999999
+ ρₛ: nothing
+ Rₛ: nothing
+ t₀: -5.0
+ incl: 1.0471975511965979
+ Ω: 1.5707963267948966
+ ω: 0.0
+</pre></v></r><r><k>4</k><v><pre>KeplerianOrbit
+ a: nothing
+ aRₛ: 50.0
+ b: 37.5
+ ecc: 0.0
+ P: 4.999999999999999
+ ρₛ: nothing
+ Rₛ: nothing
+ t₀: -5.0
+ incl: 0.7227342478134157
+ Ω: 1.5707963267948966
+ ω: 0.0
+</pre></v></r><r><k>5</k><v><pre>KeplerianOrbit
+ a: nothing
+ aRₛ: 50.0
+ b: 3.061616997868383e-15
+ ecc: 0.0
+ P: 4.999999999999999
+ ρₛ: nothing
+ Rₛ: nothing
+ t₀: -5.0
+ incl: 1.5707963267948966
+ Ω: 1.5707963267948966
+ ω: 0.0
+</pre></v></r><r><k>6</k><v><pre>KeplerianOrbit
+ a: nothing
+ aRₛ: 50.0
+ b: 12.5
+ ecc: 0.0
+ P: 4.999999999999999
+ ρₛ: nothing
+ Rₛ: nothing
+ t₀: -5.0
+ incl: 1.318116071652818
+ Ω: 1.5707963267948966
+ ω: 0.0
+</pre></v></r><r><k>7</k><v><pre>KeplerianOrbit
+ a: nothing
+ aRₛ: 50.0
+ b: 24.999999999999993
+ ecc: 0.0
+ P: 4.999999999999999
+ ρₛ: nothing
+ Rₛ: nothing
+ t₀: -5.0
+ incl: 1.0471975511965979
+ Ω: 1.5707963267948966
+ ω: 0.0
+</pre></v></r><r><k>8</k><v><pre>KeplerianOrbit
+ a: nothing
+ aRₛ: 50.0
+ b: 37.5
+ ecc: 0.0
+ P: 4.999999999999999
+ ρₛ: nothing
+ Rₛ: nothing
+ t₀: -5.0
+ incl: 0.7227342478134157
+ Ω: 1.5707963267948966
+ ω: 0.0
+</pre></v></r><r><k>9</k><v><pre>KeplerianOrbit
+ a: nothing
+ aRₛ: 50.0
+ b: 3.061616997868383e-15
+ ecc: 0.0
+ P: 4.999999999999999
+ ρₛ: nothing
+ Rₛ: nothing
+ t₀: -5.0
+ incl: 1.5707963267948966
+ Ω: 1.5707963267948966
+ ω: 0.0
+</pre></v></r><r><k>10</k><v><pre>KeplerianOrbit
+ a: nothing
+ aRₛ: 50.0
+ b: 12.5
+ ecc: 0.0
+ P: 4.999999999999999
+ ρₛ: nothing
+ Rₛ: nothing
+ t₀: -5.0
+ incl: 1.318116071652818
+ Ω: 1.5707963267948966
+ ω: 0.0
+</pre></v></r><r><k>11</k><v><pre>KeplerianOrbit
+ a: nothing
+ aRₛ: 50.0
+ b: 24.999999999999993
+ ecc: 0.0
+ P: 4.999999999999999
+ ρₛ: nothing
+ Rₛ: nothing
+ t₀: -5.0
+ incl: 1.0471975511965979
+ Ω: 1.5707963267948966
+ ω: 0.0
+</pre></v></r><r><k>12</k><v><pre>KeplerianOrbit
+ a: nothing
+ aRₛ: 50.0
+ b: 37.5
+ ecc: 0.0
+ P: 4.999999999999999
+ ρₛ: nothing
+ Rₛ: nothing
+ t₀: -5.0
+ incl: 0.7227342478134157
+ Ω: 1.5707963267948966
+ ω: 0.0
+</pre></v></r><r><k>13</k><v><pre>KeplerianOrbit
+ a: nothing
+ aRₛ: 50.0
+ b: 3.061616997868383e-15
+ ecc: 0.225
+ P: 4.999999999999999
+ ρₛ: nothing
+ Rₛ: nothing
+ t₀: -5.0
+ incl: 1.5707963267948966
+ Ω: 1.5707963267948966
+ ω: 0.0
+</pre></v></r><r><k>14</k><v><pre>KeplerianOrbit
+ a: nothing
+ aRₛ: 50.0
+ b: 12.5
+ ecc: 0.225
+ P: 4.999999999999999
+ ρₛ: nothing
+ Rₛ: nothing
+ t₀: -5.0
+ incl: 1.318116071652818
+ Ω: 1.5707963267948966
+ ω: 0.0
+</pre></v></r><r><k>15</k><v><pre>KeplerianOrbit
+ a: nothing
+ aRₛ: 50.0
+ b: 24.999999999999993
+ ecc: 0.225
+ P: 4.999999999999999
+ ρₛ: nothing
+ Rₛ: nothing
+ t₀: -5.0
+ incl: 1.0471975511965979
+ Ω: 1.5707963267948966
+ ω: 0.0
+</pre></v></r><r><k>16</k><v><pre>KeplerianOrbit
+ a: nothing
+ aRₛ: 50.0
+ b: 37.5
+ ecc: 0.225
+ P: 4.999999999999999
+ ρₛ: nothing
+ Rₛ: nothing
+ t₀: -5.0
+ incl: 0.7227342478134157
+ Ω: 1.5707963267948966
+ ω: 0.0
+</pre></v></r><r><k>17</k><v><pre>KeplerianOrbit
+ a: nothing
+ aRₛ: 50.0
+ b: 3.061616997868383e-15
+ ecc: 0.225
+ P: 4.999999999999999
+ ρₛ: nothing
+ Rₛ: nothing
+ t₀: -5.0
+ incl: 1.5707963267948966
+ Ω: 1.5707963267948966
+ ω: 0.0
+</pre></v></r><r><k>18</k><v><pre>KeplerianOrbit
+ a: nothing
+ aRₛ: 50.0
+ b: 12.5
+ ecc: 0.225
+ P: 4.999999999999999
+ ρₛ: nothing
+ Rₛ: nothing
+ t₀: -5.0
+ incl: 1.318116071652818
+ Ω: 1.5707963267948966
+ ω: 0.0
+</pre></v></r><r><k>19</k><v><pre>KeplerianOrbit
+ a: nothing
+ aRₛ: 50.0
+ b: 24.999999999999993
+ ecc: 0.225
+ P: 4.999999999999999
+ ρₛ: nothing
+ Rₛ: nothing
+ t₀: -5.0
+ incl: 1.0471975511965979
+ Ω: 1.5707963267948966
+ ω: 0.0
+</pre></v></r><r><k>20</k><v><pre>KeplerianOrbit
+ a: nothing
+ aRₛ: 50.0
+ b: 37.5
+ ecc: 0.225
+ P: 4.999999999999999
+ ρₛ: nothing
+ Rₛ: nothing
+ t₀: -5.0
+ incl: 0.7227342478134157
+ Ω: 1.5707963267948966
+ ω: 0.0
+</pre></v></r><r><jlmore class="">more</jlmore></r><r><k>711</k><v><pre>KeplerianOrbit
+ a: nothing
+ aRₛ: 100.0
+ b: 49.999999999999986
+ ecc: 0.9
+ P: 49.99999999999999
+ ρₛ: nothing
+ Rₛ: nothing
+ t₀: 5.0
+ incl: 1.0471975511965979
+ Ω: 1.5707963267948966
+ ω: 0.0
+</pre></v></r><r><k>712</k><v><pre>KeplerianOrbit
+ a: nothing
+ aRₛ: 100.0
+ b: 75.0
+ ecc: 0.9
+ P: 49.99999999999999
+ ρₛ: nothing
+ Rₛ: nothing
+ t₀: 5.0
+ incl: 0.7227342478134157
+ Ω: 1.5707963267948966
+ ω: 0.0
+</pre></v></r><r><k>713</k><v><pre>KeplerianOrbit
+ a: nothing
+ aRₛ: 100.0
+ b: 6.123233995736766e-15
+ ecc: 0.9
+ P: 49.99999999999999
+ ρₛ: nothing
+ Rₛ: nothing
+ t₀: 5.0
+ incl: 1.5707963267948966
+ Ω: 1.5707963267948966
+ ω: 0.0
+</pre></v></r><r><k>714</k><v><pre>KeplerianOrbit
+ a: nothing
+ aRₛ: 100.0
+ b: 25.0
+ ecc: 0.9
+ P: 49.99999999999999
+ ρₛ: nothing
+ Rₛ: nothing
+ t₀: 5.0
+ incl: 1.318116071652818
+ Ω: 1.5707963267948966
+ ω: 0.0
+</pre></v></r><r><k>715</k><v><pre>KeplerianOrbit
+ a: nothing
+ aRₛ: 100.0
+ b: 49.999999999999986
+ ecc: 0.9
+ P: 49.99999999999999
+ ρₛ: nothing
+ Rₛ: nothing
+ t₀: 5.0
+ incl: 1.0471975511965979
+ Ω: 1.5707963267948966
+ ω: 0.0
+</pre></v></r><r><k>716</k><v><pre>KeplerianOrbit
+ a: nothing
+ aRₛ: 100.0
+ b: 75.0
+ ecc: 0.9
+ P: 49.99999999999999
+ ρₛ: nothing
+ Rₛ: nothing
+ t₀: 5.0
+ incl: 0.7227342478134157
+ Ω: 1.5707963267948966
+ ω: 0.0
+</pre></v></r><r><k>717</k><v><pre>KeplerianOrbit
+ a: nothing
+ aRₛ: 100.0
+ b: 6.123233995736766e-15
+ ecc: 0.9
+ P: 49.99999999999999
+ ρₛ: nothing
+ Rₛ: nothing
+ t₀: 5.0
+ incl: 1.5707963267948966
+ Ω: 1.5707963267948966
+ ω: 0.0
+</pre></v></r><r><k>718</k><v><pre>KeplerianOrbit
+ a: nothing
+ aRₛ: 100.0
+ b: 25.0
+ ecc: 0.9
+ P: 49.99999999999999
+ ρₛ: nothing
+ Rₛ: nothing
+ t₀: 5.0
+ incl: 1.318116071652818
+ Ω: 1.5707963267948966
+ ω: 0.0
+</pre></v></r><r><k>719</k><v><pre>KeplerianOrbit
+ a: nothing
+ aRₛ: 100.0
+ b: 49.999999999999986
+ ecc: 0.9
+ P: 49.99999999999999
+ ρₛ: nothing
+ Rₛ: nothing
+ t₀: 5.0
+ incl: 1.0471975511965979
+ Ω: 1.5707963267948966
+ ω: 0.0
+</pre></v></r><r><k>720</k><v><pre>KeplerianOrbit
+ a: nothing
+ aRₛ: 100.0
+ b: 75.0
+ ecc: 0.9
+ P: 49.99999999999999
+ ρₛ: nothing
+ Rₛ: nothing
+ t₀: 5.0
+ incl: 0.7227342478134157
+ Ω: 1.5707963267948966
+ ω: 0.0
+</pre></v></r></jlarray></jltree></div></pluto-output><pluto-input><button class="delete_cell" title="Delete cell"><span></span></button><div class="CodeMirror cm-s-default CodeMirror-wrap"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 66.3333px; left: 102.812px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" tabindex="0" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;"></textarea></div><div class="CodeMirror-vscrollbar" tabindex="-1" cm-not-content="true"><div style="min-width: 1px; height: 0px;"></div></div><div class="CodeMirror-hscrollbar" tabindex="-1" cm-not-content="true"><div style="height: 100%; min-height: 1px; width: 0px;"></div></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 30px; margin-bottom: -10px; border-right-width: 40px; min-height: 23px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"><pre class="CodeMirror-line-like"><span>xxxxxxxxxx</span></pre><div class="CodeMirror-linenumber CodeMirror-gutter-elt"><div>1</div></div><div class="CodeMirror-linenumber CodeMirror-gutter-elt"><div>11</div></div></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors" style=""><div class="CodeMirror-cursor" style="left: 72.8125px; top: 61.3333px; height: 15.3333px;">&nbsp;</div></div><div class="CodeMirror-code" role="presentation" style=""><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-variable">orbits</span> <span class="cm-operator">=</span> [</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">2</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-builtin">KeplerianOrbit</span>(</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">3</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-variable">aRₛ</span> <span class="cm-operator">=</span> <span class="cm-variable">sky_test</span>[<span class="cm-string">"a"</span>][<span class="cm-variable">i</span>],</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">4</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-variable">P</span> <span class="cm-operator">=</span> <span class="cm-variable">sky_test</span>[<span class="cm-string">"period"</span>][<span class="cm-variable">i</span>],</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">5</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-variable">t₀</span> <span class="cm-operator">=</span> <span class="cm-variable">sky_test</span>[<span class="cm-string">"t0"</span>][<span class="cm-variable">i</span>],</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">6</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-variable">ecc</span> <span class="cm-operator">=</span> <span class="cm-variable">sky_test</span>[<span class="cm-string">"e"</span>][<span class="cm-variable">i</span>],</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">7</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-variable">ω</span> <span class="cm-operator">=</span> <span class="cm-variable">sky_test</span>[<span class="cm-string">"omega"</span>][<span class="cm-variable">i</span>],</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">8</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-variable">incl</span> <span class="cm-operator">=</span> <span class="cm-variable">sky_test</span>[<span class="cm-string">"incl"</span>][<span class="cm-variable">i</span>],</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">9</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span>)</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">10</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-keyword">for</span> <span class="cm-variable">i</span> <span class="cm-operator">in</span> <span class="cm-number">1</span><span class="cm-operator">:</span><span class="cm-builtin">length</span>(<span class="cm-variable">sky_test</span>[<span class="cm-string">"t0"</span>]) </span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">11</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;">]</span></pre></div></div></div></div></div></div><div style="position: absolute; height: 40px; width: 1px; border-bottom: 0px solid transparent; top: 177px;"></div><div class="CodeMirror-gutters" style="height: 217px; left: 0px;"><div class="CodeMirror-gutter CodeMirror-linenumbers" style="width: 29px;"></div></div></div></div></pluto-input><pluto-runarea><button class="runcell" title="Run"><span></span></button><span class="runtime">399&nbsp;ms</span></pluto-runarea><button class="add_cell after" title="Add cell"><span></span></button></pluto-cell><pluto-cell class="" id="fad76b9a-7b23-11eb-325a-bf2bc3f035c6"><pluto-shoulder draggable="true" title="Drag to move cell"><button class="foldcode" title="Show/hide code"><span></span></button></pluto-shoulder><pluto-trafficlight></pluto-trafficlight><button class="add_cell before" title="Add cell"><span></span></button><pluto-output class="scroll_y " mime="text/plain"><assignee></assignee><div><pre><code>1000×720 Array{Float64,2}:
+  3.30019e-13  12.5     25.0     37.5     …  136.437  136.778  137.795  139.475
+  6.2729       13.8975  25.5834  37.7288     137.219  137.554  138.557  140.212
+ 12.4467       17.3634  27.2248  38.3931     137.993  138.324  139.311  140.942
+ 18.4238       21.7823  29.6577  39.4304     138.76   139.086  140.059  141.665
+ 24.1097       26.4802  32.5724  40.75       139.52   139.84   140.799  142.381
+ 29.4147       31.103   35.692   42.2467  …  140.272  140.588  141.531  143.09
+ 34.2549       35.4444  38.7949  43.8134     141.017  141.328  142.257  143.793
+  ⋮                                       ⋱                             
+ 29.4147       31.103   35.692   42.2467     132.412  132.779  133.875  135.681
+ 24.1097       26.4802  32.5724  40.75    …  133.233  133.594  134.674  136.455
+ 18.4238       21.7823  29.6577  39.4304     134.045  134.402  135.466  137.221
+ 12.4467       17.3634  27.2248  38.3931     134.85   135.201  136.25   137.979
+  6.2729       13.8975  25.5834  37.7288     135.647  135.993  137.026  138.731
+  4.91569e-13  12.5     25.0     37.5        136.437  136.778  137.795  139.475</code></pre></div></pluto-output><pluto-input><button class="delete_cell" title="Delete cell"><span></span></button><div class="CodeMirror cm-s-default CodeMirror-wrap"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 112.333px; left: 72.2292px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" tabindex="0" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;"></textarea></div><div class="CodeMirror-vscrollbar" tabindex="-1" cm-not-content="true"><div style="min-width: 1px; height: 0px;"></div></div><div class="CodeMirror-hscrollbar" tabindex="-1" cm-not-content="true"><div style="height: 100%; min-height: 1px; width: 0px;"></div></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 30px; margin-bottom: -10px; border-right-width: 40px; min-height: 23px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"><pre class="CodeMirror-line-like">x</pre></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors" style=""><div class="CodeMirror-cursor" style="left: 42.2292px; top: 107.333px; height: 15.3333px;">&nbsp;</div></div><div class="CodeMirror-code" role="presentation" style=""><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-keyword">begin</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">2</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-variable">r</span> <span class="cm-operator">=</span> <span class="cm-builtin">Matrix</span>{<span class="cm-variable">Float64</span>}(<span class="cm-variable">undef</span>, <span class="cm-builtin">length</span>(<span class="cm-variable">sky_test</span>[<span class="cm-string">"t"</span>]), <span class="cm-builtin">length</span>(<span class="cm-variable">sky_test</span>[<span class="cm-string">"t0"</span>]))</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">3</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">4</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-keyword">for</span> (<span class="cm-variable">orbit</span>, <span class="cm-variable">r_i</span>) <span class="cm-operator">in</span> <span class="cm-builtin">zip</span>(<span class="cm-variable">orbits</span>, <span class="cm-builtin">eachcol</span>(<span class="cm-variable">r</span>))</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">5</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-variable">r_i</span> <span class="cm-operator">.=</span> <span class="cm-builtin">compute_r</span>(<span class="cm-variable">orbit</span>, <span class="cm-variable">sky_test</span>[<span class="cm-string">"t"</span>])</span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">6</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-keyword">end</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">7</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" class="cm-tab-wrap-hack" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">8</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-tab" role="presentation" cm-text="	">    </span><span class="cm-variable">r</span></span></pre></div><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">9</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-keyword">end</span></span></pre></div></div></div></div></div></div><div style="position: absolute; height: 40px; width: 1px; border-bottom: 0px solid transparent; top: 146px;"></div><div class="CodeMirror-gutters" style="height: 186px; left: 0px;"><div class="CodeMirror-gutter CodeMirror-linenumbers" style="width: 29px;"></div></div></div></div></pluto-input><pluto-runarea><button class="runcell" title="Run"><span></span></button><span class="runtime">271&nbsp;ms</span></pluto-runarea><button class="add_cell after" title="Add cell"><span></span></button></pluto-cell><pluto-cell class="" id="b793af16-7b24-11eb-0948-41b16c1e02c6"><pluto-shoulder draggable="true" title="Drag to move cell"><button class="foldcode" title="Show/hide code"><span></span></button></pluto-shoulder><pluto-trafficlight></pluto-trafficlight><button class="add_cell before" title="Add cell"><span></span></button><pluto-output class="scroll_y " mime="text/plain"><assignee></assignee><div><pre><code>true</code></pre></div></pluto-output><pluto-input><button class="delete_cell" title="Delete cell"><span></span></button><div class="CodeMirror cm-s-default CodeMirror-wrap"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 5px; left: 202.198px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" tabindex="0" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;"></textarea></div><div class="CodeMirror-vscrollbar" tabindex="-1" cm-not-content="true"><div style="min-width: 1px; height: 0px;"></div></div><div class="CodeMirror-hscrollbar" tabindex="-1" cm-not-content="true"><div style="height: 100%; min-height: 1px; width: 0px;"></div></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 30px; margin-bottom: -10px; border-right-width: 40px; min-height: 23px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"><pre class="CodeMirror-line-like"><span>xxxxxxxxxx</span></pre><div class="CodeMirror-linenumber CodeMirror-gutter-elt"><div>1</div></div></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors" style="visibility: hidden;"><div class="CodeMirror-cursor" style="left: 172.198px; top: 0px; height: 15.3333px;">&nbsp;</div></div><div class="CodeMirror-code" role="presentation"><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-builtin">sum</span>(<span class="cm-variable">sky_test</span>[<span class="cm-string">"m"</span>]) <span class="cm-operator">&gt;</span> <span class="cm-number">0</span></span></pre></div></div></div></div></div></div><div style="position: absolute; height: 40px; width: 1px; border-bottom: 0px solid transparent; top: 23px;"></div><div class="CodeMirror-gutters" style="height: 63px; left: 0px;"><div class="CodeMirror-gutter CodeMirror-linenumbers" style="width: 29px;"></div></div></div></div></pluto-input><pluto-runarea><button class="runcell" title="Run"><span></span></button><span class="runtime">23.7&nbsp;ms</span></pluto-runarea><button class="add_cell after" title="Add cell"><span></span></button></pluto-cell><pluto-cell class="" id="bcb46be6-7b24-11eb-0de7-0d3d9daaf665"><pluto-shoulder draggable="true" title="Drag to move cell"><button class="foldcode" title="Show/hide code"><span></span></button></pluto-shoulder><pluto-trafficlight></pluto-trafficlight><button class="add_cell before" title="Add cell"><span></span></button><pluto-output class="scroll_y " mime="text/plain"><assignee></assignee><div><pre><code>false</code></pre></div></pluto-output><pluto-input><button class="delete_cell" title="Delete cell"><span></span></button><div class="CodeMirror cm-s-default CodeMirror-wrap"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 5px; left: 408.594px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" tabindex="0" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;"></textarea></div><div class="CodeMirror-vscrollbar" tabindex="-1" cm-not-content="true"><div style="min-width: 1px; height: 0px;"></div></div><div class="CodeMirror-hscrollbar" tabindex="-1" cm-not-content="true"><div style="height: 100%; min-height: 1px; width: 0px;"></div></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 30px; margin-bottom: -10px; border-right-width: 40px; min-height: 23px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"><pre class="CodeMirror-line-like">x</pre></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors" style=""><div class="CodeMirror-cursor" style="left: 378.594px; top: 0px; height: 15.3333px;">&nbsp;</div></div><div class="CodeMirror-code" role="presentation"><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-builtin">isapprox</span>(<span class="cm-variable">r</span>[<span class="cm-variable">sky_test</span>[<span class="cm-string">"m"</span>]], <span class="cm-variable">sky_test</span><span class=" CodeMirror-matchingbracket">[</span><span class="cm-string">"r_batman_m"</span><span class=" CodeMirror-matchingbracket">]</span>, <span class="cm-variable">atol</span><span class="cm-operator">=</span><span class="cm-number">2e-5</span>)</span></pre></div></div></div></div></div></div><div style="position: absolute; height: 40px; width: 1px; border-bottom: 0px solid transparent; top: 23px;"></div><div class="CodeMirror-gutters" style="height: 63px; left: 0px;"><div class="CodeMirror-gutter CodeMirror-linenumbers" style="width: 29px;"></div></div></div></div></pluto-input><pluto-runarea><button class="runcell" title="Run"><span></span></button><span class="runtime">378&nbsp;ms</span></pluto-runarea><button class="add_cell after" title="Add cell"><span></span></button></pluto-cell><pluto-cell class="" id="e757a692-7b24-11eb-2596-c770d1f60fb0"><pluto-shoulder draggable="true" title="Drag to move cell"><button class="foldcode" title="Show/hide code"><span></span></button></pluto-shoulder><pluto-trafficlight></pluto-trafficlight><button class="add_cell before" title="Add cell"><span></span></button><pluto-output class="" mime="application/vnd.pluto.tree+object"><assignee></assignee><div><jltree class="collapsed">Float64<jlarray class="Array"><r><k>1</k><v><pre>3.30019e-13</pre></v></r><r><k>2</k><v><pre>6.2729</pre></v></r><r><k>3</k><v><pre>12.4467</pre></v></r><r><k>4</k><v><pre>18.4238</pre></v></r><r><k>5</k><v><pre>24.1097</pre></v></r><r><k>6</k><v><pre>29.4147</pre></v></r><r><k>7</k><v><pre>34.2549</pre></v></r><r><k>8</k><v><pre>34.1401</pre></v></r><r><k>9</k><v><pre>29.2874</pre></v></r><r><k>10</k><v><pre>23.9719</pre></v></r><r><k>11</k><v><pre>18.2775</pre></v></r><r><k>12</k><v><pre>12.2943</pre></v></r><r><k>13</k><v><pre>6.11688</pre></v></r><r><k>14</k><v><pre>0.157237</pre></v></r><r><k>15</k><v><pre>6.42886</pre></v></r><r><k>16</k><v><pre>12.5989</pre></v></r><r><k>17</k><v><pre>18.5699</pre></v></r><r><k>18</k><v><pre>24.2474</pre></v></r><r><k>19</k><v><pre>29.5417</pre></v></r><r><k>20</k><v><pre>34.3692</pre></v></r><r><jlmore class="">more</jlmore></r><r><k>282459</k><v><pre>158.849</pre></v></r><r><k>282460</k><v><pre>158.297</pre></v></r><r><k>282461</k><v><pre>157.738</pre></v></r><r><k>282462</k><v><pre>157.174</pre></v></r><r><k>282463</k><v><pre>156.605</pre></v></r><r><k>282464</k><v><pre>156.029</pre></v></r><r><k>282465</k><v><pre>155.448</pre></v></r><r><k>282466</k><v><pre>154.861</pre></v></r><r><k>282467</k><v><pre>138.731</pre></v></r><r><k>282468</k><v><pre>139.475</pre></v></r></jlarray></jltree></div></pluto-output><pluto-input><button class="delete_cell" title="Delete cell"><span></span></button><div class="CodeMirror cm-s-default CodeMirror-wrap"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 5px; left: 156.323px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" tabindex="0" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;"></textarea></div><div class="CodeMirror-vscrollbar" tabindex="-1" cm-not-content="true"><div style="min-width: 1px; height: 0px;"></div></div><div class="CodeMirror-hscrollbar" tabindex="-1" cm-not-content="true"><div style="height: 100%; min-height: 1px; width: 0px;"></div></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 30px; margin-bottom: -10px; border-right-width: 40px; min-height: 23px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"><pre class="CodeMirror-line-like"><span>xxxxxxxxxx</span></pre><div class="CodeMirror-linenumber CodeMirror-gutter-elt"><div>1</div></div></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors"><div class="CodeMirror-cursor" style="left: 126.323px; top: 0px; height: 15.3333px;">&nbsp;</div></div><div class="CodeMirror-code" role="presentation"><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-variable">r</span>[<span class="cm-variable">sky_test</span>[<span class="cm-string">"m"</span>]]</span></pre></div></div></div></div></div></div><div style="position: absolute; height: 40px; width: 1px; border-bottom: 0px solid transparent; top: 23px;"></div><div class="CodeMirror-gutters" style="height: 63px; left: 0px;"><div class="CodeMirror-gutter CodeMirror-linenumbers" style="width: 29px;"></div></div></div></div></pluto-input><pluto-runarea><button class="runcell" title="Run"><span></span></button><span class="runtime">2.9&nbsp;ms</span></pluto-runarea><button class="add_cell after" title="Add cell"><span></span></button></pluto-cell><pluto-cell class="" id="ec14e6c2-7b24-11eb-267b-a3a77d1cbd71"><pluto-shoulder draggable="true" title="Drag to move cell"><button class="foldcode" title="Show/hide code"><span></span></button></pluto-shoulder><pluto-trafficlight></pluto-trafficlight><button class="add_cell before" title="Add cell"><span></span></button><pluto-output class="" mime="application/vnd.pluto.tree+object"><assignee></assignee><div><jltree class="collapsed">Float64<jlarray class="Array"><r><k>1</k><v><pre>0.0</pre></v></r><r><k>2</k><v><pre>12.5</pre></v></r><r><k>3</k><v><pre>25.0</pre></v></r><r><k>4</k><v><pre>37.5</pre></v></r><r><k>5</k><v><pre>0.0</pre></v></r><r><k>6</k><v><pre>12.5</pre></v></r><r><k>7</k><v><pre>25.0</pre></v></r><r><k>8</k><v><pre>37.5</pre></v></r><r><k>9</k><v><pre>0.0</pre></v></r><r><k>10</k><v><pre>12.5</pre></v></r><r><k>11</k><v><pre>25.0</pre></v></r><r><k>12</k><v><pre>37.5</pre></v></r><r><k>13</k><v><pre>0.0</pre></v></r><r><k>14</k><v><pre>11.8672</pre></v></r><r><k>15</k><v><pre>23.7344</pre></v></r><r><k>16</k><v><pre>35.6016</pre></v></r><r><k>17</k><v><pre>0.0</pre></v></r><r><k>18</k><v><pre>11.8672</pre></v></r><r><k>19</k><v><pre>23.7344</pre></v></r><r><k>20</k><v><pre>35.6016</pre></v></r><r><jlmore class="">more</jlmore></r><r><k>282459</k><v><pre>82.4694</pre></v></r><r><k>282460</k><v><pre>92.1717</pre></v></r><r><k>282461</k><v><pre>91.613</pre></v></r><r><k>282462</k><v><pre>92.2587</pre></v></r><r><k>282463</k><v><pre>94.1691</pre></v></r><r><k>282464</k><v><pre>97.2698</pre></v></r><r><k>282465</k><v><pre>91.613</pre></v></r><r><k>282466</k><v><pre>92.2587</pre></v></r><r><k>282467</k><v><pre>94.1691</pre></v></r><r><k>282468</k><v><pre>97.2698</pre></v></r></jlarray></jltree></div></pluto-output><pluto-input><button class="delete_cell" title="Delete cell"><span></span></button><div class="CodeMirror cm-s-default CodeMirror-wrap"><div style="overflow: hidden; position: relative; width: 3px; height: 0px; top: 5px; left: 202.177px;"><textarea autocorrect="off" autocapitalize="off" spellcheck="false" tabindex="0" style="position: absolute; bottom: -1em; padding: 0px; width: 1000px; height: 1em; outline: none;"></textarea></div><div class="CodeMirror-vscrollbar" tabindex="-1" cm-not-content="true"><div style="min-width: 1px; height: 0px;"></div></div><div class="CodeMirror-hscrollbar" tabindex="-1" cm-not-content="true"><div style="height: 100%; min-height: 1px; width: 0px;"></div></div><div class="CodeMirror-scrollbar-filler" cm-not-content="true"></div><div class="CodeMirror-gutter-filler" cm-not-content="true"></div><div class="CodeMirror-scroll" tabindex="-1"><div class="CodeMirror-sizer" style="margin-left: 30px; margin-bottom: -10px; border-right-width: 40px; min-height: 23px; padding-right: 0px; padding-bottom: 0px;"><div style="position: relative; top: 0px;"><div class="CodeMirror-lines" role="presentation"><div role="presentation" style="position: relative; outline: none;"><div class="CodeMirror-measure"><pre class="CodeMirror-line-like"><span>xxxxxxxxxx</span></pre><div class="CodeMirror-linenumber CodeMirror-gutter-elt"><div>1</div></div></div><div class="CodeMirror-measure"></div><div style="position: relative; z-index: 1;"></div><div class="CodeMirror-cursors" style=""><div class="CodeMirror-cursor" style="left: 172.177px; top: 0px; height: 15.3333px;">&nbsp;</div></div><div class="CodeMirror-code" role="presentation"><div style="position: relative;"><div class="CodeMirror-gutter-wrapper" style="left: -30px;"><div class="CodeMirror-linenumber CodeMirror-gutter-elt" style="left: 0px; width: 21px;">1</div></div><pre class=" CodeMirror-line " role="presentation"><span role="presentation" style="padding-right: 0.1px;"><span class="cm-variable">sky_test</span>[<span class="cm-string">"r_batman_m"</span>]</span></pre></div></div></div></div></div></div><div style="position: absolute; height: 40px; width: 1px; border-bottom: 0px solid transparent; top: 23px;"></div><div class="CodeMirror-gutters" style="height: 63px; left: 0px;"><div class="CodeMirror-gutter CodeMirror-linenumbers" style="width: 29px;"></div></div></div></div></pluto-input><pluto-runarea><button class="runcell" title="Run"><span></span></button><span class="runtime">2.4&nbsp;μs</span></pluto-runarea><button class="add_cell after" title="Add cell"><span></span></button></pluto-cell></pluto-notebook><dropruler></dropruler></main>
+                <svg id="MJX-SVG-global-cache" style="display: none;"><defs></defs></svg>
+            </body>
+            </html>
+        
