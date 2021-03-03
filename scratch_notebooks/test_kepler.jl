@@ -11,11 +11,8 @@ begin
 	Pkg.activate("..")
 	Pkg.instantiate()
 	using PlutoUI
-	using StatsPlots
-	using Transits.Orbits: KeplerianOrbit, relative_position
-	using Unitful
-	using UnitfulAstro
 	using PyCall
+	using Transits.Orbits: KeplerianOrbit, relative_position
 end
 
 # ╔═╡ e34d610a-7b23-11eb-0132-55ce740f8e17
@@ -92,6 +89,18 @@ orbits = [
 	for i in 1:length(sky_test["t0"]) 
 ]
 
+# ╔═╡ a2bd0134-7bd4-11eb-0888-193eadeea713
+begin
+	rr = Matrix{Float64}(undef, 6, 3)
+	for (orbit, rr_i) in zip([6, 7, 8], eachcol(rr))
+		rr_i .= ([1, 2, 3, 4, 5, 6],)
+	end
+	rr
+end
+
+# ╔═╡ ffea4268-7bd4-11eb-2631-13e75cd2c5e9
+
+
 # ╔═╡ fad76b9a-7b23-11eb-325a-bf2bc3f035c6
 begin
 	r = Matrix{Float64}(undef, length(sky_test["t"]), length(sky_test["t0"]))
@@ -101,10 +110,10 @@ begin
 	end
 end
 
-# ╔═╡ be818b5a-7bd0-11eb-012e-e597b9a9b06f
-r[1]
+# ╔═╡ 4c10817c-7bd3-11eb-37da-af543c5142e2
+r
 
-# ╔═╡ 96e01d24-7bcf-11eb-0968-e17036963dd7
+# ╔═╡ 4d22883c-7bd1-11eb-0f77-4d89bd3b2ef5
 m = sky_test["m"]
 
 # ╔═╡ 3526d5bc-7bcc-11eb-3918-316776b303f2
@@ -125,9 +134,11 @@ allclose(r_Transits, r_batman, atol=2e-5)
 # ╠═e8cf7b42-7b23-11eb-12b9-9978504654a8
 # ╠═ec86643a-7b23-11eb-0e9f-7df7963f0452
 # ╠═0be84e52-7b24-11eb-1368-2d1128d1564a
+# ╠═a2bd0134-7bd4-11eb-0888-193eadeea713
+# ╠═ffea4268-7bd4-11eb-2631-13e75cd2c5e9
 # ╠═fad76b9a-7b23-11eb-325a-bf2bc3f035c6
-# ╠═be818b5a-7bd0-11eb-012e-e597b9a9b06f
-# ╠═96e01d24-7bcf-11eb-0968-e17036963dd7
+# ╠═4c10817c-7bd3-11eb-37da-af543c5142e2
+# ╠═4d22883c-7bd1-11eb-0f77-4d89bd3b2ef5
 # ╠═3526d5bc-7bcc-11eb-3918-316776b303f2
 # ╠═3e268450-7bcc-11eb-27c7-a7ca0ce7c20d
 # ╠═6cb273a0-7bcd-11eb-1e61-0fb10f2d7954
