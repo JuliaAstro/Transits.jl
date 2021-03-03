@@ -198,10 +198,10 @@ end
 # orbital plan to the equatorial plane
 function relative_position(orbit::KeplerianOrbit, t)
     sinν, cosν = compute_true_anomaly(orbit, t)
-    if iszero(orbit.ecc)
-        r = orbit.aRₛ
+    if false #iszero(orbit.ecc)
+        r = -orbit.aRₛ
     else
-        r = orbit.aRₛ * (1 - orbit.ecc^2) / (1 + orbit.ecc * cosν)
+        r = -orbit.aRₛ * (1 - orbit.ecc^2) / (1 + orbit.ecc * cosν)
     end
     return rotate_vector(orbit, r * cosν, r * sinν)
 end
@@ -220,7 +220,7 @@ function rotate_vector(orbit::KeplerianOrbit, x, y)
     sinω, cosω = sincos(orbit.ω)
 
     # Rotate about z0 axis by ω
-    if iszero(orbit.ecc)
+    if false #iszero(orbit.ecc)
         x1, y1 = x, y
     else
         x1 = cosω * x - sinω * y
@@ -232,14 +232,11 @@ function rotate_vector(orbit::KeplerianOrbit, x, y)
     y2 = cosi * y1
     Z = -sini * y1
 
-    if iszero(orbit.Ω)
-        return SA[x2, y2, Z]
-    else
-        # Rotate about z2 axis by Ω
-        X = cosΩ * x2 - sinΩ * y2
-        Y = sinΩ * x2 + cosΩ * y2
-        return SA[X, Y, Z]
-    end
+    # Rotate about z2 axis by Ω
+    X = cosΩ * x2 - sinΩ * y2
+    Y = sinΩ * x2 + cosΩ * y2   
+
+    return SA[X, Y, Z]
 end
 
 function Base.show(io::IO, orbit::KeplerianOrbit)
