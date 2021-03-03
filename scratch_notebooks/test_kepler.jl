@@ -12,7 +12,7 @@ begin
 	Pkg.instantiate()
 	using PlutoUI
 	using StatsPlots
-	using Transits.Orbits: relative_position
+	using Transits.Orbits: KeplerianOrbit, relative_position
 	using Unitful
 	using UnitfulAstro
 	using PyCall
@@ -103,6 +103,47 @@ begin
 	r
 end
 
+# ╔═╡ 38bdfaa4-7bb6-11eb-3dfc-15629993f0ed
+begin
+	i = 1
+	KeplerianOrbit(
+		aRₛ = sky_test["a"][i],
+		P = sky_test["period"][i],
+		t₀ = sky_test["t0"][i],
+		ecc = sky_test["e"][i],
+		ω = sky_test["omega"][i],
+		incl = sky_test["incl"][i],
+	)
+end
+
+# ╔═╡ f7d9b13e-7bb7-11eb-3727-49239a87cc42
+compute_r(orbits[1], sky_test["t"])[1:5]
+
+# ╔═╡ 9500c63a-7bba-11eb-3252-f94e2babe97b
+orbits[1]
+
+# ╔═╡ cbc5c33c-7bba-11eb-03cc-6defd443c825
+orbit_1 = KeplerianOrbit(
+	aRₛ = 50.0,
+	P = 5.0,
+	t₀ = -5.0,
+	ecc = 0.0,
+	ω = -π,
+	incl = π / 2.0,
+)
+
+# ╔═╡ 0a8f5968-7bbb-11eb-1869-3d78d332f961
+compute_r(orbits[3], sky_test["t"])[1:30]
+
+# ╔═╡ e118d14c-7bbb-11eb-2978-7b751996d571
+relative_position.(orbits[1], sky_test["t"])
+
+# ╔═╡ cbd1f886-7bc5-11eb-2e69-e7163e8f90b6
+orbits[5].M₀
+
+# ╔═╡ 46b7eb2e-7bc0-11eb-2eba-3199343db155
+orbits[begin]
+
 # ╔═╡ b793af16-7b24-11eb-0948-41b16c1e02c6
 sum(sky_test["m"]) > 0
 
@@ -115,6 +156,9 @@ r[sky_test["m"]]
 # ╔═╡ ec14e6c2-7b24-11eb-267b-a3a77d1cbd71
 sky_test["r_batman_m"]
 
+# ╔═╡ 8a1f2dfa-7bb6-11eb-23c8-990443b7ec1d
+plot(r[:, 1])
+
 # ╔═╡ Cell order:
 # ╠═12d523ae-7b24-11eb-3e11-5581a47e1b90
 # ╠═e34d610a-7b23-11eb-0132-55ce740f8e17
@@ -122,7 +166,16 @@ sky_test["r_batman_m"]
 # ╠═ec86643a-7b23-11eb-0e9f-7df7963f0452
 # ╠═0be84e52-7b24-11eb-1368-2d1128d1564a
 # ╠═fad76b9a-7b23-11eb-325a-bf2bc3f035c6
+# ╠═38bdfaa4-7bb6-11eb-3dfc-15629993f0ed
+# ╠═f7d9b13e-7bb7-11eb-3727-49239a87cc42
+# ╠═9500c63a-7bba-11eb-3252-f94e2babe97b
+# ╠═cbc5c33c-7bba-11eb-03cc-6defd443c825
+# ╠═0a8f5968-7bbb-11eb-1869-3d78d332f961
+# ╠═e118d14c-7bbb-11eb-2978-7b751996d571
+# ╠═cbd1f886-7bc5-11eb-2e69-e7163e8f90b6
+# ╠═46b7eb2e-7bc0-11eb-2eba-3199343db155
 # ╠═b793af16-7b24-11eb-0948-41b16c1e02c6
 # ╠═bcb46be6-7b24-11eb-0de7-0d3d9daaf665
 # ╠═e757a692-7b24-11eb-2596-c770d1f60fb0
 # ╠═ec14e6c2-7b24-11eb-267b-a3a77d1cbd71
+# ╠═8a1f2dfa-7bb6-11eb-23c8-990443b7ec1d

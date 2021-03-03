@@ -6,7 +6,6 @@ using UnitfulAstro
 
 const G = PhysicalConstants.CODATA2018.G
 const G_cgs = ustrip(u"cm^3/g/s^2", G)
-const M₀ = π / 2.0
 
 """
     KeplerianOrbit(; kwargs...)
@@ -38,6 +37,9 @@ struct KeplerianOrbit{T,L,D,R,A,I} <: AbstractOrbit
     incl::A
     Ω::R
     ω::R
+    M₀::R
+    tₚ::T
+    t_ref::T
 end
 
 # Enable keyword dispatch and argument name aliasing
@@ -49,6 +51,8 @@ end
     aRs => aRₛ,
     Rs => Rₛ,
     t0 => t₀,
+    M0 => M₀,
+    tp => tₚ,
 )
 
 @kwmethod function KeplerianOrbit(;ρₛ, Rₛ, ecc, P, t₀, incl)
@@ -56,12 +60,15 @@ end
     #Rₛ isa Real && (Rₛ = Rₛ * 6.957e10)
     #P isa Real && (P = P * 86_400.0)
     #incl isa Real && (incl = incl * π / 180.0)
-    Ω = M₀
+    Ω = 0.0
     ω = 0.0
     aRₛ = compute_aRₛ(ρₛ=ρₛ, P=P)
     a = compute_a(ρₛ, P, Rₛ)
     b = compute_b(ρₛ, P, sincos(incl))
     n = 2.0 * π / P
+    M₀ = compute_M₀(ecc, ω)
+    tₚ = t₀ - M₀ / n
+    t_ref = tₚ - t₀
 
     # Normalize quantities
     a, Rₛ = promote(a, Rₛ)
@@ -82,13 +89,20 @@ end
         incl,
         Ω,
         ω,
+        M₀,
+        tₚ,
+        t_ref,
     )
 end
 
 @kwmethod function KeplerianOrbit(;aRₛ, P, b, t₀, ecc)
-    Ω = M₀
+    Ω = 0.0
     ω = 0.0
     incl = compute_incl(aRₛ, b, ecc, sincos(ω))
+    M₀ = compute_M₀(ecc, ω)
+    n = 2.0 * π / P
+    tₚ = t₀ - M₀ / n
+    t_ref = tₚ - t₀
 
     return KeplerianOrbit(
         nothing,
@@ -98,18 +112,24 @@ end
         P,
         nothing,
         nothing,
-        2.0 * π / P,
+        n,
         t₀,
         incl,
         Ω,
         ω,
+        M₀,
+        tₚ,
+        t_ref,
     )
 end
 
 @kwmethod function KeplerianOrbit(;aRₛ, P, t₀, ecc, ω, incl)
-    Ω = M₀
-    ω = 0.0
+    Ω = 0.0
     b = compute_b(aRₛ, sincos(incl))
+    M₀ = compute_M₀(ecc, ω)
+    n = 2.0 * π / P
+    tₚ = t₀ - M₀ / n
+    t_ref = tₚ - t₀
 
     return KeplerianOrbit(
         nothing,
@@ -119,11 +139,14 @@ end
         P,
         nothing,
         nothing,
-        2.0 * π / P,
+        n,
         t₀,
         incl,
         Ω,
         ω,
+        M₀,
+        tₚ,
+        t_ref,
     )
 end
 
@@ -155,6 +178,21 @@ function compute_incl(aRₛ, b, ecc, sincosω)
     return acos((b/aRₛ) * (1.0 + ecc*sincosω[1])/(1.0 - ecc^2))
 end
 
+function compute_M₀(ecc, ω)
+    if false #iszero(ecc)
+        M₀ = π / 2.0
+    else
+        sinω, cosω = sincos(ω)
+        E₀ = 2.0 * atan(
+            sqrt(1.0 - ecc) * cosω,
+            sqrt(1.0 + ecc) * (1.0 + sinω),
+        )
+        M₀ = E₀ - ecc * sin(E₀)
+    end
+    return M₀
+end
+
+
 # Finds the position `r` of the planet along its orbit after rotating
 # through the true anomaly `ν`, then transforms this from the
 # orbital plan to the equatorial plane
@@ -168,25 +206,9 @@ function relative_position(orbit::KeplerianOrbit, t)
     return rotate_vector(orbit, r * cosν, r * sinν)
 end
 
-function compute_M(orbit::KeplerianOrbit, t)
-    if iszero(orbit.ecc)
-        M = M₀ + orbit.n * (t - orbit.t₀) / 2.0
-    else
-        sinω, cosω = sincos(orbit.ω)
-        E₀ = 2.0 * atan(
-            sqrt(1.0 - orbit.ecc) * cosω,
-            sqrt(1.0 + orbit.ecc) * (1.0 + sinω),
-        )
-        M₀_ecc = E₀ - orbit.ecc * sin(E₀)
-        M = M₀_ecc + orbit.n * (t - orbit.t₀)
-    end
-    return M
-end
-
 # Returns sin(ν), cos(ν)
 function compute_true_anomaly(orbit::KeplerianOrbit, t)
-    #M = compute_M(orbit, t)
-    M = M₀ + orbit.n * (t - orbit.t₀) / 2.0
+    M = orbit.n * (t - orbit.t₀ - orbit.t_ref)
     E = kepler_solver(M, orbit.ecc)
     return sincos(trueanom(E, orbit.ecc))
 end
@@ -210,11 +232,14 @@ function rotate_vector(orbit::KeplerianOrbit, x, y)
     y2 = cosi * y1
     Z = -sini * y1
 
-    # Rotate about z2 axis by Ω
-    X = cosΩ * x2 - sinΩ * y2
-    Y = sinΩ * x2 + cosΩ * y2
-
-    return SA[X, Y, Z]
+    if iszero(orbit.Ω)
+        return SA[x2, y2, Z]
+    else
+        # Rotate about z2 axis by Ω
+        X = cosΩ * x2 - sinΩ * y2
+        Y = sinΩ * x2 + cosΩ * y2
+        return SA[X, Y, Z]
+    end
 end
 
 function Base.show(io::IO, orbit::KeplerianOrbit)
