@@ -1,6 +1,8 @@
 using PyCall
 using Transits.Orbits: KeplerianOrbit, relative_position
 
+pyimport("pip")["main"](["install", "batman-package", "numpy==1.20.1"])
+
 @testset "KeplerianOrbit: sky coords" begin
     # Comparison coords from `batman`
     py"""
@@ -49,11 +51,10 @@ using Transits.Orbits: KeplerianOrbit, relative_position
     sky_test = py"sky_coords"()
     allclose = py"np.allclose"
 
-    function compute_r(orbit, t)
+    # Return length(t) × (x; y; z) matrix
+    function compute_xyz(orbit, t)
         pos = relative_position.(orbit, t)
-        return map(pos) do arr
-            √(arr[1]^2 + arr[2]^2)
-        end
+        return reduce(hcat, pos)'
     end
 
     # Create comparison orbits from Transits.jl
@@ -70,16 +71,25 @@ using Transits.Orbits: KeplerianOrbit, relative_position
     ]
 
     # Compute coords
-    r = Matrix{Float64}(undef, length(sky_test["t"]), length(sky_test["t0"]))
-    for (orbit, r_i) in zip(orbits, eachcol(r))
-        r_i .= compute_r(orbit, sky_test["t"])
+    x = Matrix{Float64}(undef, length(sky_test["t"]), length(sky_test["t0"]))
+    y = similar(x)
+    z = similar(x)
+    for (orbit, x_i, y_i, z_i) in zip(orbits, eachcol(x), eachcol(y), eachcol(z))
+        a, b, c = eachcol(compute_xyz(orbit, sky_test["t"]))
+        x_i .= a
+        y_i .= b
+        z_i .= c
     end
 
     # Compare
     m = sky_test["m"]
+    r = @. √(x^2 + y^2)
     r_Transits = r[m]
     r_batman = sky_test["r_batman"][m]
 
     @test sum(m) > 0
     @test allclose(r_Transits, r_batman, atol=2e-5)
+    @test all(z[m] .> 0)
+    no_transit = @. (z[!(m)] < 0) | (r[!(m)] > 2)
+    @test all(no_transit)
 end
