@@ -150,6 +150,37 @@ end
     )
 end
 
+@kwmethod function KeplerianOrbit(;Rₛ, P, t₀, b, ecc, ω)
+    Ω = 0.0
+    Mₛ = 0.151 * 1.989e33 # 0.151 solar masses
+    ρₛ = Mₛ / ( (4/3) * π * Rₛ^3 )
+    a = compute_a(ρₛ, P, Rₛ)
+    aRₛ = a / Rₛ
+    incl = compute_incl(aRₛ, b, ecc, sincos(ω))
+    M₀ = compute_M₀(ecc, ω)
+    n = 2.0 * π / P
+    tₚ = t₀ - M₀ / n
+    t_ref = tₚ - t₀
+
+    return KeplerianOrbit(
+        a,
+        aRₛ,
+        b,
+        ecc,
+        P,
+        ρₛ,
+        Rₛ,
+        n,
+        t₀,
+        incl,
+        Ω,
+        ω,
+        M₀,
+        tₚ,
+        t_ref,
+    )
+end
+
 #############
 # Orbit logic
 #############

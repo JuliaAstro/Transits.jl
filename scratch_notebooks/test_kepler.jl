@@ -13,10 +13,32 @@ begin
 	using PlutoUI
 	using PyCall
 	using Transits.Orbits: KeplerianOrbit, relative_position
+	using Unitful, UnitfulAstro
+	using StatsPlots
 end
 
 # ╔═╡ e34d610a-7b23-11eb-0132-55ce740f8e17
 pyimport("pip")["main"](["install", "batman-package", "numpy==1.20.1"])
+
+# ╔═╡ 5fbf61ca-7caf-11eb-19be-7f3cf3e04fa2
+begin
+	Rₛ = 0.189
+	P = 0.4626413
+	t₀ = 0.2
+	b = 0.5
+	ecc = 0.1
+	ω = 0.1
+end
+
+# ╔═╡ 1e7084b4-7cab-11eb-1ab2-97ad504d12fb
+orbit = KeplerianOrbit(
+	Rₛ = ustrip(u"cm", Rₛ * u"Rsun"),
+	P =  ustrip(u"s", P * u"d"),
+	t₀ = ustrip(u"s", t₀ * u"d"),
+	b = b,
+	ecc = ecc,
+	ω = ω,
+)
 
 # ╔═╡ e8cf7b42-7b23-11eb-12b9-9978504654a8
 begin
@@ -24,48 +46,50 @@ begin
 	import numpy as np
 	from batman import _rsky
 	
-	sky_test = {}
+	def small_star():
+		t = np.linspace(0, $(orbit.P), 500)
 	
-	def sky_coords():
-		t = np.linspace(-100, 100, 1_000)
+		a = $(orbit.a)
+		incl = $(orbit.incl)
 
-		t0, period, a, e, omega, incl = (
-			x.flatten()
-			for x in np.meshgrid(
-				np.linspace(-5.0, 5.0, 2),
-				np.exp(np.linspace(np.log(5.0), np.log(50.0), 3)),
-				np.linspace(50.0, 100.0, 2),
-				np.linspace(0.0, 0.9, 5),
-				np.linspace(-np.pi, np.pi, 3),
-				np.arccos(np.linspace(0, 1, 5)[:-1]),
-			)
+		r_batman = _rsky._rsky(
+			t,
+			$t₀,
+			$P,
+			$(orbit.aRₛ),
+			$(orbit.incl),
+			$ecc,
+			$ω,
+			1,
+			1
 		)
-		
-		r_batman = np.empty((len(t), len(t0)))
 
-		for i in range(len(t0)):
-			r_batman[:, i] = _rsky._rsky(
-				t, t0[i], period[i], a[i], incl[i], e[i], omega[i], 1, 1
-			)
-		
 		m = r_batman < 100.0
-		
-		sky_test["m_sum"] = m.sum()
-		sky_test["r_batman"] = r_batman
-		sky_test["m"] = m
-		sky_test["t"] = t
-		sky_test["t0"] = t0
-		sky_test["period"] = period
-		sky_test["a"] = a
-		sky_test["e"] = e
-		sky_test["omega"] = omega
-		sky_test["incl"] = incl
 	
-		return sky_test
+		return {
+			"t": t,
+			"r_batman": r_batman,
+			"m": m,
+		}
 	"""
-	sky_test = py"sky_coords"()
+	small_star = py"small_star"
 	allclose = py"np.allclose"
 end
+
+# ╔═╡ ef22798c-7cad-11eb-0e44-2b4ea6d7a264
+test_vals = small_star()
+
+# ╔═╡ 278b5d02-7cb1-11eb-0e3f-d90fe339491e
+m = test_vals["m"]
+
+# ╔═╡ 3306b0b4-7cb1-11eb-1d3c-993f49ef2006
+t = test_vals["t"]
+
+# ╔═╡ 4596be2c-7cb1-11eb-364c-ada7577fd31d
+r_batman = test_vals["r_batman"]
+
+# ╔═╡ 722aceea-7cae-11eb-06d7-978d2695c7e9
+m |> sum
 
 # ╔═╡ ec86643a-7b23-11eb-0e9f-7df7963f0452
 function compute_r(orbit, t)
@@ -76,70 +100,39 @@ function compute_r(orbit, t)
 	return r
 end
 
-# ╔═╡ 0be84e52-7b24-11eb-1368-2d1128d1564a
-orbits = [
-	KeplerianOrbit(
-		aRₛ = sky_test["a"][i],
-		P = sky_test["period"][i],
-		t₀ = sky_test["t0"][i],
-		ecc = sky_test["e"][i],
-		ω = sky_test["omega"][i],
-		incl = sky_test["incl"][i],
-	)
-	for i in 1:length(sky_test["t0"]) 
-]
+# ╔═╡ 02dc0966-7cb1-11eb-08d1-e714b6823147
+r = compute_r(orbit, t)
 
-# ╔═╡ a2bd0134-7bd4-11eb-0888-193eadeea713
-begin
-	rr = Matrix{Float64}(undef, 6, 3)
-	for (orbit, rr_i) in zip([6, 7, 8], eachcol(rr))
-		rr_i .= ([1, 2, 3, 4, 5, 6],)
-	end
-	rr
-end
+# ╔═╡ 13c46c6e-7cb1-11eb-1a0d-413fb58dd2fb
+allclose(r_batman[m], r[m], atol=2e-5)
 
-# ╔═╡ ffea4268-7bd4-11eb-2631-13e75cd2c5e9
+# ╔═╡ 60f3252a-7cb1-11eb-055b-cbbdde15f0a4
+r_batman[m]
 
+# ╔═╡ 641aacf0-7cb1-11eb-2fb4-cf81c5d0053c
+r[m]
 
-# ╔═╡ fad76b9a-7b23-11eb-325a-bf2bc3f035c6
-begin
-	r = Matrix{Float64}(undef, length(sky_test["t"]), length(sky_test["t0"]))
-	
-	for (orbit, r_i) in zip(orbits, eachcol(r))
-		r_i .= compute_r(orbit, sky_test["t"])
-	end
-end
+# ╔═╡ 6852e742-7cb1-11eb-291a-13e7eba5b039
+plot(r[m])
 
-# ╔═╡ 4c10817c-7bd3-11eb-37da-af543c5142e2
-r
-
-# ╔═╡ 4d22883c-7bd1-11eb-0f77-4d89bd3b2ef5
-m = sky_test["m"]
-
-# ╔═╡ 3526d5bc-7bcc-11eb-3918-316776b303f2
-r_Transits = r[m]
-
-# ╔═╡ 3e268450-7bcc-11eb-27c7-a7ca0ce7c20d
-r_batman = sky_test["r_batman"][m]
-
-# ╔═╡ 6cb273a0-7bcd-11eb-1e61-0fb10f2d7954
-sum(sky_test["m"]) > 0
-
-# ╔═╡ 2dafbabe-7bcd-11eb-12d5-47ba9b1cf4aa
-allclose(r_Transits, r_batman, atol=2e-5)
+# ╔═╡ 8ab92060-7cb1-11eb-2a1a-03e986f95f83
+plot(r_batman[m])
 
 # ╔═╡ Cell order:
 # ╠═12d523ae-7b24-11eb-3e11-5581a47e1b90
 # ╠═e34d610a-7b23-11eb-0132-55ce740f8e17
+# ╠═5fbf61ca-7caf-11eb-19be-7f3cf3e04fa2
+# ╠═1e7084b4-7cab-11eb-1ab2-97ad504d12fb
 # ╠═e8cf7b42-7b23-11eb-12b9-9978504654a8
+# ╠═ef22798c-7cad-11eb-0e44-2b4ea6d7a264
+# ╠═278b5d02-7cb1-11eb-0e3f-d90fe339491e
+# ╠═3306b0b4-7cb1-11eb-1d3c-993f49ef2006
+# ╠═4596be2c-7cb1-11eb-364c-ada7577fd31d
+# ╠═722aceea-7cae-11eb-06d7-978d2695c7e9
 # ╠═ec86643a-7b23-11eb-0e9f-7df7963f0452
-# ╠═0be84e52-7b24-11eb-1368-2d1128d1564a
-# ╠═a2bd0134-7bd4-11eb-0888-193eadeea713
-# ╠═ffea4268-7bd4-11eb-2631-13e75cd2c5e9
-# ╠═fad76b9a-7b23-11eb-325a-bf2bc3f035c6
-# ╠═4c10817c-7bd3-11eb-37da-af543c5142e2
-# ╠═4d22883c-7bd1-11eb-0f77-4d89bd3b2ef5
-# ╠═3526d5bc-7bcc-11eb-3918-316776b303f2
-# ╠═3e268450-7bcc-11eb-27c7-a7ca0ce7c20d
-# ╠═6cb273a0-7bcd-11eb-1e61-0fb10f2d7954
-# ╠═2dafbabe-7bcd-11eb-12d5-47ba9b1cf4aa
+# ╠═02dc0966-7cb1-11eb-08d1-e714b6823147
+# ╠═13c46c6e-7cb1-11eb-1a0d-413fb58dd2fb
+# ╠═60f3252a-7cb1-11eb-055b-cbbdde15f0a4
+# ╠═641aacf0-7cb1-11eb-2fb4-cf81c5d0053c
+# ╠═6852e742-7cb1-11eb-291a-13e7eba5b039
+# ╠═8ab92060-7cb1-11eb-2a1a-03e986f95f83
