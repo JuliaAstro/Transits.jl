@@ -1,7 +1,8 @@
+using Conda
 using PyCall
 using Transits.Orbits: KeplerianOrbit, relative_position
 
-pyimport("pip")["main"](["install", "batman-package", "numpy==1.20.1"])
+Conda.add("batman-package"; channel="conda-forge")
 
 @testset "KeplerianOrbit: sky coords" begin
     # Comparison coords from `batman`

@@ -150,12 +150,40 @@ end
     )
 end
 
-@kwmethod function KeplerianOrbit(;Rₛ, P, t₀, b, ecc, ω)
+@kwmethod function KeplerianOrbit(;Mₛ, Rₛ, P, t₀, b, ecc, ω)
     Ω = 0.0
-    Mₛ = 0.151 * 1.989e33 # 0.151 solar masses
     ρₛ = Mₛ / ( (4/3) * π * Rₛ^3 )
     a = compute_a(ρₛ, P, Rₛ)
-    aRₛ = a / Rₛ
+    aRₛ = compute_aRₛ(a=a, Rₛ=Rₛ)
+    incl = compute_incl(aRₛ, b, ecc, sincos(ω))
+    M₀ = compute_M₀(ecc, ω)
+    n = 2.0 * π / P
+    tₚ = t₀ - M₀ / n
+    t_ref = tₚ - t₀
+
+    return KeplerianOrbit(
+        a,
+        aRₛ,
+        b,
+        ecc,
+        P,
+        ρₛ,
+        Rₛ,
+        n,
+        t₀,
+        incl,
+        Ω,
+        ω,
+        M₀,
+        tₚ,
+        t_ref,
+    )
+end
+
+@kwmethod function KeplerianOrbit(;a, Rₛ, P, t₀, b, ecc, ω)
+    Ω = 0.0
+    aRₛ = compute_aRₛ(a=a, Rₛ=Rₛ)
+    ρₛ = compute_ρₛ(aRₛ, P)
     incl = compute_incl(aRₛ, b, ecc, sincos(ω))
     M₀ = compute_M₀(ecc, ω)
     n = 2.0 * π / P
@@ -265,7 +293,7 @@ function rotate_vector(orbit::KeplerianOrbit, x, y)
 
     # Rotate about z2 axis by Ω
     X = cosΩ * x2 - sinΩ * y2
-    Y = sinΩ * x2 + cosΩ * y2   
+    Y = sinΩ * x2 + cosΩ * y2
 
     return SA[X, Y, Z]
 end
