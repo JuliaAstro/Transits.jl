@@ -46,6 +46,17 @@ orbit = KeplerianOrbit(
 	ω = ω,
 )
 
+# ╔═╡ f6f4a05c-7d25-11eb-116d-c1d49a27f8df
+orbit2 = KeplerianOrbit(
+	ρₛ = 31.53136891307936,
+	Rₛ = ustrip(u"cm", Rₛ * u"Rsun"),
+	P =  ustrip(u"s", P * u"d"),
+	t₀ = ustrip(u"s", t₀ * u"d"),
+	b = b,
+	ecc = ecc,
+	ω = ω,	
+)
+
 # ╔═╡ 415d8962-7d1f-11eb-27c9-5f40fdb3be4c
 orbit.incl
 
@@ -100,7 +111,7 @@ begin
 	def small_star():
 		t = np.linspace(0, $P, 500)
 	
-		a = $(orbit.aRₛ) * $Rₛ # `exoplanet` stores a in solar units
+		a = $(orbit.aRₛ) #* $Rₛ # `exoplanet` stores a in solar units
 		incl = $(orbit.incl)
 
 		r_batman = _rsky._rsky(
@@ -138,6 +149,9 @@ t_days = test_vals["t"]
 
 # ╔═╡ a216cc32-7d1f-11eb-08f0-efaf94411185
 t = ustrip.(u"s", t_days * u"d")
+
+# ╔═╡ baf405de-7d25-11eb-10bf-1f17278de8ed
+relative_position(orbit, t[1])
 
 # ╔═╡ 4596be2c-7cb1-11eb-364c-ada7577fd31d
 r_batman = test_vals["r_batman"]
@@ -193,6 +207,8 @@ plotly()
 # ╠═e6012662-7d11-11eb-2986-91b35a94a153
 # ╠═5fbf61ca-7caf-11eb-19be-7f3cf3e04fa2
 # ╠═1e7084b4-7cab-11eb-1ab2-97ad504d12fb
+# ╠═baf405de-7d25-11eb-10bf-1f17278de8ed
+# ╠═f6f4a05c-7d25-11eb-116d-c1d49a27f8df
 # ╠═415d8962-7d1f-11eb-27c9-5f40fdb3be4c
 # ╠═2ca5daa6-7d1f-11eb-1715-7d1cd314abce
 # ╠═c8e2fefe-7d1e-11eb-20f7-eb5cb8c21373

@@ -95,6 +95,45 @@ end
     )
 end
 
+@kwmethod function KeplerianOrbit(;ρₛ, Rₛ, P, t₀, b, ecc, ω)
+    # Apply relevant conversions to CGS
+    #Rₛ isa Real && (Rₛ = Rₛ * 6.957e10)
+    #P isa Real && (P = P * 86_400.0)
+    #incl isa Real && (incl = incl * π / 180.0)
+    Ω = 0.0
+    aRₛ = compute_aRₛ(ρₛ=ρₛ, P=P)
+    a = compute_a(ρₛ, P, Rₛ)
+    incl = compute_incl(aRₛ, b, ecc, sincos(ω))
+    n = 2.0 * π / P
+    M₀ = compute_M₀(ecc, ω)
+    tₚ = t₀ - M₀ / n
+    t_ref = tₚ - t₀
+
+    # Normalize quantities
+    a, Rₛ = promote(a, Rₛ)
+
+    # Normalize unitless types
+    aRₛ, b, ecc = promote(aRₛ, b, ecc)
+
+    return KeplerianOrbit(
+        a,
+        aRₛ,
+        b,
+        ecc,
+        P,
+        ρₛ,
+        Rₛ,
+        n,
+        t₀,
+        incl,
+        Ω,
+        ω,
+        M₀,
+        tₚ,
+        t_ref,
+    )
+end
+
 @kwmethod function KeplerianOrbit(;aRₛ, P, b, t₀, ecc)
     Ω = 0.0
     ω = 0.0
