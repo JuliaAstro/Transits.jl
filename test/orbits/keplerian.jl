@@ -3,7 +3,7 @@ using PyCall
 using Transits.Orbits: KeplerianOrbit, relative_position
 using Unitful, UnitfulAstro
 
-Conda.add("batman-package"; channel="conda-forge")
+Conda.add(["numpy", "batman-package"]; channel="conda-forge")
 
 # Common Python functionality
 py"""
