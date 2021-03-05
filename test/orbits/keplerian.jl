@@ -120,8 +120,8 @@ end
 
     # Sample model from `Transits.jl`
     orbit = KeplerianOrbit(
-        Mₛ = ustrip(u"g", m_star * u"Msun"),
         Rₛ = ustrip(u"cm", r_star * u"Rsun"),
+        Mₛ = ustrip(u"g", m_star * u"Msun"),
         P =  ustrip(u"s", period * u"d"),
         t₀ = ustrip(u"s", t0 * u"d"),
         b = b,
@@ -164,4 +164,29 @@ end
     r = compute_r(orbit, t)
     @test sum(m) > 0
     @test allclose(r_batman[m], r[m], atol=2e-5)
+end
+
+@testset "KeplerianOrbit: impact" begin
+    # Model inputs
+    m_star = 0.151 # Solar masses
+    r_star = 0.189 # Solar radii
+    period = 0.4626413 # Days
+    t0 = 0.2 # Days
+    b = 0.5
+    ecc = 0.8
+    ω = 0.1
+
+    # Sample model from `Transits.jl`
+    orbit = KeplerianOrbit(
+        Rₛ = ustrip(u"cm", r_star * u"Rsun"),
+        Mₛ = ustrip(u"g", m_star * u"Msun"),
+        P =  ustrip(u"s", period * u"d"),
+        t₀ = ustrip(u"s", t0 * u"d"),
+        b = b,
+        ecc = ecc,
+        ω = ω,
+    )
+
+    pos = relative_position.(orbit, orbit.t₀)
+    @test allclose((√(pos[1]^2 + pos[2]^2)), orbit.b)
 end
