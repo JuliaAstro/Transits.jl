@@ -3,6 +3,9 @@ using PyCall
 using Transits.Orbits: KeplerianOrbit, relative_position
 using Unitful, UnitfulAstro
 
+# Use Julia's own version of Python
+ENV["PYTHON"] = ""
+Pkg.build("PyCall")
 Conda.add(["numpy", "batman-package"]; channel="conda-forge")
 
 # Common Python functionality
