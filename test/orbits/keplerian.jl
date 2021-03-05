@@ -1,16 +1,30 @@
 using Conda
 using PyCall
 using Transits.Orbits: KeplerianOrbit, relative_position
+using Unitful, UnitfulAstro
 
 Conda.add("batman-package"; channel="conda-forge")
+
+# Common Python functionality
+py"""
+import numpy as np
+from batman import _rsky
+"""
+const allclose = py"np.allclose"
+
+# Common Julia functionality
+function compute_r(orbit, t)
+    pos = relative_position.(orbit, t)
+    r = map(pos) do arr
+        √(arr[1]^2 + arr[2]^2)
+    end
+    return r
+end
 
 @testset "KeplerianOrbit: sky coords" begin
     # Comparison coords from `batman`
     py"""
-    import numpy as np
-    from batman import _rsky
-
-    sky_test = {}
+    sky_coords = {}
 
     def sky_coords():
         t = np.linspace(-100, 100, 1_000)
@@ -36,21 +50,20 @@ Conda.add("batman-package"; channel="conda-forge")
 
         m = r_batman < 100.0
 
-        sky_test["m_sum"] = m.sum()
-        sky_test["r_batman"] = r_batman
-        sky_test["m"] = m
-        sky_test["t"] = t
-        sky_test["t0"] = t0
-        sky_test["period"] = period
-        sky_test["a"] = a
-        sky_test["e"] = e
-        sky_test["omega"] = omega
-        sky_test["incl"] = incl
-
-        return sky_test
+        return {
+            "m_sum" : m.sum(),
+            "r_batman" : r_batman,
+            "m" : m,
+            "t" : t,
+            "t0" : t0,
+            "period" : period,
+            "a" : a,
+            "e" : e,
+            "omega" : omega,
+            "incl" : incl,
+        }
     """
-    sky_test = py"sky_coords"()
-    allclose = py"np.allclose"
+    sky_coords = py"sky_coords"()
 
     # Return length(t) × (x; y; z) matrix
     function compute_xyz(orbit, t)
@@ -61,36 +74,94 @@ Conda.add("batman-package"; channel="conda-forge")
     # Create comparison orbits from Transits.jl
     orbits = [
         KeplerianOrbit(
-            aRₛ = sky_test["a"][i],
-            P = sky_test["period"][i],
-            t₀ = sky_test["t0"][i],
-            ecc = sky_test["e"][i],
-            ω = sky_test["omega"][i],
-            incl = sky_test["incl"][i],
+            aRₛ = sky_coords["a"][i],
+            P = sky_coords["period"][i],
+            t₀ = sky_coords["t0"][i],
+            ecc = sky_coords["e"][i],
+            ω = sky_coords["omega"][i],
+            incl = sky_coords["incl"][i],
         )
-        for i in 1:length(sky_test["t0"])
+        for i in 1:length(sky_coords["t0"])
     ]
 
     # Compute coords
-    x = Matrix{Float64}(undef, length(sky_test["t"]), length(sky_test["t0"]))
+    x = Matrix{Float64}(undef, length(sky_coords["t"]), length(sky_coords["t0"]))
     y = similar(x)
     z = similar(x)
     for (orbit, x_i, y_i, z_i) in zip(orbits, eachcol(x), eachcol(y), eachcol(z))
-        a, b, c = eachcol(compute_xyz(orbit, sky_test["t"]))
+        a, b, c = eachcol(compute_xyz(orbit, sky_coords["t"]))
         x_i .= a
         y_i .= b
         z_i .= c
     end
 
     # Compare
-    m = sky_test["m"]
+    m = sky_coords["m"]
     r = @. √(x^2 + y^2)
     r_Transits = r[m]
-    r_batman = sky_test["r_batman"][m]
+    r_batman = sky_coords["r_batman"][m]
 
     @test sum(m) > 0
     @test allclose(r_Transits, r_batman, atol=2e-5)
     @test all(z[m] .> 0)
     no_transit = @. (z[!(m)] < 0) | (r[!(m)] > 2)
     @test all(no_transit)
+end
+
+@testset "KeplerianOrbit: small star" begin
+    # Model inputs
+    m_star = 0.151 # Solar masses
+    r_star = 0.189 # Solar radii
+    period = 0.4626413 # Days
+    t0 = 0.2 # Days
+    b = 0.5
+    ecc = 0.1
+    ω = 0.1
+
+    # Sample model from `Transits.jl`
+    orbit = KeplerianOrbit(
+        Mₛ = ustrip(u"g", m_star * u"Msun"),
+        Rₛ = ustrip(u"cm", r_star * u"Rsun"),
+        P =  ustrip(u"s", period * u"d"),
+        t₀ = ustrip(u"s", t0 * u"d"),
+        b = b,
+        ecc = ecc,
+        ω = ω,
+    )
+
+    # Sample model from `batman`
+    py"""
+    def small_star():
+        t = np.linspace(0, $period, 500)
+        r_batman = _rsky._rsky(
+            t,
+            $t0,
+            $period,
+            $(orbit.aRₛ),
+            $(orbit.incl),
+            $ecc,
+            $ω,
+            1,
+            1
+        )
+
+        m = r_batman < 100.0
+
+        return {
+            "t": t,
+            "r_batman": r_batman,
+            "m": m,
+        }
+    """
+    small_star = py"small_star"
+
+    # Compare
+    test_vals = small_star()
+    t_days = test_vals["t"]
+    t = ustrip.(u"s", t_days * u"d")
+    r_batman = test_vals["r_batman"]
+    m = test_vals["m"]
+    r = compute_r(orbit, t)
+    @test sum(m) > 0
+    @test allclose(r_batman[m], r[m], atol=2e-5)
 end
