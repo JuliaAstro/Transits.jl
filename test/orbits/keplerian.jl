@@ -11,7 +11,7 @@ const allclose = py"np.allclose"
 function compute_r(orbit, t)
     pos = relative_position.(orbit, t)
     r = map(pos) do arr
-        √(arr[1]^2 + arr[2]^2)
+        hypot(arr[1], arr[2])
     end
     return r
 end
