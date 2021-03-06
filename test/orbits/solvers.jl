@@ -50,16 +50,10 @@ end
 #     cos_ν_solver, cos_ν_user)
 compute_summary(Es, eccs) = eachrow(hcat(_compute_vals.(Es, eccs)...))
 
-# Tests from:
-# https://github.com/dfm/kepler.py/blob/main/tests/test_kepler.py
-@testset "kepler_solver: M, E edge case" begin
-    # Test different inputs for E and ecc
-    Es = [0.0, 2 * π, -226.2, -170.4]
-    eccs = fill(1.0 - 1e-6, length(Es))
-    eccs[end] = 0.9939879759519037
+function test_vals(summary)
     (E_solver,     E_user,
      sin_ν_solver, sin_ν_user,
-     cos_ν_solver, cos_ν_user) = compute_summary(Es, eccs)
+     cos_ν_solver, cos_ν_user) = summary
 
     @test all(isfinite.(sin_ν_solver))
     @test all(isfinite.(cos_ν_solver))
@@ -68,17 +62,26 @@ compute_summary(Es, eccs) = eachrow(hcat(_compute_vals.(Es, eccs)...))
     @test allclose(cos_ν_solver, cos_ν_user)
 end
 
+# Tests from:
+# https://github.com/dfm/kepler.py/blob/main/tests/test_kepler.py
+@testset "kepler_solver: M, E edge case" begin
+    Es = [0.0, 2 * π, -226.2, -170.4]
+    eccs = fill(1.0 - 1e-6, length(Es))
+    eccs[end] = 0.9939879759519037
+    test_vals(compute_summary(Es, eccs))
+end
+
 @testset "kepler_solver: Let them eat π" begin
-    # Fix E to π
     eccs = range(0.0, 1.0; length=100)[begin:end-1]
     Es = fill(π, length(eccs))
-    (E_solver,     E_user,
-     sin_ν_solver, sin_ν_user,
-     cos_ν_solver, cos_ν_user) = compute_summary(Es, eccs)
+    test_vals(compute_summary(Es, eccs))
+end
 
-    @test all(isfinite.(sin_ν_solver))
-    @test all(isfinite.(cos_ν_solver))
-    @test allclose(E_solver, E_user)
-    @test allclose(sin_ν_solver, sin_ν_user)
-    @test allclose(cos_ν_solver, cos_ν_user)
+@testset "kepler_solver: solver" begin
+    ecc_range = range(0, 1; length=500)[begin:end-1]
+    E_range = range(-300, 300; length=1_001)
+    E_ecc_pairs = Iterators.product(E_range, ecc_range)
+    Es = reshape(map(x -> x[1], E_ecc_pairs), :, 1)
+    eccs = reshape(map(x -> x[2], E_ecc_pairs), :, 1)
+    test_vals(compute_summary(Es, eccs))
 end
