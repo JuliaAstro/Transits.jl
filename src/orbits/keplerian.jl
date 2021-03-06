@@ -1,4 +1,4 @@
-using AstroLib: kepler_solver, trueanom
+using AstroLib: trueanom, kepler_solver
 using KeywordDispatch
 using PhysicalConstants
 using Unitful

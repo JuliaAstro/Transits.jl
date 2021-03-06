@@ -20,6 +20,7 @@ rng = StableRNG(2752)
     include("distributions.jl")
     include("elliptic.jl")
     include("orbits/keplerian.jl")
+    include("orbits/solvers.jl")
     include("poly.jl")
     include("show.jl")
 end
