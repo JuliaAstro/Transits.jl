@@ -16,6 +16,9 @@ function compute_r(orbit, t)
     return r
 end
 
+# Tests from:
+# https://github.com/exoplanet-dev/exoplanet/blob/main/tests/orbits/keplerian_test.py
+
 @testset "KeplerianOrbit: sky coords" begin
     # Comparison coords from `batman`
     py"""

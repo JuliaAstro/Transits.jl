@@ -64,6 +64,7 @@ end
 
 # Tests from:
 # https://github.com/dfm/kepler.py/blob/main/tests/test_kepler.py
+
 @testset "kepler_solver: M, E edge case" begin
     Es = [0.0, 2 * π, -226.2, -170.4]
     eccs = fill(1.0 - 1e-6, length(Es))
