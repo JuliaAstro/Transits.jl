@@ -29,6 +29,9 @@ md"""
 # ╔═╡ 8ff6ff7e-7f13-11eb-0b54-83b3ef2ff52b
 stack(arr_arr) = hcat((reshape(map(p -> p[i], arr_arr), :) for i in 1:3)...)
 
+# ╔═╡ a8f2864a-7f18-11eb-2c40-f7ef09e50e9b
+println("OK")
+
 # ╔═╡ 972dc2ba-7ea2-11eb-3dbb-1584d630566a
 function flip(orbit::KeplerianOrbit, Rₚ)
 	
@@ -56,7 +59,7 @@ function test_flip()
 		P = ustrip(u"s", 100.0 * u"d"),
 		t₀ = ustrip(u"s", 0.5 * u"d"),
 		incl = 0.25 * π,
-		ecc = 0.3,
+		ecc = 0.0,
 		ω = 0.5,
 		Ω = 1.0
 	)
@@ -87,4 +90,5 @@ test_flip()
 # ╠═8ff6ff7e-7f13-11eb-0b54-83b3ef2ff52b
 # ╠═d86940c0-7ea3-11eb-3082-352f62f765d8
 # ╠═b86a9bbe-7f16-11eb-331d-f16478f8e542
+# ╠═a8f2864a-7f18-11eb-2c40-f7ef09e50e9b
 # ╠═972dc2ba-7ea2-11eb-3dbb-1584d630566a
