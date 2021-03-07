@@ -1,13 +1,6 @@
-using Transits.Orbits: KeplerianOrbit, relative_position
+using Transits.Orbits: KeplerianOrbit, flip,
+                       star_position, planet_position, relative_position
 
-# Common Python functionality
-py"""
-import numpy as np
-from batman import _rsky
-"""
-const allclose = py"np.allclose"
-
-# Common Julia functionality
 function compute_r(orbit, t)
     pos = relative_position.(orbit, t)
     r = map(pos) do arr
@@ -187,4 +180,36 @@ end
 
     pos = relative_position.(orbit, orbit.t₀)
     @test allclose((√(pos[1]^2 + pos[2]^2)), orbit.b)
+end
+
+@testset "KeplerianOrbit: flip" begin
+    stack(arr_arr) = hcat((reshape(map(p -> p[i], arr_arr), :) for i in 1:3)...)
+
+    t = ustrip.(u"s", range(0, 100; length=1_000)u"d")
+
+    orbit = KeplerianOrbit(
+        Mₛ = ustrip(u"g", 1.3 * u"Msun"),
+        Mₚ = ustrip(u"g", 0.1 * u"Msun"),
+        Rₛ = ustrip(u"cm", 1.0 * u"Rsun"),
+        P = ustrip(u"s", 100.0 * u"d"),
+        t₀ = ustrip(u"s", 0.5 * u"d"),
+        incl = 0.25 * π,
+        ecc = 0.3,
+        ω = 0.5,
+        Ω = 1.0
+    )
+    orbit_flipped = flip(orbit, ustrip(u"cm", 0.7 * u"Rsun"))
+
+
+    u_star = stack(star_position.(orbit, orbit.Rₛ, t))
+    u_planet_flipped = stack(planet_position.(orbit_flipped, orbit.Rₛ, t))
+    for i in 1:3
+        @test isapprox(u_star[:, i], u_planet_flipped[:, i], atol=1e-5)
+    end
+
+    u_planet = stack(planet_position.(orbit, orbit.Rₛ, t))
+    u_star_flipped = stack(star_position.(orbit_flipped, orbit.Rₛ, t))
+    for i in 1:3
+        @test isapprox(u_planet[:, i], u_star_flipped[:, i], atol=1e-5)
+    end
 end

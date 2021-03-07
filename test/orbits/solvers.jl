@@ -1,12 +1,5 @@
 using Transits.Orbits: trueanom, kepler_solver
 
-# Common Python functionality
-py"""
-import numpy as np
-"""
-const allclose = py"np.allclose"
-
-# Common Julia functionality
 # Compute sin_ν, cos_ν without using arctan function directly
 function compute_sincos_ν_no_atan(E, ecc; tol=1e-10)
     sin_E, cos_E = sincos(E)
