@@ -1,5 +1,5 @@
 using Transits.Orbits: KeplerianOrbit, flip,
-                       star_position, planet_position, relative_position
+                       _star_position, _planet_position, relative_position
 
 function compute_r(orbit, t)
     pos = relative_position.(orbit, t)
@@ -201,16 +201,16 @@ end
     orbit_flipped = flip(orbit, ustrip(u"cm", 0.7 * u"Rsun"))
 
 
-    u_star = stack(star_position.(orbit, orbit.Rₛ, t))
-    u_planet_flipped = stack(planet_position.(orbit_flipped, orbit.Rₛ, t))
+    u_star = stack(_star_position.(orbit, orbit.Rₛ, t))
+    u_planet_flipped = stack(_planet_position.(orbit_flipped, orbit.Rₛ, t))
     for i in 1:3
-        @test isapprox(u_star[:, i], u_planet_flipped[:, i], atol=1e-5)
+        @test allclose(u_star[:, i], u_planet_flipped[:, i], atol=1e-5)
     end
 
-    u_planet = stack(planet_position.(orbit, orbit.Rₛ, t))
-    u_star_flipped = stack(star_position.(orbit_flipped, orbit.Rₛ, t))
+    u_planet = stack(_planet_position.(orbit, orbit.Rₛ, t))
+    u_star_flipped = stack(_star_position.(orbit_flipped, orbit.Rₛ, t))
     for i in 1:3
-        @test isapprox(u_planet[:, i], u_star_flipped[:, i], atol=1e-5)
+        @test allclose(u_planet[:, i], u_star_flipped[:, i], atol=1e-5)
     end
 end
 
@@ -233,15 +233,15 @@ end
     orbit_flipped = flip(orbit, ustrip(u"cm", 0.7 * u"Rsun"))
 
 
-    u_star = stack(star_position.(orbit, orbit.Rₛ, t))
-    u_planet_flipped = stack(planet_position.(orbit_flipped, orbit.Rₛ, t))
+    u_star = stack(_star_position.(orbit, orbit.Rₛ, t))
+    u_planet_flipped = stack(_planet_position.(orbit_flipped, orbit.Rₛ, t))
     for i in 1:3
-        @test isapprox(u_star[:, i], u_planet_flipped[:, i], atol=1e-5)
+        @test allclose(u_star[:, i], u_planet_flipped[:, i], atol=1e-5)
     end
 
-    u_planet = stack(planet_position.(orbit, orbit.Rₛ, t))
-    u_star_flipped = stack(star_position.(orbit_flipped, orbit.Rₛ, t))
+    u_planet = stack(_planet_position.(orbit, orbit.Rₛ, t))
+    u_star_flipped = stack(_star_position.(orbit_flipped, orbit.Rₛ, t))
     for i in 1:3
-        @test isapprox(u_planet[:, i], u_star_flipped[:, i], atol=1e-5)
+        @test allclose(u_planet[:, i], u_star_flipped[:, i], atol=1e-5)
     end
 end

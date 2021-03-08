@@ -12,10 +12,9 @@ begin
 	using PlutoUI
 	using PyCall
 	using Transits.Orbits: KeplerianOrbit, relative_position, 
-	_position, compute_true_anomaly, star_position, planet_position
+	_position, compute_true_anomaly, _star_position, _planet_position, flip
 	using Unitful, UnitfulAstro
 	using StatsPlots
-	using Setfield
 end
 
 # ╔═╡ 132e3b14-7d78-11eb-3591-bb0f1288b88e
@@ -29,24 +28,8 @@ md"""
 # ╔═╡ 8ff6ff7e-7f13-11eb-0b54-83b3ef2ff52b
 stack(arr_arr) = hcat((reshape(map(p -> p[i], arr_arr), :) for i in 1:3)...)
 
-# ╔═╡ a8f2864a-7f18-11eb-2c40-f7ef09e50e9b
-println("OK")
-
-# ╔═╡ 972dc2ba-7ea2-11eb-3dbb-1584d630566a
-function flip(orbit::KeplerianOrbit, Rₚ)
-	
-	return KeplerianOrbit(
-		Mₛ = orbit.Mₚ,
-		Mₚ = orbit.Mₛ,
-		Rₛ = Rₚ,
-		P = orbit.P,
-		tₚ = orbit.tₚ,
-		incl = orbit.incl,
-		ecc = orbit.ecc,
-		ω = orbit.ω - π,
-		Ω = orbit.Ω
-	)
-end
+# ╔═╡ d2cf7474-7fd2-11eb-1407-151bde70042b
+allclose(a, b; rtol=1e-5, atol=1e-8) = all(@. abs(a - b) ≤ (atol + rtol*abs(b)))
 
 # ╔═╡ d86940c0-7ea3-11eb-3082-352f62f765d8
 function test_flip()
@@ -66,21 +49,21 @@ function test_flip()
 	orbit_flipped = flip(orbit, ustrip(u"cm", 0.7 * u"Rsun"))
 		
 
-	u_star = stack(star_position.(orbit, orbit.Rₛ, t))
-	u_planet_flipped = stack(planet_position.(orbit_flipped, orbit.Rₛ, t))
+	u_star = stack(_star_position.(orbit, orbit.Rₛ, t))
+	u_planet_flipped = stack(_planet_position.(orbit_flipped, orbit.Rₛ, t))
 	for i in 1:3
-		@test isapprox(u_star[:, i], u_planet_flipped[:, i], atol=1e-5)
+		@test allclose(u_star[:, i], u_planet_flipped[:, i], atol=1e-5)
 	end
 	
-	u_planet = stack(planet_position.(orbit, orbit.Rₛ, t))
-	u_star_flipped = stack(star_position.(orbit_flipped, orbit.Rₛ, t))
+	u_planet = stack(_planet_position.(orbit, orbit.Rₛ, t))
+	u_star_flipped = stack(_star_position.(orbit_flipped, orbit.Rₛ, t))
 	for i in 1:3
-		@test isapprox(u_planet[:, i], u_star_flipped[:, i], atol=1e-5)
+		@test allclose(u_planet[:, i], u_star_flipped[:, i], atol=1e-5)
 	end
 	
 end
 
-# ╔═╡ b86a9bbe-7f16-11eb-331d-f16478f8e542
+# ╔═╡ 6dabd3f2-7fd6-11eb-29d5-bd2620db7b78
 test_flip()
 
 # ╔═╡ Cell order:
@@ -89,6 +72,5 @@ test_flip()
 # ╠═132e3b14-7d78-11eb-3591-bb0f1288b88e
 # ╠═8ff6ff7e-7f13-11eb-0b54-83b3ef2ff52b
 # ╠═d86940c0-7ea3-11eb-3082-352f62f765d8
-# ╠═b86a9bbe-7f16-11eb-331d-f16478f8e542
-# ╠═a8f2864a-7f18-11eb-2c40-f7ef09e50e9b
-# ╠═972dc2ba-7ea2-11eb-3dbb-1584d630566a
+# ╠═d2cf7474-7fd2-11eb-1407-151bde70042b
+# ╠═6dabd3f2-7fd6-11eb-29d5-bd2620db7b78

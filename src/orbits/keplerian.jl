@@ -646,16 +646,12 @@ function compute_RV_params(ρₛ, Rₛ, a, P; Mₚ = zero(typeof(ρₛ * Rₛ^3.
 end
 
 function compute_M₀(ecc, ω)
-    if false #iszero(ecc)
-        M₀ = π / 2.0
-    else
-        sinω, cosω = sincos(ω)
-        E₀ = 2.0 * atan(
-            sqrt(1.0 - ecc) * cosω,
-            sqrt(1.0 + ecc) * (1.0 + sinω),
-        )
-        M₀ = E₀ - ecc * sin(E₀)
-    end
+    sinω, cosω = sincos(ω)
+    E₀ = 2.0 * atan(
+        sqrt(1.0 - ecc) * cosω,
+        sqrt(1.0 + ecc) * (1.0 + sinω),
+    )
+    M₀ = E₀ - ecc * sin(E₀)
     return M₀
 end
 
@@ -663,17 +659,18 @@ end
 # through the true anomaly `ν`, then transforms this from the
 # orbital plan to the equatorial plane
 # a_rel: aRₛ, aₛ / Rₛ, or aₚ / Rₛ
+# TODO: consider moving this to a separate orbital calculations package in the future
 function _position(orbit, a_rel, t)
     sin_ν, cos_ν = compute_true_anomaly(orbit, t)
-    if false #iszero(orbit.ecc)
+    if iszero(orbit.ecc)
         r = a_rel
     else
         r = a_rel * (1 - orbit.ecc^2) / (1 + orbit.ecc * cos_ν)
     end
     return rotate_vector(orbit, r * cos_ν, r * sin_ν)
 end
-star_position(orb, Rₛ, t) = _position.(orb, orb.aₛ / Rₛ, t)
-planet_position(orb, Rₛ, t) = _position.(orb, orb.aₚ / Rₛ, t)
+_star_position(orb, Rₛ, t) = _position.(orb, orb.aₛ / Rₛ, t)
+_planet_position(orb, Rₛ, t) = _position.(orb, orb.aₚ / Rₛ, t)
 relative_position(orbit::KeplerianOrbit, t) = _position(orbit, -orbit.aRₛ, t)
 
 # Returns sin(ν), cos(ν)
@@ -690,12 +687,8 @@ function rotate_vector(orbit::KeplerianOrbit, x, y)
     sin_ω, cos_ω = sincos(orbit.ω)
 
     # Rotate about z0 axis by ω
-    if false #iszero(orbit.ecc)
-        x1, y1 = x, y
-    else
-        x1 = cos_ω * x - sin_ω * y
-        y1 = sin_ω * x + cos_ω * y
-    end
+    x1 = cos_ω * x - sin_ω * y
+    y1 = sin_ω * x + cos_ω * y
 
     # Rotate about x1 axis by -incl
     x2 = x1
