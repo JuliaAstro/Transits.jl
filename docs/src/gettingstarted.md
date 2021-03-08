@@ -17,7 +17,7 @@ rs = range(0, 0.2, length=10) # radius ratio
 fluxes = @. ld(orbit, t, rs')
 ```
 
-![](https://github.com/JuliaAstro/Transits.jl/raw/master/limbdark.png)
+![](https://github.com/JuliaAstro/Transits.jl/raw/main/limbdark.png)
 
 ## Integrated and Secondary Curves
 
@@ -34,7 +34,7 @@ flux = @. ld(orbit, t, 0.2)
 flux_int = @. ld(orbit, t, 0.2, texp) 
 ```
 
-![](https://github.com/JuliaAstro/Transits.jl/raw/master/integrated.png)
+![](https://github.com/JuliaAstro/Transits.jl/raw/main/integrated.png)
 
 [`SecondaryLimbDark`](@ref) can be used to generate secondary eclipses given a surface brightness ratio
 
@@ -50,7 +50,7 @@ f = @. ld(orbit, t, rs')
 f_int = @. ld_int(orbit, t, rs', texp=0.3)
 ```
 
-![](https://github.com/JuliaAstro/Transits.jl/raw/master/secondary.png)
+![](https://github.com/JuliaAstro/Transits.jl/raw/main/secondary.png)
 
 ## Using Units
 
