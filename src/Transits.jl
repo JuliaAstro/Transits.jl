@@ -80,8 +80,8 @@ julia> ld(orbit, 0u"d", 0.1)
 """
 function compute(ld::AbstractLimbDark, orbit::AbstractOrbit, t, r)
     coords = Orbits.relative_position(orbit, t)
-    z = sqrt(coords[1]^2 + coords[2]^2)
-    return compute(ld, z, r)
+    μ = sqrt(coords[1]^2 + coords[2]^2)
+    return compute(ld, μ, r)
 end
 
 include("elliptic.jl")
