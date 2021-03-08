@@ -145,10 +145,10 @@ check_aRₛ(P, δ, T, τ) = (P*δ^(1/4) / (2*π)) * (4 / (T*τ))^(1/2)
 # ╔═╡ 72c01acc-7779-11eb-09b3-e7f9e1706b3a
 let
 	orbit = KeplerianOrbit(
-		P = 3u"d",
+		P = 3.0u"d",
 		aRₛ = check_aRₛ(3u"d", 0.2^2, 1u"d", 1u"hr") |> upreferred,
 		b = 0.0,
-		t₀ = 0u"d",
+		t₀ = 0.0u"d",
 		ecc = 0.0,
 	)
 	

@@ -61,7 +61,7 @@ end
     Rp => Rₚ,
 )
 
-@kwmethod function KeplerianOrbit(;ρₛ, Rₛ, ecc, P, t₀, incl)
+@kwmethod function KeplerianOrbit(;ρₛ, Rₛ, P, ecc, t₀, incl)
     # Apply relevant conversions to CGS
     #Rₛ isa Real && (Rₛ = Rₛ * 6.957e10)
     #P isa Real && (P = P * 86_400.0)
@@ -85,27 +85,8 @@ end
     # RV info
     Mₛ, aₛ, Mₚ, aₚ = compute_RV_params(ρₛ, Rₛ, a, P)
 
-    return KeplerianOrbit(
-        a,
-        aRₛ,
-        b,
-        ecc,
-        P,
-        ρₛ,
-        Rₛ,
-        n,
-        t₀,
-        tₚ,
-        t_ref,
-        incl,
-        Ω,
-        ω,
-        M₀,
-        Mₛ,
-        aₛ,
-        Mₚ,
-        aₚ
-    )
+    return KeplerianOrbit(a, aRₛ, b, ecc, P, ρₛ, Rₛ, n, t₀, tₚ, t_ref, incl, Ω, ω, M₀,
+                          Mₛ, aₛ, Mₚ, aₚ)
 end
 
 @kwmethod function KeplerianOrbit(;ρₛ, Rₛ, ecc, P, tₚ, incl)
@@ -132,27 +113,8 @@ end
     # RV info
     Mₛ, aₛ, Mₚ, aₚ = compute_RV_params(ρₛ, Rₛ, a, P)
 
-    return KeplerianOrbit(
-        a,
-        aRₛ,
-        b,
-        ecc,
-        P,
-        ρₛ,
-        Rₛ,
-        n,
-        t₀,
-        tₚ,
-        t_ref,
-        incl,
-        Ω,
-        ω,
-        M₀,
-        Mₛ,
-        aₛ,
-        Mₚ,
-        aₚ
-    )
+    return KeplerianOrbit(a, aRₛ, b, ecc, P, ρₛ, Rₛ, n, t₀, tₚ, t_ref, incl, Ω, ω, M₀,
+                          Mₛ, aₛ, Mₚ, aₚ)
 end
 
 @kwmethod function KeplerianOrbit(;ρₛ, Rₛ, P, t₀, b, ecc, ω)
@@ -179,27 +141,8 @@ end
     # RV info
     Mₛ, aₛ, Mₚ, aₚ = compute_RV_params(ρₛ, Rₛ, a, P)
 
-    return KeplerianOrbit(
-        a,
-        aRₛ,
-        b,
-        ecc,
-        P,
-        ρₛ,
-        Rₛ,
-        n,
-        t₀,
-        tₚ,
-        t_ref,
-        incl,
-        Ω,
-        ω,
-        M₀,
-        Mₛ,
-        aₛ,
-        Mₚ,
-        aₚ
-    )
+    return KeplerianOrbit(a, aRₛ, b, ecc, P, ρₛ, Rₛ, n, t₀, tₚ, t_ref, incl, Ω, ω, M₀,
+                          Mₛ, aₛ, Mₚ, aₚ)
 end
 
 @kwmethod function KeplerianOrbit(;ρₛ, Rₛ, P, tₚ, b, ecc, ω)
@@ -226,27 +169,8 @@ end
     # RV info
     Mₛ, aₛ, Mₚ, aₚ = compute_RV_params(ρₛ, Rₛ, a, P)
 
-    return KeplerianOrbit(
-        a,
-        aRₛ,
-        b,
-        ecc,
-        P,
-        ρₛ,
-        Rₛ,
-        n,
-        t₀,
-        tₚ,
-        t_ref,
-        incl,
-        Ω,
-        ω,
-        M₀,
-        Mₛ,
-        aₛ,
-        Mₚ,
-        aₚ
-    )
+    return KeplerianOrbit(a, aRₛ, b, ecc, P, ρₛ, Rₛ, n, t₀, tₚ, t_ref, incl, Ω, ω, M₀,
+                          Mₛ, aₛ, Mₚ, aₚ)
 end
 
 @kwmethod function KeplerianOrbit(;aRₛ, P, b, t₀, ecc)
@@ -259,27 +183,10 @@ end
     tₚ = t₀ - M₀ / n
     t_ref = tₚ - t₀
 
-    return KeplerianOrbit(
-        nothing,
-        aRₛ,
-        b,
-        ecc,
-        P,
-        ρₛ,
-        nothing,
-        n,
-        t₀,
-        tₚ,
-        t_ref,
-        incl,
-        Ω,
-        ω,
-        M₀,
-        nothing,
-        nothing,
-        nothing,
-        nothing
-    )
+    a = Rₛ = Mₛ = aₛ = Mₚ = aₚ = nothing
+
+    return KeplerianOrbit(a, aRₛ, b, ecc, P, ρₛ, Rₛ, n, t₀, tₚ, t_ref, incl, Ω, ω, M₀,
+                          Mₛ, aₛ, Mₚ, aₚ)
 end
 
 @kwmethod function KeplerianOrbit(;aRₛ, P, b, tₚ, ecc)
@@ -292,27 +199,10 @@ end
     t₀ = tₚ + M₀ / n
     t_ref = tₚ - t₀
 
-    return KeplerianOrbit(
-        nothing,
-        aRₛ,
-        b,
-        ecc,
-        P,
-        ρₛ,
-        nothing,
-        n,
-        t₀,
-        tₚ,
-        t_ref,
-        incl,
-        Ω,
-        ω,
-        M₀,
-        nothing,
-        nothing,
-        nothing,
-        nothing
-    )
+    a = Rₛ = Mₛ = aₛ = Mₚ = aₚ = nothing
+
+    return KeplerianOrbit(a, aRₛ, b, ecc, P, ρₛ, Rₛ, n, t₀, tₚ, t_ref, incl, Ω, ω, M₀,
+                          Mₛ, aₛ, Mₚ, aₚ)
 end
 
 @kwmethod function KeplerianOrbit(;aRₛ, P, t₀, ecc, ω, incl)
@@ -324,27 +214,10 @@ end
     tₚ = t₀ - M₀ / n
     t_ref = tₚ - t₀
 
-    return KeplerianOrbit(
-        nothing,
-        aRₛ,
-        b,
-        ecc,
-        P,
-        ρₛ,
-        nothing,
-        n,
-        t₀,
-        tₚ,
-        t_ref,
-        incl,
-        Ω,
-        ω,
-        M₀,
-        nothing,
-        nothing,
-        nothing,
-        nothing
-    )
+    a = Rₛ = Mₛ = aₛ = Mₚ = aₚ = nothing
+
+    return KeplerianOrbit(a, aRₛ, b, ecc, P, ρₛ, Rₛ, n, t₀, tₚ, t_ref, incl, Ω, ω, M₀,
+                          Mₛ, aₛ, Mₚ, aₚ)
 end
 
 @kwmethod function KeplerianOrbit(;aRₛ, P, tₚ, ecc, ω, incl)
@@ -356,27 +229,10 @@ end
     t₀ = tₚ + M₀ / n
     t_ref = tₚ - t₀
 
-    return KeplerianOrbit(
-        nothing,
-        aRₛ,
-        b,
-        ecc,
-        P,
-        ρₛ,
-        nothing,
-        n,
-        t₀,
-        tₚ,
-        t_ref,
-        incl,
-        Ω,
-        ω,
-        M₀,
-        nothing,
-        nothing,
-        nothing,
-        nothing
-    )
+    a = Rₛ = Mₛ = aₛ = Mₚ = aₚ = nothing
+
+    return KeplerianOrbit(a, aRₛ, b, ecc, P, ρₛ, Rₛ, n, t₀, tₚ, t_ref, incl, Ω, ω, M₀,
+                          Mₛ, aₛ, Mₚ, aₚ)
 end
 
 @kwmethod function KeplerianOrbit(;Mₛ, Rₛ, P, t₀, b, ecc, ω)
@@ -393,27 +249,8 @@ end
     # RV info
     Mₛ, aₛ, Mₚ, aₚ = compute_RV_params(ρₛ, Rₛ, a, P)
 
-    return KeplerianOrbit(
-        a,
-        aRₛ,
-        b,
-        ecc,
-        P,
-        ρₛ,
-        Rₛ,
-        n,
-        t₀,
-        tₚ,
-        t_ref,
-        incl,
-        Ω,
-        ω,
-        M₀,
-        Mₛ,
-        aₛ,
-        Mₚ,
-        aₚ
-    )
+    return KeplerianOrbit(a, aRₛ, b, ecc, P, ρₛ, Rₛ, n, t₀, tₚ, t_ref, incl, Ω, ω, M₀,
+                          Mₛ, aₛ, Mₚ, aₚ)
 end
 
 @kwmethod function KeplerianOrbit(;Mₛ, Rₛ, P, tₚ, b, ecc, ω)
@@ -430,27 +267,8 @@ end
     # RV info
     Mₛ, aₛ, Mₚ, aₚ = compute_RV_params(ρₛ, Rₛ, a, P)
 
-    return KeplerianOrbit(
-        a,
-        aRₛ,
-        b,
-        ecc,
-        P,
-        ρₛ,
-        Rₛ,
-        n,
-        t₀,
-        tₚ,
-        t_ref,
-        incl,
-        Ω,
-        ω,
-        M₀,
-        Mₛ,
-        aₛ,
-        Mₚ,
-        aₚ
-    )
+    return KeplerianOrbit(a, aRₛ, b, ecc, P, ρₛ, Rₛ, n, t₀, tₚ, t_ref, incl, Ω, ω, M₀,
+                          Mₛ, aₛ, Mₚ, aₚ)
 end
 
 @kwmethod function KeplerianOrbit(;Mₛ, Mₚ, Rₛ, P, t₀, incl, ecc, ω, Ω)
@@ -467,27 +285,8 @@ end
     # RV info
     Mₛ, aₛ, Mₚ, aₚ = compute_RV_params(ρₛ, Rₛ, a, P; Mₚ=Mₚ)
 
-    return KeplerianOrbit(
-        a,
-        aRₛ,
-        b,
-        ecc,
-        P,
-        ρₛ,
-        Rₛ,
-        n,
-        t₀,
-        tₚ,
-        t_ref,
-        incl,
-        Ω,
-        ω,
-        M₀,
-        Mₛ,
-        aₛ,
-        Mₚ,
-        aₚ
-    )
+    return KeplerianOrbit(a, aRₛ, b, ecc, P, ρₛ, Rₛ, n, t₀, tₚ, t_ref, incl, Ω, ω, M₀,
+                          Mₛ, aₛ, Mₚ, aₚ)
 end
 
 @kwmethod function KeplerianOrbit(;Mₛ, Mₚ, Rₛ, P, tₚ, incl, ecc, ω, Ω)
@@ -504,27 +303,8 @@ end
     # RV info
     Mₛ, aₛ, Mₚ, aₚ = compute_RV_params(ρₛ, Rₛ, a, P; Mₚ=Mₚ)
 
-    return KeplerianOrbit(
-        a,
-        aRₛ,
-        b,
-        ecc,
-        P,
-        ρₛ,
-        Rₛ,
-        n,
-        t₀,
-        tₚ,
-        t_ref,
-        incl,
-        Ω,
-        ω,
-        M₀,
-        Mₛ,
-        aₛ,
-        Mₚ,
-        aₚ
-    )
+    return KeplerianOrbit(a, aRₛ, b, ecc, P, ρₛ, Rₛ, n, t₀, tₚ, t_ref, incl, Ω, ω, M₀,
+                          Mₛ, aₛ, Mₚ, aₚ)
 end
 
 @kwmethod function KeplerianOrbit(;a, Rₛ, P, t₀, b, ecc, ω)
@@ -540,27 +320,8 @@ end
     # RV info
     Mₛ, aₛ, Mₚ, aₚ = compute_RV_params(ρₛ, Rₛ, a, P)
 
-    return KeplerianOrbit(
-        a,
-        aRₛ,
-        b,
-        ecc,
-        P,
-        ρₛ,
-        Rₛ,
-        n,
-        t₀,
-        tₚ,
-        t_ref,
-        incl,
-        Ω,
-        ω,
-        M₀,
-        Mₛ,
-        aₛ,
-        Mₚ,
-        aₚ
-    )
+    return KeplerianOrbit(a, aRₛ, b, ecc, P, ρₛ, Rₛ, n, t₀, tₚ, t_ref, incl, Ω, ω, M₀,
+                          Mₛ, aₛ, Mₚ, aₚ)
 end
 
 @kwmethod function KeplerianOrbit(;a, Rₛ, P, tₚ, b, ecc, ω)
@@ -576,27 +337,8 @@ end
     # RV info
     Mₛ, aₛ, Mₚ, aₚ = compute_RV_params(ρₛ, Rₛ, a, P)
 
-    return KeplerianOrbit(
-        a,
-        aRₛ,
-        b,
-        ecc,
-        P,
-        ρₛ,
-        Rₛ,
-        n,
-        t₀,
-        tₚ,
-        t_ref,
-        incl,
-        Ω,
-        ω,
-        M₀,
-        Mₛ,
-        aₛ,
-        Mₚ,
-        aₚ
-    )
+    return KeplerianOrbit(a, aRₛ, b, ecc, P, ρₛ, Rₛ, n, t₀, tₚ, t_ref, incl, Ω, ω, M₀,
+                          Mₛ, aₛ, Mₚ, aₚ)
 end
 
 #############
@@ -610,7 +352,7 @@ compute_ρₛ(a, P, Rₛ) = compute_ρₛ(aRₛ(a, Rₛ), P)
 # Semi-major axis / star radius ratio
 @kwdispatch compute_aRₛ()
 @kwmethod compute_aRₛ(;ρₛ, P) = cbrt(G_cgs * P^2.0 * ρₛ / (3.0 * π))
-@kwmethod compute_aRₛ(;ρₛ, P::T) where {T <: Unitful.Time} = cbrt(G_cgs * P^2.0 * ρₛ / (3.0 * π))
+@kwmethod compute_aRₛ(;ρₛ, P::T) where {T <: Unitful.Time} = cbrt(G * P^2.0 * ρₛ / (3.0 * π))
 @kwmethod compute_aRₛ(;a, P, Rₛ) = aRₛ(compute_ρₛ(a, P, Rₛ), P)
 @kwmethod compute_aRₛ(;a, Rₛ) = a / Rₛ
 
@@ -714,66 +456,67 @@ flip(orbit::KeplerianOrbit, Rₚ) = KeplerianOrbit(
     Ω = orbit.Ω
 )
 
-function Base.show(io::IO, orbit::KeplerianOrbit)
-    a = orbit.a isa Nothing ? nothing : uconvert(u"AU", orbit.a)
-    aRₛ = orbit.aRₛ
-    b = orbit.b
-    ecc = orbit.ecc
-    P = orbit.P
-    ρₛ = orbit.ρₛ
-    Rₛ = orbit.Rₛ
-    t₀ = orbit.t₀
-    incl = orbit.incl
-    Ω = orbit.Ω
-    ω = orbit.ω
-    print(
-        io,
-        """KeplerianOrbit(
-            a=$(upreferred(orbit.a)), aRₛ=$(orbit.aRₛ),
-            b=$(orbit.b), ecc=$(orbit.ecc), P=$(orbit.P),
-            ρₛ=$(orbit.ρₛ), Rₛ=$(orbit.Rₛ),
-            t₀=$(orbit.t₀), incl=$(orbit.incl),
-            Ω=$(orbit.Ω), ω = $(orbit.ω)
-        )"""
-    )
-end
+upreferred(u::Nothing) = nothing
+#function Base.show(io::IO, orbit::KeplerianOrbit)
+#    a = orbit.a isa Nothing ? nothing : uconvert(u"AU", orbit.a)
+#    aRₛ = orbit.aRₛ
+#    b = orbit.b
+#    ecc = orbit.ecc
+#    P = orbit.P
+#    ρₛ = orbit.ρₛ
+#    Rₛ = orbit.Rₛ
+#    t₀ = orbit.t₀
+#    incl = orbit.incl
+#    Ω = orbit.Ω
+#    ω = orbit.ω
+#    print(
+#        io,
+#        """KeplerianOrbit(
+#            a=$(upreferred(orbit.a)), aRₛ=$(orbit.aRₛ),
+#            b=$(orbit.b), ecc=$(orbit.ecc), P=$(orbit.P),
+#            ρₛ=$(orbit.ρₛ), Rₛ=$(orbit.Rₛ),
+#            t₀=$(orbit.t₀), incl=$(orbit.incl),
+#            Ω=$(orbit.Ω), ω = $(orbit.ω)
+#        )"""
+#    )
+#end
 
 function Base.show(io::IO, ::MIME"text/plain", orbit::KeplerianOrbit)
-    a = orbit.a isa Quantity ? orbit.a : "$(ustrip(u"AU", orbit.a * u"cm")) AU"
-    P = orbit.P isa Quantity ? orbit.P : "$(ustrip(u"d", orbit.P * u"s")) d"
-    ρₛ = orbit.ρₛ isa Quantity ? orbit.ρₛ : "$(orbit.ρₛ) g/cm^3"
-    Rₛ = orbit.Rₛ isa Quantity ? orbit.Rₛ : "$(ustrip(u"Rsun", orbit.Rₛ * u"cm")) Rsun"
-    t₀ = orbit.t₀ isa Quantity ? orbit.t₀ : "$(ustrip(u"d", orbit.t₀ * u"s")) d"
-    tₚ = orbit.tₚ isa Quantity ? orbit.tₚ : "$(ustrip(u"d", orbit.tₚ * u"s")) d"
-    t_ref = orbit.t_ref isa Quantity ? orbit.t_ref : "$(ustrip(u"d", orbit.t_ref * u"s")) d"
-    incl = orbit.incl isa Quantity ? orbit.incl : "$(ustrip(u"°", orbit.incl))°"
-    Ω = orbit.Ω isa Quantity ? orbit.Ω : "$(orbit.Ω) rad"
-    ω = orbit.ω isa Quantity ? orbit.ω : "$(orbit.ω) rad"
-    Mₛ = orbit.Mₛ isa Quantity ? orbit.Mₛ : "$(ustrip(u"Msun", orbit.Mₛ * u"g")) Msun"
-    aₛ = orbit.aₛ isa Quantity ? orbit.aₛ : "$(ustrip(u"AU", orbit.aₛ * u"cm")) AU"
-    Mₚ = orbit.Mₚ isa Quantity ? orbit.Mₚ : "$(ustrip(u"Mjup", orbit.Mₚ * u"g")) Mjup"
-    aₚ = orbit.aₚ isa Quantity ? orbit.aₚ : "$(ustrip(u"AU", orbit.aₚ * u"cm")) AU"
+    #a = orbit.a isa Quantity ? orbit.a : "$(ustrip(u"AU", orbit.a * u"cm")) AU"
+    #P = orbit.P isa Quantity ? orbit.P : "$(ustrip(u"d", orbit.P * u"s")) d"
+    #ρₛ = orbit.ρₛ isa Quantity ? orbit.ρₛ : "$(orbit.ρₛ) g/cm^3"
+    #Rₛ = orbit.Rₛ isa Quantity ? orbit.Rₛ : "$(ustrip(u"Rsun", orbit.Rₛ * u"cm")) Rsun"
+    #t₀ = orbit.t₀ isa Quantity ? orbit.t₀ : "$(ustrip(u"d", orbit.t₀ * u"s")) d"
+    #tₚ = orbit.tₚ isa Quantity ? orbit.tₚ : "$(ustrip(u"d", orbit.tₚ * u"s")) d"
+    #t_ref = orbit.t_ref isa Quantity ? orbit.t_ref : "$(ustrip(u"d", orbit.t_ref * u"s")) d"
+    #incl = orbit.incl isa Quantity ? orbit.incl : "$(ustrip(u"°", orbit.incl))°"
+    #Ω = orbit.Ω isa Quantity ? orbit.Ω : "$(orbit.Ω) rad"
+    #ω = orbit.ω isa Quantity ? orbit.ω : "$(orbit.ω) rad"
+    #Mₛ = orbit.Mₛ isa Quantity ? orbit.Mₛ : "$(ustrip(u"Msun", orbit.Mₛ * u"g")) Msun"
+    #aₛ = orbit.aₛ isa Quantity ? orbit.aₛ : "$(ustrip(u"AU", orbit.aₛ * u"cm")) AU"
+    #Mₚ = orbit.Mₚ isa Quantity ? orbit.Mₚ : "$(ustrip(u"Mjup", orbit.Mₚ * u"g")) Mjup"
+    #aₚ = orbit.aₚ isa Quantity ? orbit.aₚ : "$(ustrip(u"AU", orbit.aₚ * u"cm")) AU"
     print(
         io,
         """
         KeplerianOrbit
-         a: $a
+         a: $(upreferred(orbit.a))
          aRₛ: $(upreferred(orbit.aRₛ))
          b: $(upreferred(orbit.b))
          ecc: $(orbit.ecc)
-         P: $P
-         ρₛ: $ρₛ
-         Rₛ: $Rₛ
-         t₀: $t₀
-         tₚ: $tₚ
-         t_ref: $t_ref
-         incl: $incl
-         Ω: $Ω
-         ω: $ω
-         Mₛ: $Mₛ
-         aₛ: $aₛ
-         Mₚ: $Mₚ
-         aₚ: $aₚ
+         P: $(upreferred(orbit.P))
+         ρₛ: $(upreferred(orbit.ρₛ))
+         Rₛ: $(upreferred(orbit.Rₛ))
+         t₀: $(upreferred(orbit.t₀))
+         tₚ: $(upreferred(orbit.tₚ))
+         t_ref: $(upreferred(orbit.t_ref))
+         incl: $(upreferred(orbit.incl))
+         Ω: $(upreferred(orbit.Ω))
+         ω: $(upreferred(orbit.ω))
+         Mₛ: $(upreferred(orbit.Mₛ))
+         aₛ: $(upreferred(orbit.aₛ))
+         Mₚ: $(upreferred(orbit.Mₚ))
+         aₚ: $(upreferred(orbit.aₚ))
         """
     )
 end
