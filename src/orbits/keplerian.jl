@@ -388,11 +388,8 @@ function compute_RV_params(ρₛ, Rₛ, a, P; Mₚ = zero(typeof(ρₛ * Rₛ^3.
 end
 
 function compute_M₀(ecc, ω)
-    sinω, cosω = sincos(ω)
-    E₀ = 2.0 * atan(
-        sqrt(1.0 - ecc) * cosω,
-        sqrt(1.0 + ecc) * (1.0 + sinω),
-    )
+    sin_ω, cos_ω = sincos(ω)
+    E₀ = 2.0 * atan(√(1.0 - ecc) * cos_ω, √(1.0 + ecc) * (1.0 + sin_ω))
     M₀ = E₀ - ecc * sin(E₀)
     return M₀
 end
@@ -417,9 +414,13 @@ relative_position(orbit::KeplerianOrbit, t) = _position(orbit, -orbit.aRₛ, t)
 
 # Returns sin(ν), cos(ν)
 function compute_true_anomaly(orbit::KeplerianOrbit, t)
-    M = orbit.n * (t - orbit.t₀ - orbit.t_ref)
+    M = (t - orbit.t₀ - orbit.t_ref) * orbit.n
     E = kepler_solver(M, orbit.ecc)
-    return sincos(trueanom(E, orbit.ecc))
+    if iszero(orbit.ecc)
+        return sincos(M)
+    else
+        return sincos(trueanom(E, orbit.ecc))
+    end
 end
 
 # Transform from orbital plane to equatorial plane

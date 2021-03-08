@@ -37,32 +37,63 @@ KeplerianOrbit(
 )
 
 # ╔═╡ 4ba4e3a0-78a3-11eb-13f0-93334f4796a6
-KeplerianOrbit(
-	ρₛ = 2.37u"g/cm^3",
-	Rₛ = 0.87u"Rsun",
-	P = 4.234520u"d",
-	ecc = 0.12,
-	t₀ = 0.0u"d",
-	incl = 88.60u"°",
-)
+let
+	orbit = KeplerianOrbit(
+		ρₛ = 2.37u"g/cm^3",
+		Rₛ = 0.87u"Rsun",
+		P = 4.234520u"d",
+		ecc = 0.12,
+		t₀ = 0.0u"d",
+		incl = 88.60u"°",
+	)
+
+	u = [0.4, 0.26] # Quad limb dark
+		ld = PolynomialLimbDark(u)
+		t = range(-1, 5, length=1000)u"d" # Days from t0
+		rs = range(0, 0.2, length=5) # Radius ratio
+		fluxes = @. ld(orbit, t, rs')
+		plot(t, fluxes, label=rs', legend=:bottom, legendtitle=:rprs)
+	
+	println("-------------")
+	@show orbit.n orbit.M₀ orbit.t₀ orbit.t_ref
+end
 
 # ╔═╡ 01c1cd04-78ab-11eb-2bc9-45e070b29c3d
-KeplerianOrbit(
-	aRₛ = 13.09,
-	P =  4.234520*86_400,
-	b = 0.32,
-	t₀ = 0.0,
-	ecc = 0.12,
-)
+let
+	orbit = KeplerianOrbit(
+		aRₛ = 13.09,
+		P =  4.234520*86_400,
+		b = 0.32,
+		t₀ = 0.0,
+		ecc = 0.12,
+	)
+
+	u = [0.4, 0.26] # Quad limb dark
+	ld = PolynomialLimbDark(u)
+	t = range(-1, 5, length=1000) * 86_400 # Days from t0
+	rs = range(0, 0.2, length=5) # Radius ratio
+	fluxes = @. ld(orbit, t, rs')
+	plot(t / 86_400, fluxes, label=rs', legend=:bottom, legendtitle=:rprs)
+end
 
 # ╔═╡ 8a142fca-78aa-11eb-2c6b-112f743d3563
-KeplerianOrbit(
-	aRₛ = 13.09,
-	P = 4.234520u"d",
-	b = 0.32, # From separate ρₛ calc. above
-	t₀ = 0.0u"d",
-	ecc = 0.12,
-)
+let
+	orbit = KeplerianOrbit(
+		aRₛ = 13.09,
+		P = 3.0u"d",
+		b = 0.0, # From separate ρₛ calc. above
+		t₀ = 0.0u"d",
+		ecc = 0.0,
+	)
+
+
+	u = [0.4, 0.26] # Quad limb dark
+	ld = PolynomialLimbDark(u)
+	t = range(0, 8, length=1_000)u"d" # Days from t0
+	rs = range(0, 0.2, length=5) # Radius ratio
+	fluxes = @. ld(orbit, t, rs')
+	plot(t*2, fluxes, label=rs', legend=:bottom, legendtitle=:rprs)
+end
 
 # ╔═╡ accde7a8-76c8-11eb-1584-51b8cf5343e1
 let
@@ -79,7 +110,7 @@ let
 	t = range(-1*86_400, 5*86_400, length=1000) # Days from t0
 	rs = range(0, 0.2, length=5) # Radius ratio
 	fluxes = @. ld(orbit, t, rs')
-	plot(fluxes, label=rs', legend=:bottom, legendtitle=:rprs)
+	plot(t / 86_400, fluxes, label=rs', legend=:bottom, legendtitle=:rprs)
 end
 
 # ╔═╡ cf2f7320-752e-11eb-0991-1b852dfc264b
