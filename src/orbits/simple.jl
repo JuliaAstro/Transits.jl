@@ -14,8 +14,8 @@ end
 Circular orbit parameterized by the basic observables of a transiting system.
 
 # Parameters
-* `P`/`period` - The orbital period of the planets, nominally in days
-* `T`/`duration` - The duration of the transit, similar units as `period`.
+* `period` - The orbital period of the planets, nominally in days
+* `duration` - The duration of the transit, similar units as `period`.
 * `t0` - The midpoint time of the reference transit, similar units as `period`
 * `b` - The impact parameter of the orbit, unitless
 """
