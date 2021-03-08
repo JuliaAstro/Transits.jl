@@ -1,81 +1,64 @@
-struct SimpleOrbit{T,S,V,R} <: AbstractOrbit
+struct SimpleOrbit{T,V} <: AbstractOrbit
     period::T
     t0::T
-    b::S
+    b::V
     duration::T
-    r_star::V
-
-    b_norm::V
-    speed::R
+    speed::V
     half_period::T
     ref_time::T
 end
 
+# @kwdispatch SimpleOrbit(;P => period, T => duration, t₀ => t0, Rₛ => Rs)
+
 """
-    SimpleOrbit(; period, duration, t0=0, b=0, r_star=1)
+    SimpleOrbit(; period, duration, t0=0, b=0, Rs=1)
 
 Circular orbit parameterized by the basic observables of a transiting system.
 
 # Parameters
-* `period` - The orbital period of the planets, nominally in days
-* `duration` The duration of the transit, same units as `period`
-* `t0` - The midpoint time of the reference transit, same units as `period`
-* `b` - The impact parameter of the orbit
-* `r_star` - The radius of the star, nominally in solar radii
+* `P`/`period` - The orbital period of the planets, nominally in days
+* `T`/`duration` - The duration of the transit, similar units as `period`.
+* `t₀`/`t0` - The midpoint time of the reference transit, similar units as `period`
+* `b` - The impact parameter of the orbit, unitless
+* `Rₛ`/`Rs` - The radius of the star, nominally in solar radii. This is only used in the case of [`SecondaryLimbDark`](@ref).
 """
-function SimpleOrbit(;period, duration, t0=zero(period), b=0.0, r_star=1.0)
+function SimpleOrbit(;period, duration, t0=zero(period), b=0.0)
     half_period = 0.5 * period
     duration > half_period && error("duration cannot be longer than half the period")
-    b_norm = b * r_star
-    speed = 2 * sqrt(r_star^2 - b_norm^2) / duration
+    speed = 2 * sqrt(1 - b^2) / duration
     ref_time =  t0 - half_period
     # normalize time types
     period, t0, duration, half_period, ref_time = promote(period, t0, duration, half_period, ref_time)
-    # normalize unitless types
-    r_star, b_norm = promote(r_star, b_norm)
-    SimpleOrbit(period, t0, b, duration, r_star, b_norm, speed, half_period, ref_time)
+    SimpleOrbit(period, t0, b, duration, speed, half_period, ref_time)
 end
 
 
 period(orbit::SimpleOrbit) = orbit.period
 duration(orbit::SimpleOrbit) = orbit.duration
 
-planet_position(orbit::SimpleOrbit, t) = relative_position(orbit, t)
+relative_time(orbit::SimpleOrbit, t) =
+    (t - orbit.ref_time) % period(orbit) - orbit.half_period
 
 function relative_position(orbit::SimpleOrbit, t)
-    dt = (t - orbit.ref_time) % period(orbit) - orbit.half_period
-    x = orbit.speed * dt
-    y = orbit.b_norm
-    z = abs(dt) < 0.5 * orbit.duration ? one(x) : -one(x)
+    Δt = relative_time(orbit, t)
+    x = orbit.speed * Δt
+    y = orbit.b
+    z = abs(Δt) < 0.5 * orbit.duration ? one(x) : -one(x)
     return SA[x, y, z]
 end
 
-function in_transit(orbit::SimpleOrbit, t, r; texp=0)
-    dt = (t - orbit.ref_time) % period(orbit) - orbit.half_period
-    tol = sqrt((r + orbit.r_star)^2 - orbit.b_norm^2) / orbit.speed
-    tol += 0.5 * texp
-    return abs(dt) < tol
-end
-
-function in_transit(orbit::SimpleOrbit, t; texp=0)
-    dt = (t - orbit.ref_time) % period(orbit) - orbit.half_period
-    tol = 0.5 * (orbit.duration + texp)
-    return abs(dt) < tol
-end
-
-function flip(orbit::SimpleOrbit, r_planet)
+function flip(orbit::SimpleOrbit, ror)
     t0 = orbit.t0 + orbit.half_period
-    b = orbit.b_norm / r_planet
-    duration = 2 * sqrt(r_planet^2 + orbit.b_norm^2) / orbit.speed
-    return SimpleOrbit(orbit.period,
-                       t0,
-                       b,
-                       duration,
-                       r_planet,
-                       orbit.b_norm,
-                       orbit.speed,
-                       orbit.half_period,
-                       orbit.t0)
+    b = orbit.b / ror
+    return SimpleOrbit(
+        orbit.period,
+        t0,
+        b,
+        orbit.duration,
+        orbit.speed / ror,
+        orbit.half_period,
+        orbit.t0
+    )
 end
 
 function Base.show(io::IO, orbit::SimpleOrbit)
@@ -83,8 +66,8 @@ function Base.show(io::IO, orbit::SimpleOrbit)
     P = orbit.period
     b = orbit.b
     t0 = orbit.t0
-    Rs = orbit.r_star
-    print(io, "SimpleOrbit(P=$P, T=$T, t0=$t0, b=$b, r_star=$Rs)")
+    Rs = orbit.Rs
+    print(io, "SimpleOrbit(P=$P, T=$T, t0=$t0, b=$b)")
 end
 
 function Base.show(io::IO, ::MIME"text/plain", orbit::SimpleOrbit)
@@ -92,6 +75,5 @@ function Base.show(io::IO, ::MIME"text/plain", orbit::SimpleOrbit)
     P = orbit.period
     b = orbit.b
     t0 = orbit.t0
-    Rs = orbit.r_star
-    print(io, "SimpleOrbit\n period: $P\n duration: $T\n t0: $t0\n b: $b\n r_star: $Rs")
+    print(io, "SimpleOrbit\n period: $P\n duration: $T\n t0: $t0\n b: $b")
 end
