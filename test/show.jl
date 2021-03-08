@@ -55,13 +55,12 @@ end
 @testset "SimpleOrbit" begin
     orbit = SimpleOrbit(duration=1, period=3)
 
-    @test sprint(show, orbit) == "SimpleOrbit(P=3.0, T=1.0, t0=0.0, b=0.0, r_star=1.0)"
+    @test sprint(show, orbit) == "SimpleOrbit(P=3.0, T=1.0, t0=0.0, b=0)"
 
     @test sprint(show, "text/plain", orbit) == """
     SimpleOrbit
      period: 3.0
      duration: 1.0
      t0: 0.0
-     b: 0.0
-     r_star: 1.0"""
+     b: 0"""
 end

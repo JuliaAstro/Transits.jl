@@ -51,11 +51,11 @@ function SecondaryLimbDark(u1::AbstractVector, u2=u1; kwargs...)
     return SecondaryLimbDark(driver1, driver2; kwargs...)
 end
 
-function compute(ld::SecondaryLimbDark, orbit::AbstractOrbit, t, r; kwargs...)
-    f1 = ld.primary_driver(orbit, t, r; kwargs...)
-    orbit2 = Orbits.flip(orbit, r * orbit.r_star)
-    f2 = ld.secondary_driver(orbit2, t, 1/r; kwargs...)
-    flux_ratio = ld.brightness_ratio * r^2
+function compute(ld::SecondaryLimbDark, orbit::AbstractOrbit, t, ror; kwargs...)
+    f1 = ld.primary_driver(orbit, t, ror; kwargs...)
+    orbit2 = Orbits.flip(orbit, ror)
+    f2 = ld.secondary_driver(orbit2, t, inv(ror); kwargs...)
+    flux_ratio = ld.brightness_ratio * ror^2
     return (f1 + flux_ratio * f2) / (1 + flux_ratio)
 end
 
