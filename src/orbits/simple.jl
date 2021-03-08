@@ -1,17 +1,15 @@
-struct SimpleOrbit{T,V} <: AbstractOrbit
+struct SimpleOrbit{T,V,S} <: AbstractOrbit
     period::T
     t0::T
     b::V
     duration::T
-    speed::V
+    speed::S
     half_period::T
     ref_time::T
 end
 
-# @kwdispatch SimpleOrbit(;P => period, T => duration, t₀ => t0, Rₛ => Rs)
-
 """
-    SimpleOrbit(; period, duration, t0=0, b=0, Rs=1)
+    SimpleOrbit(; period, duration, t0=0, b=0)
 
 Circular orbit parameterized by the basic observables of a transiting system.
 
@@ -20,9 +18,8 @@ Circular orbit parameterized by the basic observables of a transiting system.
 * `T`/`duration` - The duration of the transit, similar units as `period`.
 * `t₀`/`t0` - The midpoint time of the reference transit, similar units as `period`
 * `b` - The impact parameter of the orbit, unitless
-* `Rₛ`/`Rs` - The radius of the star, nominally in solar radii. This is only used in the case of [`SecondaryLimbDark`](@ref).
 """
-function SimpleOrbit(;period, duration, t0=zero(period), b=0.0)
+function SimpleOrbit(;period, duration, t0=zero(period), b=0)
     half_period = 0.5 * period
     duration > half_period && error("duration cannot be longer than half the period")
     speed = 2 * sqrt(1 - b^2) / duration
@@ -66,7 +63,6 @@ function Base.show(io::IO, orbit::SimpleOrbit)
     P = orbit.period
     b = orbit.b
     t0 = orbit.t0
-    Rs = orbit.Rs
     print(io, "SimpleOrbit(P=$P, T=$T, t0=$t0, b=$b)")
 end
 
