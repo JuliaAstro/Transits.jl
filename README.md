@@ -2,7 +2,7 @@
 
 [![Build Status](https://github.com/juliaastro/Transits.jl/workflows/CI/badge.svg)](https://github.com/juliaastro/Transits.jl/actions)
 [![PkgEval](https://juliaci.github.io/NanosoldierReports/pkgeval_badges/T/Transits.svg)](https://juliaci.github.io/NanosoldierReports/pkgeval_badges/report.html)
-[![Coverage](https://codecov.io/gh/juliaastro/Transits.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/juliaastro/Transits.jl)
+[![Coverage](https://codecov.io/gh/juliaastro/Transits.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/juliaastro/Transits.jl)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliaastro.github.io/Transits.jl/stable)
@@ -52,10 +52,10 @@ To install use [Pkg](https://julialang.github.io/Pkg.jl/v1/managing-packages/). 
 ```julia
 pkg> add Transits
 ```
-If you want to use the most up-to-date version of the code, check it out from `master`
+If you want to use the most up-to-date version of the code, check it out from `main`
 
 ```julia
-pkg> add Transits#master
+pkg> add Transits#main
 ```
 
 ## Usage
