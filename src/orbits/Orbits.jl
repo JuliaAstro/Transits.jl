@@ -1,6 +1,5 @@
 module Orbits
 
-using KeywordDispatch
 using StaticArrays
 
 export SimpleOrbit, KeplerianOrbit
