@@ -28,5 +28,6 @@ makedocs(;
 
 deploydocs(;
     repo="github.com/JuliaAstro/Transits.jl",
-    push_preview=true
+    push_preview=true,
+    devbranch="main"
 )
