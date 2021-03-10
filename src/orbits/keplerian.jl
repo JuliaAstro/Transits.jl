@@ -57,6 +57,7 @@ end
     rho_star => ρₛ,
     aRs => aRₛ,
     Rs => Rₛ,
+    period => P,
     t0 => t₀,
     M0 => M₀,
     tp => tₚ,
