@@ -1,5 +1,6 @@
 using Transits.Orbits: KeplerianOrbit, flip,
                        _star_position, _planet_position, relative_position
+using Unitful, UnitfulAstro
 
 function compute_r(orbit, t)
     pos = relative_position.(orbit, t)
@@ -70,7 +71,7 @@ end
             t₀ = sky_coords["t0"][i],
             ecc = sky_coords["e"][i],
             ω = sky_coords["omega"][i],
-            incl = sky_coords["incl"][i],
+            incl = sky_coords["incl"][i]
         )
         for i in 1:length(sky_coords["t0"])
     ]
@@ -101,20 +102,20 @@ end
 
 @testset "KeplerianOrbit: small star" begin
     # Model inputs
-    m_star = 0.151 # Solar masses
-    r_star = 0.189 # Solar radii
-    period = 0.4626413 # Days
-    t0 = 0.2 # Days
+    r_star = 0.189
+    m_star = 0.151
+    period = 0.4626413
+    t0 = 0.2
     b = 0.5
     ecc = 0.1
     ω = 0.1
 
     # Sample model from `Transits.jl`
     orbit = KeplerianOrbit(
-        Rₛ = ustrip(u"cm", r_star * u"Rsun"),
-        Mₛ = ustrip(u"g", m_star * u"Msun"),
-        P =  ustrip(u"s", period * u"d"),
-        t₀ = ustrip(u"s", t0 * u"d"),
+        Rₛ = r_star,
+        Mₛ = m_star,
+        P =  period,
+        t₀ = t0,
         b = b,
         ecc = ecc,
         ω = ω,
@@ -148,8 +149,7 @@ end
 
     # Compare
     test_vals = small_star()
-    t_days = test_vals["t"]
-    t = ustrip.(u"s", t_days * u"d")
+    t = test_vals["t"]
     r_batman = test_vals["r_batman"]
     m = test_vals["m"]
     r = compute_r(orbit, t)
@@ -159,20 +159,20 @@ end
 
 @testset "KeplerianOrbit: impact" begin
     # Model inputs
-    m_star = 0.151 # Solar masses
-    r_star = 0.189 # Solar radii
-    period = 0.4626413 # Days
-    t0 = 0.2 # Days
+    r_star = 0.189
+    m_star = 0.151
+    period = 0.4626413
+    t0 = 0.2
     b = 0.5
     ecc = 0.8
     ω = 0.1
 
     # Sample model from `Transits.jl`
     orbit = KeplerianOrbit(
-        Rₛ = ustrip(u"cm", r_star * u"Rsun"),
-        Mₛ = ustrip(u"g", m_star * u"Msun"),
-        P =  ustrip(u"s", period * u"d"),
-        t₀ = ustrip(u"s", t0 * u"d"),
+        Rₛ = r_star,
+        Mₛ = m_star,
+        P =  period,
+        t₀ = t0,
         b = b,
         ecc = ecc,
         ω = ω,
@@ -185,20 +185,20 @@ end
 @testset "KeplerianOrbit: flip" begin
     stack(arr_arr) = hcat((reshape(map(p -> p[i], arr_arr), :) for i in 1:3)...)
 
-    t = ustrip.(u"s", range(0, 100; length=1_000)u"d")
+    t = range(0, 100; length=1_000)
 
     orbit = KeplerianOrbit(
-        Mₛ = ustrip(u"g", 1.3 * u"Msun"),
-        Mₚ = ustrip(u"g", 0.1 * u"Msun"),
-        Rₛ = ustrip(u"cm", 1.0 * u"Rsun"),
-        P = ustrip(u"s", 100.0 * u"d"),
-        t₀ = ustrip(u"s", 0.5 * u"d"),
-        incl = 0.25 * π,
+        Mₛ = 1.3,
+        Mₚ = 0.1,
+        Rₛ = 1.0,
+        P = 100.0,
+        t₀ = 0.5,
+        incl = 45.0,
         ecc = 0.3,
         ω = 0.5,
         Ω = 1.0
     )
-    orbit_flipped = flip(orbit, ustrip(u"cm", 0.7 * u"Rsun"))
+    orbit_flipped = flip(orbit, 0.7)
 
 
     u_star = stack(_star_position.(orbit, orbit.Rₛ, t))
@@ -217,21 +217,20 @@ end
 @testset "KeplerianOrbit: flip circular" begin
     stack(arr_arr) = hcat((reshape(map(p -> p[i], arr_arr), :) for i in 1:3)...)
 
-    t = ustrip.(u"s", range(0, 100; length=1_000)u"d")
+    t = range(0, 100; length=1_000)
 
     orbit = KeplerianOrbit(
-        Mₛ = ustrip(u"g", 1.3 * u"Msun"),
-        Mₚ = ustrip(u"g", 0.1 * u"Msun"),
-        Rₛ = ustrip(u"cm", 1.0 * u"Rsun"),
-        P = ustrip(u"s", 100.0 * u"d"),
-        t₀ = ustrip(u"s", 0.5 * u"d"),
-        incl = 0.25 * π,
+        Mₛ = 1.3,
+        Mₚ = 0.1,
+        Rₛ = 1.0,
+        P = 100.0,
+        t₀ = 0.5,
+        incl = 45.0,
         ecc = 0.0,
         ω = 0.5,
         Ω = 1.0
     )
-    orbit_flipped = flip(orbit, ustrip(u"cm", 0.7 * u"Rsun"))
-
+    orbit_flipped = flip(orbit, 0.7)
 
     u_star = stack(_star_position.(orbit, orbit.Rₛ, t))
     u_planet_flipped = stack(_planet_position.(orbit_flipped, orbit.Rₛ, t))

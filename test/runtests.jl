@@ -3,7 +3,7 @@ using QuadGK
 using StableRNGs
 using Transits
 using Test
-using Unitful, UnitfulAstro
+#using Unitful, UnitfulAstro
 
 py"""
 import numpy as np
