@@ -89,10 +89,6 @@ function compute_uniform_grad(b::T, r; r2, b2, sqarea, fourbrinv) where T
     return (flux, kap0, kite_area2, kck), ∇s0
 end
 
-function frule((_, _, _), ::typeof(compute_uniform), b, r; kwargs...)
-    compute_uniform_grad(b, r; kwargs...)
-end
-
 
 function compute_linear_grad(b::T, r; k2, kc, kc2, onembmr2, onembpr2, onembmr2inv, sqonembmr2, r2=r^2, b2=b^2, br=b*r, fourbr=4*br, sqbr=sqrt(br)) where T
     if iszero(b) # case 10
@@ -100,7 +96,7 @@ function compute_linear_grad(b::T, r; k2, kc, kc2, onembmr2, onembpr2, onembmr2i
         Eofk = 0.5 * π
         Em1mKdm = 0.25 * π
 
-        ∇s1 = SA[zero(T), -2 * π * r * sqrt1mr2]
+        ∇s1 = SA[zero(T), r * Λ1]
     elseif b == r
         if r == 0.5 # case 6
             Λ1 = π - 4 / 3 - 2 * (b - 0.5) + 6 * (r - 0.5)
@@ -149,11 +145,6 @@ function compute_linear_grad(b::T, r; k2, kc, kc2, onembmr2, onembpr2, onembmr2i
     return (flux, Eofk, Em1mKdm), ∇s1
 end
 
-function frule((_, _, _), ::typeof(compute_linear), b, r; kwargs...)
-    compute_linear_grad(b, r; kwargs...)
-end
-
-
 function compute_quadratic_grad(b, r; s0, r2, b2, kap0, kite_area2, k2, ∇s0)
     r2pb2 = r2 + b2
     η2 = r2 * (r2pb2 + b2)
@@ -170,11 +161,6 @@ function compute_quadratic_grad(b, r; s0, r2, b2, kap0, kite_area2, k2, ∇s0)
     ∇s2 = 2 * ∇s0 + ∇η
     return  s2, ∇s2
 end
-
-function frule((_, _, _), ::typeof(compute_quadratic), b, r; kwargs...)
-    compute_quadratic_grad(b, r; kwargs...)
-end
-
 
 function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
     T = float(S)
