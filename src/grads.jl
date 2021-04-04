@@ -171,10 +171,10 @@ function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
     ## check for trivial cases
     if b ≥ 1 + r || iszero(r)
         # completely unobscured
-        return one(T), dfdg, Zero(), Zero()
+        return one(T), dfdg, zero(T), zero(T)
     elseif r ≥ 1 + b
         # completely obscured
-        return zero(T), dfdg, Zero(), Zero()
+        return zero(T), dfdg, zero(T), zero(T)
     end
 
     r2 = r^2
@@ -204,7 +204,7 @@ function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
         dfdr *= π * ld.norm
         dfdg[1] = (onemr2 - flux) * π * ld.norm
         dfdg[2] = 2/3 * (sqrt1mr2^3 - flux) * π * ld.norm
-        return flux * π * ld.norm, dfdg * ld.norm, Zero(), dfdr
+        return flux * π * ld.norm, dfdg * ld.norm, zero(T), dfdr
     end
 
     # take a moment to calculate values used repeatedly in the
@@ -326,7 +326,7 @@ function rrule(::typeof(compute), ld::P, b, r) where {P<:PolynomialLimbDark}
         ∂ld = Composite{P}(g_n=dfdg * Δf)
         ∂b = dfdb * Δf
         ∂r = dfdr * Δf
-        NO_FIELDS, ∂ld, ∂b, ∂r
+        return NO_FIELDS, ∂ld, ∂b, ∂r
     end
     return f, compute_pullback
 end
