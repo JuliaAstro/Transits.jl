@@ -27,7 +27,7 @@ A limb dark law need only need to implement `compute(::Law, b, r)` to extend the
 """
 abstract type AbstractLimbDark end
 
-Base.broadcastable(law::AbstractLimbDark) = (law,)
+Base.broadcastable(law::AbstractLimbDark) = Ref(law)
 
 """
     (::AbstractLimbDark)(b, r)
@@ -90,14 +90,14 @@ function compute(ld::AbstractLimbDark, orbit::AbstractOrbit, t, r)
     end
 end
 
-include("elliptic.jl")
-include("series.jl")
-include("poly.jl")
-include("quad.jl")
+include("polynomial/elliptic.jl")
+include("polynomial/series.jl")
+include("polynomial/poly.jl")
+include("polynomial/poly-grads.jl")
+include("polynomial/quad.jl")
+include("polynomial/quad-grads.jl")
 include("integrated.jl")
 include("secondary.jl")
 include("distributions.jl")
-include("grads.jl")
-
 
 end
