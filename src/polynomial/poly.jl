@@ -271,7 +271,7 @@ function sqarea_triangle(p0, p1, p2)
     return sqarea
 end
 
-function compute_uniform(b::T, r; sqarea, r2=r^2, b2=b^2, fourbrinv=inv(4*b*r)) where T
+function compute_uniform(b::T, r; sqarea, r2=r^2, b2=b^2, fourbrinv=inv(4 * b * r)) where T
     if b ≤ 1 - r
         flux = π * (1 - r2)
         kap0 = convert(T, π)
@@ -289,7 +289,7 @@ function compute_uniform(b::T, r; sqarea, r2=r^2, b2=b^2, fourbrinv=inv(4*b*r)) 
     return flux, kap0, kite_area2, kck
 end
 
-function compute_linear(b::T, r; k2, kc, kc2, onembmr2, onembpr2, onembmr2inv, r2=r^2, b2=b^2, br=b*r, fourbr=4*br, sqbr=sqrt(br)) where T
+function compute_linear(b::T, r; k2, kc, kc2, onembmr2, onembpr2, onembmr2inv, r2=r^2, b2=b^2, br=b * r, fourbr=4 * br, sqbr=sqrt(br)) where T
     if iszero(b) # case 10
         Λ1 = -2 * π * sqrt(1 - r2)^3
         Eofk = 0.5 * π
@@ -324,7 +324,7 @@ function compute_linear(b::T, r; k2, kc, kc2, onembmr2, onembpr2, onembmr2inv, r
             Πofk, Eofk, Em1mKdm = cel(inv(k2), kc, p, 1 + μ, one(T), one(T), p + μ, kc2, zero(T))
             Λ1 = 2 * sqrt(onembmr2) * (onembpr2 * Πofk - (4 - 7 * r2 - b2) * Eofk) / 3
         else # case
-            Λ1 = 2 * acos(1 - 2 * r) - 2 * π * (r > 0.5) - (4/3 * (3 + 2 * r - 8 * r2) + 8 * (r + b - 1) * r) * sqrt(r * (1 - r))
+            Λ1 = 2 * acos(1 - 2 * r) - 2 * π * (r > 0.5) - (4 / 3 * (3 + 2 * r - 8 * r2) + 8 * (r + b - 1) * r) * sqrt(r * (1 - r))
             Eofk = one(T)
             Em1mKdm = one(T)
         end

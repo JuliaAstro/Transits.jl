@@ -1,6 +1,6 @@
-#=
+#= 
 This file contains the code for calculating the Mn and Nn integrals via
-series expansion.
+series expansion. 
 =#
 
 ###
@@ -61,7 +61,7 @@ function downwardM!(arr::AbstractVector{T}, Mn_coeff; n_max, sqbr, sqonembmr2, o
 
     invsqarea = inv(sqarea)
     # recurse downward
-    for m in n_max-4:-1:4
+    for m in n_max - 4:-1:4
         arr[begin + m] = ((m + 4) * arr[begin + m + 4] - 2 * (m + 3) *
                       onemr2mb2 * arr[begin + m + 2]) * invsqarea / (m + 2)
     end
@@ -78,12 +78,12 @@ function Mn_four!(arr::AbstractVector{T}; kap0, sqbr, k2, Em1mKdm, onemr2mb2, ki
         arr[begin] = kap0
         arr[begin + 1] = 4 * sqbr * k2 * Em1mKdm
         arr[begin + 2] = kap0 * onemr2mb2 + kite_area2
-        arr[begin + 3] = 8 * sqbr^3 * 2/3 * k2 * (Eofk + (3 * k2 - 2) * Em1mKdm)
+        arr[begin + 3] = 8 * sqbr^3 * 2 / 3 * k2 * (Eofk + (3 * k2 - 2) * Em1mKdm)
     else # eqn 78,80
         arr[begin] = π
         arr[begin + 1] = 2 * sqonembmr2 * Eofk
         arr[begin + 2] = π * onemr2mb2
-        arr[begin + 3] = sqonembmr2^3 * 2/3 * ((3 - 2 / k2) * Eofk + Em1mKdm / k2)
+        arr[begin + 3] = sqonembmr2^3 * 2 / 3 * ((3 - 2 / k2) * Eofk + Em1mKdm / k2)
     end
     return arr
 end
@@ -161,7 +161,7 @@ end
 function Nn_lower!(Nn::AbstractVector, Nn_coeff; Mn, onembpr2, n_max, k, k2, kwargs...)
     Nn_series!(Nn, Nn_coeff; k2, sqonembmr2, n_max, k)
 
-    for m in n_max-2:-1:2
+    for m in n_max - 2:-1:2
         Nn[begin + m] = ((m + 4) * Nn[begin + m + 2] - Mn[begin + m + 2]) / (onembpr2 * (m + 2))
     end
 
@@ -201,10 +201,10 @@ end
 function Nn_two!(Nn::AbstractVector; kap0, kc, k2, sqbr, k, Eofk, Em1mKdm)
     if k2 ≤ 1
         Nn[begin] = 0.5 * kap0 - k * kc
-        Nn[begin + 1] = 4/3 * sqbr * k2 * (2 * Em1mKdm - Eofk)
+        Nn[begin + 1] = 4 / 3 * sqbr * k2 * (2 * Em1mKdm - Eofk)
     else
         Nn[begin] = 0.5 * π
-        Nn[begin + 1] = 4/3 * sqbr * k * (2 * Eofk - Em1mKdm)
+        Nn[begin + 1] = 4 / 3 * sqbr * k * (2 * Eofk - Em1mKdm)
     end
 
     return Nn

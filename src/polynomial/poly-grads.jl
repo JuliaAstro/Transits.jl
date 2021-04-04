@@ -82,7 +82,7 @@ function compute_uniform_grad(b::T, r; r2, b2, sqarea, fourbrinv) where T
 end
 
 
-function compute_linear_grad(b::T, r; k2, kc, kc2, onembmr2, onembpr2, onembmr2inv, sqonembmr2, r2=r^2, b2=b^2, br=b*r, fourbr=4*br, sqbr=sqrt(br)) where T
+function compute_linear_grad(b::T, r; k2, kc, kc2, onembmr2, onembpr2, onembmr2inv, sqonembmr2, r2=r^2, b2=b^2, br=b * r, fourbr=4 * br, sqbr=sqrt(br)) where T
     if iszero(b) # case 10
         Λ1 = -2 * π * sqrt(1 - r2)^3
         Eofk = 0.5 * π
@@ -94,14 +94,14 @@ function compute_linear_grad(b::T, r; k2, kc, kc2, onembmr2, onembpr2, onembmr2i
             Λ1 = π - 4 / 3 - 2 * (b - 0.5) + 6 * (r - 0.5)
             Eofk = one(T)
             Em1mKdm = one(T)
-            ∇s1 = SA[2/3, -2]
+            ∇s1 = SA[2 / 3, -2]
         elseif r < 0.5 # case 5
             m = 4 * r2
             Eofk = cel(m, one(T), one(T), 1 - m)
             Em1mKdm = cel(m, one(T), one(T), zero(T))
             Λ1 = π + 2 / 3 * ((2 * m - 3) * Eofk - m * Em1mKdm) +
                  (b - r) * 4 * r * (Eofk - 2 * Em1mKdm)
-            ∇s1 = SA[-4/3 * r * (Eofk -2 * Em1mKdm), -4 * r * Eofk]
+            ∇s1 = SA[-4 / 3 * r * (Eofk - 2 * Em1mKdm), -4 * r * Eofk]
         else # case 7
             m = 4 * r2
             minv = inv(m)
@@ -109,7 +109,7 @@ function compute_linear_grad(b::T, r; k2, kc, kc2, onembmr2, onembpr2, onembmr2i
             Em1mKdm = cel(minv, one(T), one(T), zero(T))
             Λ1 = π + 1 / 3 * ((2 * m - 3) * Em1mKdm - m * Eofk) / r -
                  (b - r) * 2 * (2 * Eofk - Em1mKdm)
-            ∇s1 = SA[2/3 * (2 * Eofk - Em1mKdm), -2 * Em1mKdm]
+            ∇s1 = SA[2 / 3 * (2 * Eofk - Em1mKdm), -2 * Em1mKdm]
         end
     else
         if b + r > 1 # case 2, case 8
@@ -122,13 +122,13 @@ function compute_linear_grad(b::T, r; k2, kc, kc2, onembmr2, onembpr2, onembmr2i
             p = bmrdbpr^2 * onembpr2 * onembmr2inv
             Πofk, Eofk, Em1mKdm = cel(inv(k2), kc, p, 1 + μ, one(T), one(T), p + μ, kc2, zero(T))
             Λ1 = 2 * sqrt(onembmr2) * (onembpr2 * Πofk - (4 - 7 * r2 - b2) * Eofk) / 3
-            ∇s1 = SA[-4/3 * r * sqonembmr2 * (Eofk - 2 * Em1mKdm), -4 * r * sqonembmr2 * Eofk]
+            ∇s1 = SA[-4 / 3 * r * sqonembmr2 * (Eofk - 2 * Em1mKdm), -4 * r * sqonembmr2 * Eofk]
         else # case
-            Λ1 = 2 * acos(1 - 2 * r) - 2 * π * (r > 0.5) - (4/3 * (3 + 2 * r - 8 * r2) + 8 * (r + b - 1) * r) * sqrt(r * (1 - r))
+            Λ1 = 2 * acos(1 - 2 * r) - 2 * π * (r > 0.5) - (4 / 3 * (3 + 2 * r - 8 * r2) + 8 * (r + b - 1) * r) * sqrt(r * (1 - r))
             Eofk = one(T)
             Em1mKdm = one(T)
             g = -8 * r * sqrt(r * (1 - r))
-            ∇s1 = SA[-g/3, g]
+            ∇s1 = SA[-g / 3, g]
         end
     end
 
@@ -146,7 +146,7 @@ function compute_quadratic_grad(b, r; s0, r2, b2, kap0, kite_area2, k2, ∇s0)
     else
         Πmkap1 = atan(kite_area2, (r - 1) * (r + 1) - b2)
         four_pi_eta = 2 * (-Πmkap1 + η2 * kap0 - 0.25 * kite_area2 * (1 + 5 * r2 + b2))
-        ∇η = SA[2/b * (4 * b2 * r2 * kap0 - (1 + r2pb2) * kite_area2),
+        ∇η = SA[2 / b * (4 * b2 * r2 * kap0 - (1 + r2pb2) * kite_area2),
                 8 * r * (r2pb2 * kap0 - kite_area2)]
     end
     s2 = 2 * s0 + four_pi_eta
@@ -195,7 +195,7 @@ function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
         end
         dfdr *= π * ld.norm
         dfdg[1] = (onemr2 - flux) * π * ld.norm
-        dfdg[2] = 2/3 * (sqrt1mr2^3 - flux) * π * ld.norm
+        dfdg[2] = 2 / 3 * (sqrt1mr2^3 - flux) * π * ld.norm
         return flux * π * ld.norm, dfdg * ld.norm, zero(T), dfdr
     end
 
@@ -254,7 +254,7 @@ function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
 
     if ld.n_max == 1
         dfdg[begin] -= flux * ld.norm * π
-        dfdg[begin + 1] -= flux * ld.norm * π * 2/3
+        dfdg[begin + 1] -= flux * ld.norm * π * 2 / 3
         dfdb, dfdr = ∇flux * ld.norm
         return flux * ld.norm, dfdg * ld.norm, dfdb, dfdr
     end
@@ -266,7 +266,7 @@ function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
     dfdg[begin + 2] = s2
     if ld.n_max == 2
         dfdg[begin] -= flux * ld.norm * π
-        dfdg[begin + 1] -= flux * ld.norm * π * 2/3
+        dfdg[begin + 1] -= flux * ld.norm * π * 2 / 3
         dfdb, dfdr = ∇flux * ld.norm
         return flux * ld.norm, dfdg * ld.norm, dfdb, dfdr
     end
@@ -295,24 +295,24 @@ function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
         if b < bcut
             dpdb_M = n * (ld.Mn[begin + n - 2] * (2 * r^3 + b^3 - b - 3 * r2 * b) + b * ld.Mn[begin + n] - 4 * r^3 * ld.Nn[begin + n - 2])
         else
-            dpdb_M = n/b * ((ld.Mn[begin + n] - ld.Mn[begin + n - 2]) * (r2 + b2) + (b2 - r2)^2 * ld.Mn[begin + n - 2])
+            dpdb_M = n / b * ((ld.Mn[begin + n] - ld.Mn[begin + n - 2]) * (r2 + b2) + (b2 - r2)^2 * ld.Mn[begin + n - 2])
         end
         ∇flux = ∇flux - ld.g_n[begin + n] * SA[dpdb_M, dpdr_M]
 
     end
     dfdg[begin] -= flux * ld.norm * π
-    dfdg[begin + 1] -= flux * ld.norm * π * 2/3
+    dfdg[begin + 1] -= flux * ld.norm * π * 2 / 3
     dfdb, dfdr = ∇flux * ld.norm
     return flux * ld.norm, dfdg * ld.norm, dfdb, dfdr
 end
 
-function frule((_, Δld, Δb, Δr), ::typeof(compute), ld::LD, b, r) where {LD<:PolynomialLimbDark}
+function frule((_, Δld, Δb, Δr), ::typeof(compute), ld::LD, b, r) where {LD <: PolynomialLimbDark}
     f, dfdg, dfdb, dfdr = compute_grad(ld, b, r)
     ∂g_n = dot(dfdg, Δld.g_n)
     return f, ∂g_n + dfdb * Δb + dfdr * Δr
 end
 
-function rrule(::typeof(compute), ld::LD, b, r) where {LD<:PolynomialLimbDark}
+function rrule(::typeof(compute), ld::LD, b, r) where {LD <: PolynomialLimbDark}
     f, dfdg, dfdb, dfdr = compute_grad(ld, b, r)
     function compute_pullback(Δf)
         ∂ld = Composite{LD}(g_n=dfdg * Δf)

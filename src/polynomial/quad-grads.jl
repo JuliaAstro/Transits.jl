@@ -49,7 +49,7 @@ function compute_grad(ld::QuadLimbDark, b::S, r) where S
         end
         dfdr *= π * ld.norm
         dfdg = SA[(onemr2 - flux) * π * ld.norm,
-                  2/3 * (sqrt1mr2^3 - flux) * π * ld.norm,
+                  2 / 3 * (sqrt1mr2^3 - flux) * π * ld.norm,
                   dfdg3]
         return flux * π * ld.norm, dfdg * ld.norm, zero(T), dfdr
     end
@@ -109,7 +109,7 @@ function compute_grad(ld::QuadLimbDark, b::S, r) where S
 
     if ld.n_max == 1
         dfdg1 -= flux * ld.norm * π
-        dfdg2 -= flux * ld.norm * π * 2/3
+        dfdg2 -= flux * ld.norm * π * 2 / 3
         dfdb, dfdr = ∇flux * ld.norm
         dfdg = SA[dfdg1, dfdg2, dfdg3]
         return flux * ld.norm, dfdg * ld.norm, dfdb, dfdr
@@ -122,7 +122,7 @@ function compute_grad(ld::QuadLimbDark, b::S, r) where S
     dfdg3 = s2
 
     dfdg1 -= flux * ld.norm * π
-    dfdg2 -= flux * ld.norm * π * 2/3
+    dfdg2 -= flux * ld.norm * π * 2 / 3
     dfdb, dfdr = ∇flux * ld.norm
     dfdg = SA[dfdg1, dfdg2, dfdg3]
     return flux * ld.norm, dfdg * ld.norm, dfdb, dfdr
@@ -130,13 +130,13 @@ end
 
 ####
 
-function frule((_, Δld, Δb, Δr), ::typeof(compute), ld::LD, b, r) where {LD<:QuadLimbDark}
+function frule((_, Δld, Δb, Δr), ::typeof(compute), ld::LD, b, r) where {LD <: QuadLimbDark}
     f, dfdg, dfdb, dfdr = compute_grad(ld, b, r)
     ∂g_n = dot(dfdg, Δld.g_n)
     return f, ∂g_n + dfdb * Δb + dfdr * Δr
 end
 
-function rrule(::typeof(compute), ld::LD, b, r) where {LD<:QuadLimbDark}
+function rrule(::typeof(compute), ld::LD, b, r) where {LD <: QuadLimbDark}
     f, dfdg, dfdb, dfdr = compute_grad(ld, b, r)
     function compute_pullback(Δf)
         ∂ld = Composite{LD}(g_n=dfdg * Δf)
