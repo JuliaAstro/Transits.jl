@@ -2,9 +2,8 @@ import ChainRulesCore: frule, rrule
 using LinearAlgebra
 
 function compute_quad_gn_jac(::AbstractVector{T}) where T
-    ∇g_n = SA[zero(T) -one(T)  -1.5
-              zero(T)  one(T)   2.0
-              zero(T)  zero(T) -0.25]
+    ∇g_n = SA[-one(T) one(T)  zero(T)
+              -1.5    2.0    -0.25]
     return ∇g_n
 end
 
@@ -12,16 +11,17 @@ end
 function compute_grad(ld::QuadLimbDark, b::S, r) where S
     T = float(S)
     bcut = 1e-3
-    n = ld.n_max
-    dfdg = zeros(length(ld.g_n))
+    dfdg1 = zero(T)
+    dfdg2 = zero(T)
+    dfdg3 = zero(T)
 
     ## check for trivial cases
     if b ≥ 1 + r || iszero(r)
         # completely unobscured
-        return one(T), dfdg, zero(T), zero(T)
+        return one(T), SA[dfdg1, dfdg2, dfdg3], zero(T), zero(T)
     elseif r ≥ 1 + b
         # completely obscured
-        return zero(T), dfdg, zero(T), zero(T)
+        return zero(T), SA[dfdg1, dfdg2, dfdg3], zero(T), zero(T)
     end
 
     r2 = r^2
@@ -41,16 +41,16 @@ function compute_grad(ld::QuadLimbDark, b::S, r) where S
             dfdr = ld.g_n[begin] * facd + ld.g_n[begin + 1] * facd * sqrt1mr2
         end
         fac = 2 * r2 * onemr2
-        for i in 2:ld.n_max
-            flux -= ld.g_n[begin + i] * fac
-            dfdr += ld.g_n[begin + i] * facd * (1 * onemr2 - i * r2)
-            dfdg[begin + i] -= fac
+        if ld.n_max > 1
+            flux -= ld.g_n[begin + 1] * fac
+            dfdr += ld.g_n[begin + 1] * facd * (onemr2 - r2)
             fac *= sqrt1mr2
             facd *= sqrt1mr2
         end
         dfdr *= π * ld.norm
-        dfdg[1] = (onemr2 - flux) * π * ld.norm
-        dfdg[2] = 2/3 * (sqrt1mr2^3 - flux) * π * ld.norm
+        dfdg = SA[(onemr2 - flux) * π * ld.norm,
+                  2/3 * (sqrt1mr2^3 - flux) * π * ld.norm,
+                  dfdg3]
         return flux * π * ld.norm, dfdg * ld.norm, zero(T), dfdr
     end
 
@@ -91,11 +91,12 @@ function compute_grad(ld::QuadLimbDark, b::S, r) where S
 
     flux = ld.g_n[begin] * s0
     ∇flux = ld.g_n[begin] * ∇s0
-    dfdg[begin] = s0
+    dfdg1 = s0
 
     if ld.n_max == 0
-        dfdg[begin] -= flux * ld.norm * π
+        dfdg1 -= flux * ld.norm * π
         dfdb, dfdr = ∇flux * ld.norm
+        dfdg = SA[dfdg1, dfdg2, dfdg3]
         return flux * ld.norm, dfdg * ld.norm, dfdb, dfdr
     end
 
@@ -104,12 +105,13 @@ function compute_grad(ld::QuadLimbDark, b::S, r) where S
 
     flux += ld.g_n[begin + 1] * s1
     ∇flux = ∇flux + ld.g_n[begin + 1] * ∇s1
-    dfdg[begin + 1] = s1
+    dfdg2 = s1
 
     if ld.n_max == 1
-        dfdg[begin] -= flux * ld.norm * π
-        dfdg[begin + 1] -= flux * ld.norm * π * 2/3
+        dfdg1 -= flux * ld.norm * π
+        dfdg2 -= flux * ld.norm * π * 2/3
         dfdb, dfdr = ∇flux * ld.norm
+        dfdg = SA[dfdg1, dfdg2, dfdg3]
         return flux * ld.norm, dfdg * ld.norm, dfdb, dfdr
     end
 
@@ -117,17 +119,12 @@ function compute_grad(ld::QuadLimbDark, b::S, r) where S
     s2, ∇s2 = compute_quadratic_grad(b, r; s0, r2, b2, kap0, kite_area2, k2, ∇s0)
     flux += ld.g_n[begin + 2] * s2
     ∇flux = ∇flux + ld.g_n[begin + 2] * ∇s2
-    dfdg[begin + 2] = s2
-    if ld.n_max == 2
-        dfdg[begin] -= flux * ld.norm * π
-        dfdg[begin + 1] -= flux * ld.norm * π * 2/3
-        dfdb, dfdr = ∇flux * ld.norm
-        return flux * ld.norm, dfdg * ld.norm, dfdb, dfdr
-    end
+    dfdg3 = s2
 
-    dfdg[begin] -= flux * ld.norm * π
-    dfdg[begin + 1] -= flux * ld.norm * π * 2/3
+    dfdg1 -= flux * ld.norm * π
+    dfdg2 -= flux * ld.norm * π * 2/3
     dfdb, dfdr = ∇flux * ld.norm
+    dfdg = SA[dfdg1, dfdg2, dfdg3]
     return flux * ld.norm, dfdg * ld.norm, dfdb, dfdr
 end
 
@@ -155,7 +152,7 @@ function frule((_, Δu_n), ::Type{<:QuadLimbDark}, u_n::AbstractVector{S}) where
     ∇g_n = compute_quad_gn_jac(u_n)
 
     # calculate flux normalization factor, which only depends on first two terms
-    ∂g_n = @views ∇g_n[:, begin + 1:end] * Δu_n
+    ∂g_n = ∇g_n * Δu_n
     ∂Ω = Composite{typeof(Ω)}(g_n=∂g_n)
     return Ω, ∂Ω
 end
@@ -166,7 +163,7 @@ function rrule(::Type{<:QuadLimbDark}, u_n::AbstractVector{S}; maxiter=100) wher
     ∇g_n = compute_quad_gn_jac(u_n)
 
     function QuadLimbDark_pullback(Δld)
-        ∂u = @views ∇g_n[:, begin + 1:end]' * Δld.g_n
+        ∂u = ∇g_n * Δld.g_n
         return NO_FIELDS, ∂u
     end
     return Ω, QuadLimbDark_pullback
