@@ -61,14 +61,6 @@ function compute_gn_jac(u_n::AbstractVector{T}) where T
     return g_n, dgdu
 end
 
-function compute_gn_jac(u_n::StaticVector{3,T}) where T
-    g_n = compute_gn(u_n)
-    ∇g_n = SA[zero(T) -one(T)  -1.5
-              zero(T)  one(T)   2.0
-              zero(T)  zero(T) -0.25]
-    return g_n, ∇g_n
-end
-
 function compute_uniform_grad(b::T, r; r2, b2, sqarea, fourbrinv) where T
     if b ≤ 1 - r
         flux = π * (1 - r2)
@@ -314,16 +306,16 @@ function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
     return flux * ld.norm, dfdg * ld.norm, dfdb, dfdr
 end
 
-function frule((_, Δld, Δb, Δr), ::typeof(compute), ld::PolynomialLimbDark, b, r)
+function frule((_, Δld, Δb, Δr), ::typeof(compute), ld::LD, b, r) where {LD<:PolynomialLimbDark}
     f, dfdg, dfdb, dfdr = compute_grad(ld, b, r)
     ∂g_n = dot(dfdg, Δld.g_n)
     return f, ∂g_n + dfdb * Δb + dfdr * Δr
 end
 
-function rrule(::typeof(compute), ld::P, b, r) where {P<:PolynomialLimbDark}
+function rrule(::typeof(compute), ld::LD, b, r) where {LD<:PolynomialLimbDark}
     f, dfdg, dfdb, dfdr = compute_grad(ld, b, r)
     function compute_pullback(Δf)
-        ∂ld = Composite{P}(g_n=dfdg * Δf)
+        ∂ld = Composite{LD}(g_n=dfdg * Δf)
         ∂b = dfdb * Δf
         ∂r = dfdr * Δf
         return NO_FIELDS, ∂ld, ∂b, ∂r
@@ -331,7 +323,7 @@ function rrule(::typeof(compute), ld::P, b, r) where {P<:PolynomialLimbDark}
     return f, compute_pullback
 end
 
-function frule((_, Δu_n), ::typeof(PolynomialLimbDark), u::AbstractVector{S}; maxiter=100) where S
+function frule((_, Δu_n), ::Type{<:PolynomialLimbDark}, u::AbstractVector{S}; maxiter=100) where S
     T = float(S)
     # add constant u_0 term
     n_max = length(u)
@@ -360,7 +352,7 @@ function frule((_, Δu_n), ::typeof(PolynomialLimbDark), u::AbstractVector{S}; m
 end
 
 
-function rrule(::typeof(PolynomialLimbDark), u::AbstractVector{S}; maxiter=100) where S
+function rrule(::Type{<:PolynomialLimbDark}, u::AbstractVector{S}; maxiter=100) where S
     T = float(S)
     # add constant u_0 term
     n_max = length(u)
