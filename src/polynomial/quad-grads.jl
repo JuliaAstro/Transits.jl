@@ -1,12 +1,6 @@
 import ChainRulesCore: frule, rrule
 using LinearAlgebra
 
-function compute_quad_gn_jac(::AbstractVector{T}) where T
-    ∇g_n = SA[-one(T) one(T)  zero(T)
-              -1.5    2.0    -0.25]
-    return ∇g_n
-end
-
 
 function compute_grad(ld::QuadLimbDark, b::S, r) where S
     T = float(S)
@@ -147,20 +141,31 @@ function rrule(::typeof(compute), ld::LD, b, r) where {LD <: QuadLimbDark}
     return f, compute_pullback
 end
 
-function frule((_, Δu_n), ::Type{<:QuadLimbDark}, u_n::AbstractVector{S}) where S
+function frule((_, Δu_n), ::Type{<:QuadLimbDark}, u_n::AbstractVector{T}) where T
     Ω = QuadLimbDark(u_n)
-    ∇g_n = compute_quad_gn_jac(u_n)
-
+    ∇g_n = SA[zero(T) zero(T) zero(T)
+              -one(T)  one(T) zero(T)
+                 -1.5     2.0  -0.25]
+    
     # calculate flux normalization factor, which only depends on first two terms
-    ∂g_n = ∇g_n * Δu_n
+    N = length(u_n)
+    if N == 0
+        Δu_n_full = SA[0, 0, 0]
+    elseif N == 1
+        Δu_n_full = SA[0, u_n[begin], 0]
+    else
+        Δu_n_full = SA[0, u_n[begin], u_n[begin + 1]]
+    end
+    ∂g_n = ∇g_n * Δu_n_full
     ∂Ω = Composite{typeof(Ω)}(g_n=∂g_n)
     return Ω, ∂Ω
 end
 
 
-function rrule(::Type{<:QuadLimbDark}, u_n::AbstractVector{S}; maxiter=100) where S
+function rrule(::Type{<:QuadLimbDark}, u_n::AbstractVector{T}; maxiter=100) where T
     Ω = QuadLimbDark(u_n)
-    ∇g_n = compute_quad_gn_jac(u_n)
+    ∇g_n = SA[-one(T)  one(T) zero(T)
+                 -1.5     2.0  -0.25]
 
     function QuadLimbDark_pullback(Δld)
         ∂u = ∇g_n * Δld.g_n
