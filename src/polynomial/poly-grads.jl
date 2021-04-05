@@ -16,7 +16,7 @@ function compute_gn_jac(u_n::AbstractVector{T}) where T
         for j in 0:i
             r = (-1)^j * bcoeff
             a_n[begin + j] -= r * u_n[begin + i]
-            dadu[begin + j, begin + i] -= r
+            dadu[begin + i, begin + j] -= r
             bcoeff *= (i - j) / (j + 1)
         end
     end
@@ -26,35 +26,35 @@ function compute_gn_jac(u_n::AbstractVector{T}) where T
         if j ≥ n - 1
             g_n[begin + j] = a_n[begin + j] / (j + 2)
             for i in 0:n - 1
-                dgdu[begin + j, begin + i + 1] = dadu[begin + j, begin + i + 1] / (j + 2)
+                dgdu[begin + i + 1, begin + j] = dadu[begin + i + 1, begin + j] / (j + 2)
             end
         else
             g_n[begin + j] = a_n[begin + j] / (j + 2) + g_n[begin + j + 2]
             for i in 0:n - 1
-                dgdu[begin + j, begin + i + 1] = dadu[begin + j, begin + i + 1] / (j + 2) + dgdu[begin + j + 2, begin + i + 1]
+                dgdu[begin + i + 1, begin + j] = dadu[begin + i + 1, begin + j] / (j + 2) + dgdu[begin + i + 1, begin + j + 2]
             end
         end
     end
     if n ≥ 3
         g_n[begin + 1] = a_n[begin + 1] + 3 * g_n[begin + 3]
         for i in 0:n - 1
-            dgdu[begin + 1, begin + i + 1] = dadu[begin + 1, begin + i + 1] + 3 * dgdu[begin + 3, begin + i + 1]
+            dgdu[begin + i + 1, begin + 1] = dadu[begin + i + 1, begin + 1] + 3 * dgdu[begin + i + 1, begin + 3]
         end
     elseif n ≥ 1
         g_n[begin + 1] = a_n[begin + 1]
         for i in 0:n - 1
-            dgdu[begin + 1, begin + i + 1] = dadu[begin + 1, begin + i + 1]
+            dgdu[begin + i + 1, begin + 1] = dadu[begin + i + 1, begin + 1]
         end
     end
     if n ≥ 2
         g_n[begin] = a_n[begin] + 2 * g_n[begin + 2]
         for i in 0:n - 1
-            dgdu[begin, begin + i + 1] = dadu[begin, begin + i + 1] + 2 * dgdu[begin + 2, begin + i + 1]
+            dgdu[begin + i + 1, begin] = dadu[begin + i + 1, begin] + 2 * dgdu[begin + i + 1, begin + 2]
         end
     else
         g_n[begin] = a_n[begin]
         for i in 0:n - 1
-            dgdu[begin, begin + i + 1] = dadu[begin, begin + i + 1]
+            dgdu[begin + i + 1, begin] = dadu[begin + i + 1, begin]
         end
     end
 
@@ -346,7 +346,7 @@ function frule((_, Δu_n), ::Type{<:PolynomialLimbDark}, u::AbstractVector{S}; m
     Nn = similar(g_n)
 
     Ω = PolynomialLimbDark(n_max, u_n, g_n, Mn_coeff, Nn_coeff, norm, Mn, Nn)
-    ∂g_n = @views ∇g_n[:, begin + 1:end] * Δu_n
+    ∂g_n = @views ∇g_n[begin + 1:end, :] * Δu_n
     ∂Ω = Composite{typeof(Ω)}(g_n=∂g_n)
     return Ω, ∂Ω
 end
@@ -375,9 +375,10 @@ function rrule(::Type{<:PolynomialLimbDark}, u::AbstractVector{S}; maxiter=100) 
     Nn = similar(g_n)
 
     Ω = PolynomialLimbDark(n_max, u_n, g_n, Mn_coeff, Nn_coeff, norm, Mn, Nn)
+    ∂g_n = @view ∇g_n[begin + 1:end, :]
 
     function PolynomialLimbDark_pullback(Δld)
-        ∂u = @views ∇g_n[:, begin + 1:end]' * Δld.g_n
+        ∂u = ∂g_n * Δld.g_n
         return NO_FIELDS, ∂u
     end
     return Ω, PolynomialLimbDark_pullback
