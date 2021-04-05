@@ -24,21 +24,11 @@ using Transits: compute_grad
 #     test_rrule(compute, ld, 0.0, 0.1)
 # end
 
-function randbr(rng, condition)
-    b = 2 * rand(rng)
-    r = 2 * rand(rng)
-    while !condition(b, r)
-        b = 2 * rand(rng)
-        r = 2 * rand(rng)
-    end
-    return b, r
-end
-
-function finite_diff(b_, r_, u_n_; diff=big(1e-18))
+function finite_diff(b_, r_, u_n_, law=PolynomialLimbDark; diff=big(1e-18))
     b = big(b_)
     r = big(r_)
     u_n = big.(u_n_)
-    ld = PolynomialLimbDark(u_n)
+    ld = law(u_n)
     f = ld(b, r)
 
     # modulate r
@@ -64,8 +54,8 @@ function finite_diff(b_, r_, u_n_; diff=big(1e-18))
     return Float64.([dfdb, dfdr])
 end
 
-function test_compute_grad(b, r, u_n)
-    ld = PolynomialLimbDark(u_n)
+function test_compute_grad(b, r, u_n, law=PolynomialLimbDark)
+    ld = law(u_n)
     _, _, dfdb, dfdr = @inferred compute_grad(ld, b, r)
     grad_analytical = [dfdb, dfdr]
 
@@ -78,7 +68,7 @@ function test_compute_grad(b, r, u_n)
         @test grad_analytical ≈ grad_big atol = atol
 
         # test against finite diff for correctness
-        grad_numerical = finite_diff(b, r, u_n)
+        grad_numerical = finite_diff(b, r, u_n, law)
         @test grad_analytical ≈ grad_numerical atol = atol
     end
 end
@@ -109,7 +99,10 @@ test_names = ["uniform", "linear", "quadratic", "cubic", "quartic", "quintic", "
             -logspace(δ, ϵ, nb) .+ (1 + r);
             range(1 + r - ϵ, 1 + r - 1e-13, length=nb)
         ])
-        test_compute_grad.(bs, r, (u_n,))
+        test_compute_grad.(bs, r, (u_n,), PolynomialLimbDark)
+        if length(u_n) < 3
+            test_compute_grad.(bs, r, (u_n,), QuadLimbDark)
+        end
     end
 
     rs = [1, 1.000001, 2, 10, 100]
@@ -125,6 +118,9 @@ test_names = ["uniform", "linear", "quadratic", "cubic", "quartic", "quintic", "
             -logspace(δ, ϵ, nb) .+ (r + 1);
             r + 1 - 1e-13
         ])
-        test_compute_grad.(bs, r, (u_n,))
+        test_compute_grad.(bs, r, (u_n,), PolynomialLimbDark)
+        if length(u_n) < 3
+            test_compute_grad.(bs, r, (u_n,), QuadLimbDark)
+        end
     end
 end

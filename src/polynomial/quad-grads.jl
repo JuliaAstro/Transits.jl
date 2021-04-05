@@ -36,15 +36,13 @@ function compute_grad(ld::QuadLimbDark, b::S, r) where S
         end
         fac = 2 * r2 * onemr2
         if ld.n_max > 1
-            flux -= ld.g_n[begin + 1] * fac
-            dfdr += ld.g_n[begin + 1] * facd * (2 * onemr2 - r2)
-            fac *= sqrt1mr2
-            facd *= sqrt1mr2
+            flux -= ld.g_n[begin + 2] * fac
+            dfdr += ld.g_n[begin + 2] * facd * 2 * (onemr2 - r2)
         end
         dfdr *= π * ld.norm
         dfdg = SA[(onemr2 - flux) * π * ld.norm,
                   2 / 3 * (sqrt1mr2^3 - flux) * π * ld.norm,
-                  dfdg3]
+                  -fac]
         return flux * π * ld.norm, dfdg * ld.norm, zero(T), dfdr
     end
 
