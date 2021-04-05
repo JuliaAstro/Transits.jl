@@ -37,7 +37,7 @@ function compute_grad(ld::QuadLimbDark, b::S, r) where S
         fac = 2 * r2 * onemr2
         if ld.n_max > 1
             flux -= ld.g_n[begin + 1] * fac
-            dfdr += ld.g_n[begin + 1] * facd * (onemr2 - r2)
+            dfdr += ld.g_n[begin + 1] * facd * (2 * onemr2 - r2)
             fac *= sqrt1mr2
             facd *= sqrt1mr2
         end

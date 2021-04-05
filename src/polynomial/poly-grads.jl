@@ -121,9 +121,9 @@ function compute_linear_grad(b::T, r; k2, kc, kc2, onembmr2, onembpr2, onembmr2i
             μ = 3 * bmrdbpr * onembmr2inv
             p = bmrdbpr^2 * onembpr2 * onembmr2inv
             Πofk, Eofk, Em1mKdm = cel(inv(k2), kc, p, 1 + μ, one(T), one(T), p + μ, kc2, zero(T))
-            Λ1 = 2 * sqrt(onembmr2) * (onembpr2 * Πofk - (4 - 7 * r2 - b2) * Eofk) / 3
+            Λ1 = 2 * sqonembmr2 * (onembpr2 * Πofk - (4 - 7 * r2 - b2) * Eofk) / 3
             ∇s1 = SA[-4 / 3 * r * sqonembmr2 * (Eofk - 2 * Em1mKdm), -4 * r * sqonembmr2 * Eofk]
-        else # case
+        else # case 4
             Λ1 = 2 * acos(1 - 2 * r) - 2 * π * (r > 0.5) - (4 / 3 * (3 + 2 * r - 8 * r2) + 8 * (r + b - 1) * r) * sqrt(r * (1 - r))
             Eofk = one(T)
             Em1mKdm = one(T)
@@ -188,7 +188,7 @@ function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
         fac = 2 * r2 * onemr2
         for i in 2:ld.n_max
             flux -= ld.g_n[begin + i] * fac
-            dfdr += ld.g_n[begin + i] * facd * (1 * onemr2 - i * r2)
+            dfdr += ld.g_n[begin + i] * facd * (2 * onemr2 - i * r2)
             dfdg[begin + i] -= fac
             fac *= sqrt1mr2
             facd *= sqrt1mr2
@@ -275,7 +275,7 @@ function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
     if k2 < 0.5 && ld.n_max > 3
         downwardM!(ld.Mn, ld.Mn_coeff; n_max=ld.n_max, sqonembmr2, sqbr, onemr2mb2, k, k2, sqarea, kap0, Eofk, Em1mKdm, kite_area2)
         if b < bcut
-            Nn_lower!(ld.Nn, ld.Nn_coeff; Mn=ld.Mn, n_max=ld.n_max, kap0, kc, k2, sqbr, k, Eofk, Em1mKdm)
+            Nn_lower!(ld.Nn, ld.Nn_coeff; Mn=ld.Mn, n_max=ld.n_max, onembpr2, sqonembmr2, kap0, kc, k2, sqbr, k, Eofk, Em1mKdm)
         end
     else
         upwardM!(ld.Mn; sqbr, n_max=ld.n_max, sqonembmr2, onemr2mb2, sqarea, k2, kap0, Eofk, Em1mKdm, kite_area2)

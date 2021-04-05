@@ -158,7 +158,7 @@ function compute_Nn_coeffs!(Nn_coeff::AbstractMatrix{T}, n_max) where T
 end
 
 
-function Nn_lower!(Nn::AbstractVector, Nn_coeff; Mn, onembpr2, n_max, k, k2, kwargs...)
+function Nn_lower!(Nn::AbstractVector, Nn_coeff; Mn, onembpr2, sqonembmr2, n_max, k, k2, kwargs...)
     Nn_series!(Nn, Nn_coeff; k2, sqonembmr2, n_max, k)
 
     for m in n_max - 2:-1:2
@@ -176,7 +176,7 @@ function Nn_series!(Nn::AbstractVector{T}, Nn_coeff; k2, sqonembmr2, n_max, k) w
     for j in 1:2
         Nn[begin + n_max - 2 + j] = Nn_coeff[begin + j - 1, begin]
         k2n = one(T)
-        for n in 1:size(Nn_coeff, 3) - 1
+        for n in 1:size(Nn_coeff, 2) - 1
             k2n *= k2
             term = k2n * Nn_coeff[begin + j - 1, begin + n]
             Nn[begin + n_max - 2 + j] += term
@@ -188,7 +188,6 @@ function Nn_series!(Nn::AbstractVector{T}, Nn_coeff; k2, sqonembmr2, n_max, k) w
 
     return Nn
 end
-
 
 function Nn_raise!(Nn::AbstractVector, Mn; n_max, onembpr2, kwargs...)
     Nn_two!(Nn; kwargs...)

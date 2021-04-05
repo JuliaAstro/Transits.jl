@@ -4,13 +4,13 @@ using Transits: compute_grad
 
 # @testset "PolynomialLimbDark" begin
 #     u = [0.4, 0.26, 0.1, 0.1]
-#     test_frule(PolynomialLimbDark, u)
-#     test_rrule(PolynomialLimbDark, u)
+#     # test_frule(PolynomialLimbDark, u)
+#     # test_rrule(PolynomialLimbDark, u)
 
 #     ld = PolynomialLimbDark(u)
 
-#     test_frule(compute, ld, 0.0, 0.1)
-#     test_rrule(compute, ld, 0.0, 0.1)
+#     test_frule(compute, ld, 0.0, 0.1; fdm=forward_fdm(10, 1))
+#     test_rrule(compute, ld, 0.0, 0.1; fdm=forward_fdm(10, 1))
 # end
 
 # @testset "QuadLimbDark" begin
@@ -34,32 +34,97 @@ function randbr(rng, condition)
     return b, r
 end
 
-function test_compute_grad(b, r, u_n)
+function finite_diff(b_, r_, u_n_; diff=big(1e-18))
+    b = big(b_)
+    r = big(r_)
+    u_n = big.(u_n_)
     ld = PolynomialLimbDark(u_n)
-    primal(X) = compute(ld, X[1], X[2])
-    X = [b, r]
-    grad_ForwardDiff = ForwardDiff.gradient(primal, X)
-    _, _, dfdb, dfdr = compute_grad(ld, b, r)
-    grad_analytical = [dfdb, dfdr]
-    # grad_FiniteDiff = FiniteDifferences.grad(central_fdm(5, 1), primal, X)[1]
+    f = ld(b, r)
 
-    # @test grad_analytical ≈ grad_FiniteDiff atol=1e-7
-    @test grad_analytical ≈ grad_ForwardDiff atol=1e-8
+    # modulate r
+    f₊ = ld(b, r + diff)
+    if r == 1 && length(u_n) > 2
+        dfdr = (f₊ - f) / diff
+    else
+        f₋ = ld(b, r - diff)
+        dfdr = (f₊ - f₋) / (2 * diff)
+    end
+
+    # modulate b
+    f₊ = ld(b + diff, r)
+    if b > diff
+        f₋ = ld(b - diff, r)
+        dfdb = (f₊ - f₋) / (2 * diff)
+    elseif iszero(b)
+        dfdb = zero(b)
+    else
+        dfdb = (f₊ - f) / diff
+    end
+    
+    return Float64.([dfdb, dfdr])
 end
 
-@testset "`compute` grads" begin
-    u_n = [0.4, 0.26]
-    # b + r < 1
-    b, r = randbr(rng, (b, r) -> b + r < 1)
-    test_compute_grad(b, r, u_n)
-    # b + r > 1
-    b, r = randbr(rng, (b, r) -> b + r > 1)
-    test_compute_grad(b, r, u_n)
+function test_compute_grad(b, r, u_n)
+    ld = PolynomialLimbDark(u_n)
+    _, _, dfdb, dfdr = @inferred compute_grad(ld, b, r)
+    grad_analytical = [dfdb, dfdr]
 
-    # special cases
-    test_compute_grad(0.5, 0.5, u_n) # r = b = 1/2
-    test_compute_grad(0.3, 0.0, u_n) # b = 0
-    test_compute_grad(0.2, 0.8, u_n) # r + b = 1
-    test_compute_grad(0.3, 0.3, u_n) # r = b < 1/2
-    test_compute_grad(3.0, 3.0, u_n) # r = b > 1/2 
+    atol = r != 1 ? 1e-7 : 3e-6
+
+    @testset "compute_grad - b=$b, r=$r" begin
+        # test against BigFloat for numerical accuracy
+        _, _, dfdb_big, dfdr_big = compute_grad(ld, big(b), big(r))
+        grad_big = [dfdb_big, dfdr_big]
+        @test grad_analytical ≈ grad_big atol = atol
+
+        # test against finite diff for correctness
+        grad_numerical = finite_diff(b, r, u_n)
+        @test grad_analytical ≈ grad_numerical atol = atol
+    end
+end
+
+logspace(start, stop, N) = 10 .^range(log10(start), log10(stop), length=N)
+
+test_coeffs = [[0.0], [1.0], [2.0, -1.0], [3.0, -3.0, 1.0], fill(0.1, 4), fill(0.1, 5), fill(0.1, 10)]
+test_names = ["uniform", "linear", "quadratic", "cubic", "quartic", "quintic", "10th order"]
+
+@testset "`compute` grads - $name" for (name, u_n) in zip(test_names, test_coeffs)
+    # b + r < 1
+    rs = [0.01, 0.1, 0.5, 0.999999]
+    nb = 50
+    ϵ, δ = 1e-9, 1e-3
+    for r in rs
+        bs = abs.([
+            range(0, ϵ, length=nb);
+            range(ϵ, δ, length=nb);
+            range(δ, r - δ, length=nb);
+            -logspace(δ, ϵ, nb) .+ r;
+            range(r - ϵ, r + ϵ, length=nb);
+            logspace(ϵ, δ, nb) .+ r;
+            range(r + δ, 1 - r - δ, length=nb);
+            -logspace(δ, ϵ, nb) .+ (1 - r);
+            range(1 - r - ϵ, 1 - r + ϵ, length=nb);
+            logspace(ϵ, δ, nb) .+ (1 - r);
+            range(1 - r + δ, 1 + r - δ, length=nb);
+            -logspace(δ, ϵ, nb) .+ (1 + r);
+            range(1 + r - ϵ, 1 + r - 1e-13, length=nb)
+        ])
+        test_compute_grad.(bs, r, (u_n,))
+    end
+
+    rs = [1, 1.000001, 2, 10, 100]
+    for r in rs
+        bs = abs.([
+            r - 1 + 1e-13;
+            logspace(ϵ, δ, nb) .+ (r - 1);
+            range(r - 1 + δ, r - δ, length=nb);
+            -logspace(δ, ϵ, nb) .+ r;
+            range(r - ϵ, r + ϵ, length=nb);
+            logspace(ϵ, δ, nb) .+ r;
+            range(r + δ, r + 1 - δ, length=nb);
+            -logspace(δ, ϵ, nb) .+ (r + 1);
+            r + 1 - 1e-13
+        ])
+        test_compute_grad.(bs, r, (u_n,))
+    end
 end
