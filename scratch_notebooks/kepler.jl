@@ -1,11 +1,8 @@
 ### A Pluto.jl notebook ###
-# v0.12.21
+# v0.14.1
 
 using Markdown
 using InteractiveUtils
-
-# ╔═╡ 888afc3a-7715-11eb-3dbe-096fba0a014d
-using UnitfulRecipes
 
 # ╔═╡ fe341026-7278-11eb-2490-0f2ffdeae45e
 begin
@@ -19,6 +16,9 @@ begin
 	using Unitful
 	using UnitfulAstro
 end
+
+# ╔═╡ 888afc3a-7715-11eb-3dbe-096fba0a014d
+using UnitfulRecipes
 
 # ╔═╡ 29f28a74-77f8-11eb-2b70-dd1462a347fc
 TableOfContents(depth=6)

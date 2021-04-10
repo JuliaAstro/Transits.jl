@@ -592,45 +592,30 @@ flip(orbit::KeplerianOrbit, Rₚ) = KeplerianOrbit(
 #    )
 #end
 
+stringify_units(value::Unitful.AbstractQuantity, unit) = value
+stringify_units(value, unit) = "$value $unit"
 function Base.show(io::IO, ::MIME"text/plain", orbit::KeplerianOrbit)
-    a     = orbit.P isa Quantity ? orbit.a     : "$(orbit.a) Rsun"
-    aRₛ   = orbit.P isa Quantity ? orbit.aRₛ   : "$(orbit.aRₛ)"
-    b     = orbit.P isa Quantity ? orbit.b     : "$(orbit.b)"
-    ecc   = orbit.P isa Quantity ? orbit.ecc   : "$(orbit.ecc)"
-    P     = orbit.P isa Quantity ? orbit.P     : "$(orbit.P) d"
-    ρₛ    = orbit.P isa Quantity ? orbit.ρₛ    : "$(orbit.ρₛ) Msun/Rsun^3"
-    Rₛ    = orbit.P isa Quantity ? orbit.Rₛ    : "$(orbit.Rₛ) Rsun"
-    t₀    = orbit.P isa Quantity ? orbit.t₀    : "$(orbit.t₀) d"
-    tₚ    = orbit.P isa Quantity ? orbit.tₚ    : "$(orbit.tₚ) d"
-    t_ref = orbit.P isa Quantity ? orbit.t_ref : "$(orbit.t_ref) d"
-    incl  = orbit.P isa Quantity ? orbit.incl  : "$(orbit.incl) rad"
-    Ω     = orbit.P isa Quantity ? orbit.Ω     : "$(orbit.Ω) rad"
-    ω     = orbit.P isa Quantity ? orbit.ω     : "$(orbit.ω) rad"
-    Mₛ    = orbit.P isa Quantity ? orbit.Mₛ    : "$(orbit.Mₛ) Msun"
-    aₛ    = orbit.P isa Quantity ? orbit.aₛ    : "$(orbit.aₛ) Rsun"
-    Mₚ    = orbit.P isa Quantity ? orbit.Mₚ    : "$(orbit.Mₚ) Msun"
-    aₚ    = orbit.P isa Quantity ? orbit.aₚ    : "$(orbit.aₚ) Rsun"
     print(
         io,
         """
-        KeplerianOrbit
-         a: $a
-         aRₛ: $aRₛ
-         b: $b
-         ecc: $ecc
-         P: $P
-         ρₛ: $ρₛ
-         Rₛ: $Rₛ
-         t₀: $t₀
-         tₚ: $tₚ
-         t_ref: $t_ref
-         incl: $incl
-         Ω: $Ω
-         ω: $ω
-         Mₛ: $Mₛ
-         aₛ: $aₛ
-         Mₚ: $Mₚ
-         aₚ: $aₚ
-        """
+        Keplerian Orbit
+          a: $(stringify_units(orbit.a, "Rsun"))
+          aRₛ: $(orbit.aRₛ)
+          b: $(orbit.b)
+          ecc: $(orbit.ecc)
+          P: $(stringify_units(orbit.P, "d"))
+          ρₛ: $(stringify_units(orbit.ρₛ, "Msun/Rsun^3"))
+          Rₛ: $(stringify_units(orbit.Rₛ, "Rsun"))
+          t₀: $(stringify_units(orbit.t₀, "d"))
+          tₚ: $(stringify_units(orbit.tₚ, "d"))
+          t_ref: $(stringify_units(orbit.t_ref, "d"))
+          incl: $(stringify_units(orbit.incl, "rad"))
+          Ω: $(stringify_units(orbit.Ω, "rad"))
+          ω: $(stringify_units(orbit.ω, "rad"))
+          Mₛ: $(stringify_units(orbit.Mₛ, "Msun"))
+          aₛ: $(stringify_units(orbit.aₛ, "Rsun"))
+          Mₚ: $(stringify_units(orbit.Mₚ, "Msun"))
+          aₚ: $(stringify_units(orbit.aₚ, "Rsun"))
+      """
     )
 end
