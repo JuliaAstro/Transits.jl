@@ -27,7 +27,7 @@ Keplerian orbit parameterized by the basic observables of a transiting 2-body sy
 * `Omega`/`Ω` - The longitude of the ascending node, same units as `incl`.
 * `omega`/`ω` - The argument of periapsis, same units as `Ω`.
 """
-struct KeplerianOrbit{T,L,D,R,A,I} <: AbstractOrbit
+struct KeplerianOrbit{T,L,D,R,A,I,M} <: AbstractOrbit
     a::L
     aRₛ::R
     b::R
@@ -43,10 +43,10 @@ struct KeplerianOrbit{T,L,D,R,A,I} <: AbstractOrbit
     Ω::R
     ω::R
     M₀::R
-    Mₛ
-    aₛ
-    Mₚ
-    aₚ
+    Mₛ::M
+    aₛ::L
+    Mₚ::M
+    aₚ::L
 end
 
 # Enable keyword dispatch and argument name aliasing
