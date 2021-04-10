@@ -15,17 +15,17 @@ Keplerian orbit parameterized by the basic observables of a transiting 2-body sy
 
 # Parameters
 * `a` - The semi-major axis, nominally in AU
-* `aRs` - The ratio of the semi-major axis to the star radius. Aliased to `aRₛ`
+* `aRs`/`aRₛ` - The ratio of the semi-major axis to the star radius.
 * `b` - The impact parameter, bounded between 0 ≤ b ≤ 1
 * `ecc` - The eccentricity of the closed orbit, bounded between 0 ≤ ecc < 1
-* `period` - The orbital period of the planet, nominally in days. Aliased to `P`
-* `rho_star` - The spherical star density, nominally in g/cc. Aliased to `ρₛ`
-* `r_star` - The star mass, nominally in solar radii. Aliased to `Rₛ`
-* `t0` - The midpoint time of the reference transit, same units as `P`. Aliased to `t₀`
+* `period`/`P` - The orbital period of the planet, nominally in days.
+* `rho_star`/`ρₛ` - The spherical star density, nominally in g/cm^3.
+* `r_star`/`Rₛ` - The star mass, nominally in solar radii.
+* `t0`/`t₀` - The midpoint time of the reference transit, same units as `P`.
 * `incl` - The inclination of the orbital plane relative to the axis perpendicular to the
            reference plane, nominally in radians
-* `Omega` - The longitude of the ascending node, same units as `incl`. Aliased to `Ω`
-* `omega` - The argument of periapsis, same units as `Ω`. Aliased to `ω`
+* `Omega`/`Ω` - The longitude of the ascending node, same units as `incl`.
+* `omega`/`ω` - The argument of periapsis, same units as `Ω`.
 """
 struct KeplerianOrbit{T,L,D,R,A,I} <: AbstractOrbit
     a::L
