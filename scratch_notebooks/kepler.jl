@@ -163,7 +163,7 @@ end
 
 # ╔═╡ ab44e378-8e6d-4e2a-9908-bd409531129a
 md"""
-## Phase prediction
+## Phase estimates
 """
 
 # ╔═╡ caa432a8-be41-43f5-80df-e149769c9de6
@@ -201,6 +201,7 @@ function compute_phases(t, P, t0)
 end
 
 # ╔═╡ 275c663f-80dc-4c1b-a443-3784b8023eeb
+# https://discourse.julialang.org/t/findnearest-function/4143
 function searchsortednearest(a, x)
    idx = searchsortedfirst(a,x)
    if (idx==1); return idx; end
@@ -218,7 +219,7 @@ begin
 	p_HP23 = 0.1113
 	u_HP23 = [0.4, 0.26]
 	ld_HP23 = PolynomialLimbDark(u_HP23)
-	t_HP23 = range(0 - 3 / 24, 0 + 2.5 / 24, length=1000) # days
+	t_HP23 = range(0 - 3 / 24, 0 + 3 / 24, length=1000) # days
 	ϕ = compute_phases.(t_HP23, orbit_HP23.P/2.0, orbit_HP23.t₀)
 	fluxes_HP23 = @. ld_HP23(orbit_HP23, t_HP23, p_HP23)
 	
@@ -270,7 +271,7 @@ APT_phase_range = compute_phases.([t_groups[begin][begin] - t_buff/60/24, t_grou
 
 # ╔═╡ 67c1b206-c9e9-4a2d-b471-e8ff6ad49c01
 md"""
-would correspond to an APT phase of **$(APT_phase_range[1]) - $(APT_phase_range[2])**
+would correspond to an APT phase of **$(APT_phase_range[1]) - $(APT_phase_range[2])** for the start of the first group 🚀
 """
 
 # ╔═╡ Cell order:
