@@ -1,5 +1,4 @@
 using AstroLib: trueanom, kepler_solver
-using KeywordDispatch
 using PhysicalConstants
 using Unitful, UnitfulAstro
 
@@ -49,22 +48,6 @@ struct KeplerianOrbit{T,L,D,R,A,I,M} <: AbstractOrbit
     aₚ::L
 end
 
-# Enable keyword dispatch and argument name aliasing
-@kwdispatch KeplerianOrbit(;
-    Omega => Ω,
-    omega => ω,
-    aRs => aRₛ,
-    rho_star => ρₛ,
-    aRs => aRₛ,
-    Rs => Rₛ,
-    period => P,
-    t0 => t₀,
-    M0 => M₀,
-    tp => tₚ,
-    Mp => Mₚ,
-    Rp => Rₚ,
-)
-
 function normalize_inputs(a, aRₛ, b, ecc, P, Rₛ, t₀, tₚ, t_ref, Mₛ, aₛ, Mₚ, aₚ)
     # Normalize unitless types
     aRₛ, b, ecc = promote(aRₛ, b, ecc)
@@ -100,7 +83,7 @@ function normalize_inputs(
     return aRₛ, b, ecc, P, t₀, tₚ, t_ref
 end
 
-@kwmethod function KeplerianOrbit(;ρₛ, Rₛ, P, ecc, t₀, incl)
+function KeplerianOrbit(ρₛ, Rₛ, P, ecc, t₀, incl)
     # Apply domain specific unit conversions
     ρₛ isa Real && (ρₛ = convert_ρₛ(ρₛ))
     G = P isa Real ? G_nom : G_unit
@@ -126,85 +109,7 @@ end
                           Mₛ, aₛ, Mₚ, aₚ)
 end
 
-@kwmethod function KeplerianOrbit(;ρₛ, Rₛ, ecc, P, tₚ, incl)
-    # Apply domain specific unit conversions
-    ρₛ isa Real && (ρₛ = convert_ρₛ(ρₛ))
-    G = P isa Real ? G_nom : G_unit
-
-    # Compute remaining system parameters
-    Ω = 0.0
-    ω = 0.0
-    aRₛ = compute_aRₛ(ρₛ, P, G)
-    a = compute_a(ρₛ, P, Rₛ, G)
-    b = compute_b(ρₛ, P, sincos(incl), ecc, ω, G)
-    n = 2.0 * π / P
-    M₀ = compute_M₀(ecc, ω)
-    t₀ = tₚ + M₀ / n
-    t_ref = tₚ - t₀
-    Mₛ, aₛ, Mₚ, aₚ = compute_RV_params(ρₛ, Rₛ, a, P, G)
-
-    # Normalize inputs
-    a, aRₛ, b, ecc, P, Rₛ, t₀, tₚ, t_ref, Mₛ, aₛ, Mₚ, aₚ = normalize_inputs(
-        a, aRₛ, b, ecc, P, Rₛ, t₀, tₚ, t_ref, Mₛ, aₛ, Mₚ, aₚ
-    )
-
-    return KeplerianOrbit(a, aRₛ, b, ecc, P, ρₛ, Rₛ, n, t₀, tₚ, t_ref, incl, Ω, ω, M₀,
-                          Mₛ, aₛ, Mₚ, aₚ)
-end
-
-@kwmethod function KeplerianOrbit(;ρₛ, Rₛ, P, t₀, b, ecc, ω)
-    # Apply domain specific unit conversions
-    ρₛ isa Real && (ρₛ = convert_ρₛ(ρₛ))
-    G = P isa Real ? G_nom : G_unit
-
-    # Compute remaining system parameters
-    Ω = 0.0
-    aRₛ = compute_aRₛ(ρₛ, P, G)
-    a = compute_a(ρₛ, P, Rₛ, G)
-    incl = compute_incl(aRₛ, b, ecc, sincos(ω))
-    n = 2.0 * π / P
-    M₀ = compute_M₀(ecc, ω)
-    tₚ = t₀ - M₀ / n
-    t_ref = tₚ - t₀
-    Mₛ = compute_Mₛ(ρₛ, Mₛ)
-    Mₛ, aₛ, Mₚ, aₚ = compute_RV_params(ρₛ, Rₛ, a, P, G)
-
-    # Normalize inputs
-    a, aRₛ, b, ecc, P, Rₛ, t₀, tₚ, t_ref, Mₛ, aₛ, Mₚ, aₚ = normalize_inputs(
-        a, aRₛ, b, ecc, P, Rₛ, t₀, tₚ, t_ref, Mₛ, aₛ, Mₚ, aₚ
-    )
-
-    return KeplerianOrbit(a, aRₛ, b, ecc, P, ρₛ, Rₛ, n, t₀, tₚ, t_ref, incl, Ω, ω, M₀,
-                          Mₛ, aₛ, Mₚ, aₚ)
-end
-
-@kwmethod function KeplerianOrbit(;ρₛ, Rₛ, P, tₚ, b, ecc, ω)
-    # Apply domain specific unit conversions
-    ρₛ isa Real && (ρₛ = convert_ρₛ(ρₛ))
-    G = P isa Real ? G_nom : G_unit
-
-    # Compute remaining system parameters
-    Ω = 0.0
-    aRₛ = compute_aRₛ(ρₛ, P, G)
-    a = compute_a(ρₛ, P, Rₛ, G)
-    incl = compute_incl(aRₛ, b, ecc, sincos(ω))
-    n = 2.0 * π / P
-    M₀ = compute_M₀(ecc, ω)
-    t₀ = tₚ + M₀ / n
-    t_ref = tₚ - t₀
-    Mₛ = compute_Mₛ(ρₛ, Mₛ)
-    Mₛ, aₛ, Mₚ, aₚ = compute_RV_params(ρₛ, Rₛ, a, P, G)
-
-    # Normalize inputs
-    a, aRₛ, b, ecc, P, Rₛ, t₀, tₚ, t_ref, Mₛ, aₛ, Mₚ, aₚ = normalize_inputs(
-        a, aRₛ, b, ecc, P, Rₛ, t₀, tₚ, t_ref, Mₛ, aₛ, Mₚ, aₚ
-    )
-
-    return KeplerianOrbit(a, aRₛ, b, ecc, P, ρₛ, Rₛ, n, t₀, tₚ, t_ref, incl, Ω, ω, M₀,
-                          Mₛ, aₛ, Mₚ, aₚ)
-end
-
-@kwmethod function KeplerianOrbit(;aRₛ, P, b, t₀, ecc)
+function KeplerianOrbit(aRₛ, P, b, t₀, ecc)
     # Apply domain specific unit conversions
     G = P isa Real ? G_nom : G_unit
 
@@ -221,224 +126,6 @@ end
 
     # Normalize inputs
     aRₛ, b, ecc, P, t₀, tₚ, t_ref = normalize_inputs(
-        a, aRₛ, b, ecc, P, Rₛ, t₀, tₚ, t_ref, Mₛ, aₛ, Mₚ, aₚ
-    )
-
-    return KeplerianOrbit(a, aRₛ, b, ecc, P, ρₛ, Rₛ, n, t₀, tₚ, t_ref, incl, Ω, ω, M₀,
-                          Mₛ, aₛ, Mₚ, aₚ)
-end
-
-@kwmethod function KeplerianOrbit(;aRₛ, P, b, tₚ, ecc)
-    # Apply domain specific unit conversions
-    G = P isa Real ? G_nom : G_unit
-
-    # Compute remaining system parameters
-    Ω = 0.0
-    ω = 0.0
-    ρₛ = compute_ρₛ(aRₛ, P, G)
-    incl = compute_incl(aRₛ, b, ecc, sincos(ω))
-    M₀ = compute_M₀(ecc, ω)
-    n = 2.0 * π / P
-    t₀ = tₚ + M₀ / n
-    t_ref = tₚ - t₀
-    a = Rₛ = Mₛ = aₛ = Mₚ = aₚ = nothing
-
-    # Normalize inputs
-    aRₛ, b, ecc, P, t₀, tₚ, t_ref = normalize_inputs(
-        a, aRₛ, b, ecc, P, Rₛ, t₀, tₚ, t_ref, Mₛ, aₛ, Mₚ, aₚ
-    )
-
-    return KeplerianOrbit(a, aRₛ, b, ecc, P, ρₛ, Rₛ, n, t₀, tₚ, t_ref, incl, Ω, ω, M₀,
-                          Mₛ, aₛ, Mₚ, aₚ)
-end
-
-@kwmethod function KeplerianOrbit(;aRₛ, P, t₀, ecc, ω, incl)
-    # Apply domain specific unit conversions
-    G = P isa Real ? G_nom : G_unit
-
-    # Compute remaining system parameters
-    Ω = 0.0
-    ρₛ = compute_ρₛ(aRₛ, P, G)
-    b = compute_b(aRₛ, sincos(incl), ecc, ω)
-    M₀ = compute_M₀(ecc, ω)
-    n = 2.0 * π / P
-    tₚ = t₀ - M₀ / n
-    t_ref = tₚ - t₀
-    a = Rₛ = Mₛ = aₛ = Mₚ = aₚ = nothing
-
-    # Normalize inputs
-    aRₛ, b, ecc, P, t₀, tₚ, t_ref = normalize_inputs(
-        a, aRₛ, b, ecc, P, Rₛ, t₀, tₚ, t_ref, Mₛ, aₛ, Mₚ, aₚ
-    )
-
-    return KeplerianOrbit(a, aRₛ, b, ecc, P, ρₛ, Rₛ, n, t₀, tₚ, t_ref, incl, Ω, ω, M₀,
-                          Mₛ, aₛ, Mₚ, aₚ)
-end
-
-@kwmethod function KeplerianOrbit(;aRₛ, P, tₚ, ecc, ω, incl)
-    # Apply domain specific unit conversions
-    G = P isa Real ? G_nom : G_unit
-
-    # Compute remaining system parameters
-    Ω = 0.0
-    ρₛ = compute_ρₛ(aRₛ, P, G)
-    b = compute_b(aRₛ, sincos(incl), ecc, ω)
-    M₀ = compute_M₀(ecc, ω)
-    n = 2.0 * π / P
-    t₀ = tₚ + M₀ / n
-    t_ref = tₚ - t₀
-    a = Rₛ = Mₛ = aₛ = Mₚ = aₚ = nothing
-
-    # Normalize inputs
-    aRₛ, b, ecc, P, t₀, tₚ, t_ref = normalize_inputs(
-        a, aRₛ, b, ecc, P, Rₛ, t₀, tₚ, t_ref, Mₛ, aₛ, Mₚ, aₚ
-    )
-
-    return KeplerianOrbit(a, aRₛ, b, ecc, P, ρₛ, Rₛ, n, t₀, tₚ, t_ref, incl, Ω, ω, M₀,
-                          Mₛ, aₛ, Mₚ, aₚ)
-end
-
-@kwmethod function KeplerianOrbit(;Mₛ, Rₛ, P, t₀, b, ecc, ω)
-    # Apply domain specific unit conversions
-    G = P isa Real ? G_nom : G_unit
-
-    # Compute remaining system parameters
-    Ω = 0.0
-    ρₛ = 3.0 * Mₛ / ( 4.0 * π * Rₛ^3.0 )
-    aRₛ = compute_aRₛ(ρₛ, P, G)
-    a = compute_a(aRₛ, Rₛ, G)
-    incl = compute_incl(aRₛ, b, ecc, sincos(ω))
-    M₀ = compute_M₀(ecc, ω)
-    n = 2.0 * π / P
-    tₚ = t₀ - M₀ / n
-    t_ref = tₚ - t₀
-    Mₛ, aₛ, Mₚ, aₚ = compute_RV_params(ρₛ, Rₛ, a, P, G)
-
-    # Normalize inputs
-    a, aRₛ, b, ecc, P, Rₛ, t₀, tₚ, t_ref, Mₛ, aₛ, Mₚ, aₚ = normalize_inputs(
-        a, aRₛ, b, ecc, P, Rₛ, t₀, tₚ, t_ref, Mₛ, aₛ, Mₚ, aₚ
-    )
-
-    return KeplerianOrbit(a, aRₛ, b, ecc, P, ρₛ, Rₛ, n, t₀, tₚ, t_ref, incl, Ω, ω, M₀,
-                          Mₛ, aₛ, Mₚ, aₚ)
-end
-
-@kwmethod function KeplerianOrbit(;Mₛ, Rₛ, P, tₚ, b, ecc, ω)
-    # Apply domain specific unit conversions
-    G = P isa Real ? G_nom : G_unit
-
-    # Compute remaining system parameters
-    Ω = 0.0
-    ρₛ = 3.0 * Mₛ / ( 4.0 * π * Rₛ^3.0 )
-    aRₛ = compute_aRₛ(ρₛ, P, G)
-    a = compute_a(aRₛ, Rₛ, G)
-    incl = compute_incl(aRₛ, b, ecc, sincos(ω))
-    M₀ = compute_M₀(ecc, ω)
-    n = 2.0 * π / P
-    t₀ =  tₚ + M₀ / n
-    t_ref = tₚ - t₀
-    Mₛ, aₛ, Mₚ, aₚ = compute_RV_params(ρₛ, Rₛ, a, P, G)
-
-    # Normalize inputs
-    a, aRₛ, b, ecc, P, Rₛ, t₀, tₚ, t_ref, Mₛ, aₛ, Mₚ, aₚ = normalize_inputs(
-        a, aRₛ, b, ecc, P, Rₛ, t₀, tₚ, t_ref, Mₛ, aₛ, Mₚ, aₚ
-    )
-
-    return KeplerianOrbit(a, aRₛ, b, ecc, P, ρₛ, Rₛ, n, t₀, tₚ, t_ref, incl, Ω, ω, M₀,
-                          Mₛ, aₛ, Mₚ, aₚ)
-end
-
-@kwmethod function KeplerianOrbit(;Mₛ, Mₚ, Rₛ, P, t₀, incl, ecc, ω, Ω)
-    # Apply domain specific unit conversions
-    G = P isa Real ? G_nom : G_unit
-
-    # Compute remaining system parameters
-    ρₛ = 3.0 * Mₛ / ( 4.0 * π * Rₛ^3.0 )
-    M_tot = Mₛ + Mₚ
-    a = compute_a(M_tot, P, G)
-    aRₛ = compute_aRₛ(a, Rₛ, G)
-    b = compute_b(aRₛ, sincos(incl), ecc, ω)
-    M₀ = compute_M₀(ecc, ω)
-    n = 2.0 * π / P
-    tₚ = t₀ - M₀ / n
-    t_ref = tₚ - t₀
-    Mₛ, aₛ, Mₚ, aₚ = compute_RV_params(ρₛ, Rₛ, a, P, G; Mₚ=Mₚ)
-
-    # Normalize inputs
-    a, aRₛ, b, ecc, P, Rₛ, t₀, tₚ, t_ref, Mₛ, aₛ, Mₚ, aₚ = normalize_inputs(
-        a, aRₛ, b, ecc, P, Rₛ, t₀, tₚ, t_ref, Mₛ, aₛ, Mₚ, aₚ
-    )
-
-    return KeplerianOrbit(a, aRₛ, b, ecc, P, ρₛ, Rₛ, n, t₀, tₚ, t_ref, incl, Ω, ω, M₀,
-                          Mₛ, aₛ, Mₚ, aₚ)
-end
-
-@kwmethod function KeplerianOrbit(;Mₛ, Mₚ, Rₛ, P, tₚ, incl, ecc, ω, Ω)
-    # Apply domain specific unit conversions
-    G = P isa Real ? G_nom : G_unit
-
-    # Compute remaining system parameters
-    ρₛ = 3.0 * Mₛ / ( 4.0 * π * Rₛ^3.0 )
-    M_tot = Mₛ + Mₚ
-    a = compute_a(M_tot, P, G)
-    aRₛ = compute_aRₛ(a, Rₛ, G)
-    b = compute_b(aRₛ, sincos(incl), ecc, ω)
-    M₀ = compute_M₀(ecc, ω)
-    n = 2.0 * π / P
-    t₀ = tₚ + M₀ / n
-    t_ref = tₚ - t₀
-    Mₛ, aₛ, Mₚ, aₚ = compute_RV_params(ρₛ, Rₛ, a, P, G; Mₚ=Mₚ)
-
-    # Normalize inputs
-    a, aRₛ, b, ecc, P, Rₛ, t₀, tₚ, t_ref, Mₛ, aₛ, Mₚ, aₚ = normalize_inputs(
-        a, aRₛ, b, ecc, P, Rₛ, t₀, tₚ, t_ref, Mₛ, aₛ, Mₚ, aₚ
-    )
-
-    return KeplerianOrbit(a, aRₛ, b, ecc, P, ρₛ, Rₛ, n, t₀, tₚ, t_ref, incl, Ω, ω, M₀,
-                          Mₛ, aₛ, Mₚ, aₚ)
-end
-
-@kwmethod function KeplerianOrbit(;a, Rₛ, P, t₀, b, ecc, ω)
-    # Apply domain specific unit conversions
-    G = P isa Real ? G_nom : G_unit
-
-    # Compute remaining system parameters
-    Ω = 0.0
-    aRₛ = compute_aRₛ(a, Rₛ, G)
-    ρₛ = compute_ρₛ(aRₛ, P, G)
-    incl = compute_incl(aRₛ, b, ecc, sincos(ω))
-    M₀ = compute_M₀(ecc, ω)
-    n = 2.0 * π / P
-    tₚ = t₀ - M₀ / n
-    t_ref = tₚ - t₀
-    Mₛ, aₛ, Mₚ, aₚ = compute_RV_params(ρₛ, Rₛ, a, P, G)
-
-    # Normalize inputs
-    a, aRₛ, b, ecc, P, Rₛ, t₀, tₚ, t_ref, Mₛ, aₛ, Mₚ, aₚ = normalize_inputs(
-        a, aRₛ, b, ecc, P, Rₛ, t₀, tₚ, t_ref, Mₛ, aₛ, Mₚ, aₚ
-    )
-
-    return KeplerianOrbit(a, aRₛ, b, ecc, P, ρₛ, Rₛ, n, t₀, tₚ, t_ref, incl, Ω, ω, M₀,
-                          Mₛ, aₛ, Mₚ, aₚ)
-end
-
-@kwmethod function KeplerianOrbit(;a, Rₛ, P, tₚ, b, ecc, ω)
-    # Apply domain specific unit conversions
-    G = P isa Real ? G_nom : G_unit
-
-    # Compute remaining system parameters
-    Ω = 0.0
-    aRₛ = compute_aRₛ(a, Rₛ, G)
-    ρₛ = compute_ρₛ(aRₛ, P, G)
-    incl = compute_incl(aRₛ, b, ecc, sincos(ω))
-    M₀ = compute_M₀(ecc, ω)
-    n = 2.0 * π / P
-    t₀ = tₚ + M₀ / n
-    t_ref = tₚ - t₀
-    Mₛ, aₛ, Mₚ, aₚ = compute_RV_params(ρₛ, Rₛ, a, P, G)
-
-    # Normalize inputs
-    a, aRₛ, b, ecc, P, Rₛ, t₀, tₚ, t_ref, Mₛ, aₛ, Mₚ, aₚ = normalize_inputs(
         a, aRₛ, b, ecc, P, Rₛ, t₀, tₚ, t_ref, Mₛ, aₛ, Mₚ, aₚ
     )
 
@@ -561,37 +248,6 @@ flip(orbit::KeplerianOrbit, Rₚ) = KeplerianOrbit(
     Ω = orbit.Ω
 )
 
-#@kwdispatch upreferred()
-#upreferred(u::Nothing) = nothing
-#@kwmethod upreferred(;a::T) where {T <: Length} = u"AU"
-#upreferred(u::Unitful.Length) = u"Rsun"
-#upreferred(u::Unitful.Length) = uconvert(u"Rsun", u)
-#upreferred(u::Unitful.Mass) = uconvert(u"Msun", u)
-#upreferred(u::Unitful.Density) = uconvert(u"g/cm^3", u)
-#function Base.show(io::IO, orbit::KeplerianOrbit)
-#    a = orbit.a isa Nothing ? nothing : uconvert(u"AU", orbit.a)
-#    aRₛ = orbit.aRₛ
-#    b = orbit.b
-#    ecc = orbit.ecc
-#    P = orbit.P
-#    ρₛ = orbit.ρₛ
-#    Rₛ = orbit.Rₛ
-#    t₀ = orbit.t₀
-#    incl = orbit.incl
-#    Ω = orbit.Ω
-#    ω = orbit.ω
-#    print(
-#        io,
-#        """KeplerianOrbit(
-#            a=$(upreferred(orbit.a)), aRₛ=$(orbit.aRₛ),
-#            b=$(orbit.b), ecc=$(orbit.ecc), P=$(orbit.P),
-#            ρₛ=$(orbit.ρₛ), Rₛ=$(orbit.Rₛ),
-#            t₀=$(orbit.t₀), incl=$(orbit.incl),
-#            Ω=$(orbit.Ω), ω = $(orbit.ω)
-#        )"""
-#    )
-#end
-
 stringify_units(value::Unitful.AbstractQuantity, unit) = value
 stringify_units(value, unit) = "$value $unit"
 function Base.show(io::IO, ::MIME"text/plain", orbit::KeplerianOrbit)
@@ -599,23 +255,23 @@ function Base.show(io::IO, ::MIME"text/plain", orbit::KeplerianOrbit)
         io,
         """
         Keplerian Orbit
-          a: $(stringify_units(orbit.a, "Rsun"))
+          a: $(stringify_units(orbit.a, "R⊙"))
           aRₛ: $(orbit.aRₛ)
           b: $(orbit.b)
           ecc: $(orbit.ecc)
           P: $(stringify_units(orbit.P, "d"))
-          ρₛ: $(stringify_units(orbit.ρₛ, "Msun/Rsun^3"))
-          Rₛ: $(stringify_units(orbit.Rₛ, "Rsun"))
+          ρₛ: $(stringify_units(orbit.ρₛ, "M⊙/R⊙³"))
+          Rₛ: $(stringify_units(orbit.Rₛ, "R⊙"))
           t₀: $(stringify_units(orbit.t₀, "d"))
           tₚ: $(stringify_units(orbit.tₚ, "d"))
           t_ref: $(stringify_units(orbit.t_ref, "d"))
           incl: $(stringify_units(orbit.incl, "rad"))
           Ω: $(stringify_units(orbit.Ω, "rad"))
           ω: $(stringify_units(orbit.ω, "rad"))
-          Mₛ: $(stringify_units(orbit.Mₛ, "Msun"))
-          aₛ: $(stringify_units(orbit.aₛ, "Rsun"))
-          Mₚ: $(stringify_units(orbit.Mₚ, "Msun"))
-          aₚ: $(stringify_units(orbit.aₚ, "Rsun"))
+          Mₛ: $(stringify_units(orbit.Mₛ, "M⊙"))
+          aₛ: $(stringify_units(orbit.aₛ, "R⊙"))
+          Mₚ: $(stringify_units(orbit.Mₚ, "M⊙"))
+          aₚ: $(stringify_units(orbit.aₚ, "R⊙"))
       """
     )
 end
