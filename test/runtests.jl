@@ -11,10 +11,10 @@ PLOT && include("plots.jl")
 rng = StableRNG(2752)
 
 @testset "Transits" begin
-    # include("elliptic.jl")
-    # include("Mn_integral.jl")
-    # include("poly.jl")
-    # include("show.jl")
-    # include("distributions.jl")
+    include("elliptic.jl")
+    include("Mn_integral.jl")
+    include("poly.jl")
+    include("show.jl")
+    include("distributions.jl")
     include("grads.jl")
 end
