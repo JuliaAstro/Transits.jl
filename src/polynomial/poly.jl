@@ -296,7 +296,7 @@ function compute_linear(b::T, r; k2, kc, kc2, onembmr2, onembpr2, onembmr2inv, r
         Em1mKdm = 0.25 * π
     elseif b == r
         if r == 0.5 # case 6
-            Λ1 = π - 4 / 3 - 2 * (b - 0.5) + 6 * (r - 0.5)
+            Λ1 = π - 4 / 3
             Eofk = one(T)
             Em1mKdm = one(T)
         elseif r < 0.5 # case 5

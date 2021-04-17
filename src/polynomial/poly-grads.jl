@@ -91,7 +91,7 @@ function compute_linear_grad(b::T, r; k2, kc, kc2, onembmr2, onembpr2, onembmr2i
         ∇s1 = SA[zero(T), r * Λ1]
     elseif b == r
         if r == 0.5 # case 6
-            Λ1 = π - 4 / 3 - 2 * (b - 0.5) + 6 * (r - 0.5)
+            Λ1 = π - 4 / 3
             Eofk = one(T)
             Em1mKdm = one(T)
             ∇s1 = SA[2 / 3, -2]
@@ -99,16 +99,16 @@ function compute_linear_grad(b::T, r; k2, kc, kc2, onembmr2, onembpr2, onembmr2i
             m = 4 * r2
             Eofk = cel(m, one(T), one(T), 1 - m)
             Em1mKdm = cel(m, one(T), one(T), zero(T))
-            Λ1 = π + 2 / 3 * ((2 * m - 3) * Eofk - m * Em1mKdm) +
-                 (b - r) * 4 * r * (Eofk - 2 * Em1mKdm)
+            Λ1 = π + 2 / 3 * ((2 * m - 3) * Eofk - m * Em1mKdm)
+                # + (b - r) * 4 * r * (Eofk - 2 * Em1mKdm)
             ∇s1 = SA[-4 / 3 * r * (Eofk - 2 * Em1mKdm), -4 * r * Eofk]
         else # case 7
             m = 4 * r2
             minv = inv(m)
             Eofk = cel(minv, one(T), one(T), 1 - minv)
             Em1mKdm = cel(minv, one(T), one(T), zero(T))
-            Λ1 = π + 1 / 3 * ((2 * m - 3) * Em1mKdm - m * Eofk) / r -
-                 (b - r) * 2 * (2 * Eofk - Em1mKdm)
+            Λ1 = π + ((2 * m - 3) * Em1mKdm - m * Eofk) / (3 * r)
+            #  -(b - r) * 2 * (2 * Eofk - Em1mKdm)
             ∇s1 = SA[2 / 3 * (2 * Eofk - Em1mKdm), -2 * Em1mKdm]
         end
     else
@@ -249,7 +249,7 @@ function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
     (s1, Eofk, Em1mKdm), ∇s1 = compute_linear_grad(b, r; k2, kc, kc2, r2, b2, br, fourbr, sqbr, onembmr2, onembpr2, onembmr2inv, sqonembmr2)
 
     flux += ld.g_n[begin + 1] * s1
-    ∇flux = ∇flux + ld.g_n[begin + 1] * ∇s1
+    ∇flux += ld.g_n[begin + 1] * ∇s1
     dfdg[begin + 1] = s1
 
     if ld.n_max == 1
@@ -297,7 +297,7 @@ function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
         else
             dpdb_M = n / b * ((ld.Mn[begin + n] - ld.Mn[begin + n - 2]) * (r2 + b2) + (b2 - r2)^2 * ld.Mn[begin + n - 2])
         end
-        ∇flux = ∇flux - ld.g_n[begin + n] * SA[dpdb_M, dpdr_M]
+        ∇flux -= ld.g_n[begin + n] * SA[dpdb_M, dpdr_M]
 
     end
     dfdg[begin] -= flux * ld.norm * π
@@ -346,7 +346,7 @@ function frule((_, Δu_n), ::Type{<:PolynomialLimbDark}, u::AbstractVector{S}; m
     Nn = similar(g_n)
 
     Ω = PolynomialLimbDark(n_max, u_n, g_n, Mn_coeff, Nn_coeff, norm, Mn, Nn)
-    ∂g_n = @views ∇g_n[begin + 1:end, :] * Δu_n
+    ∂g_n = @views ∇g_n[begin + 1:end, :]' * Δu_n
     ∂Ω = Composite{typeof(Ω)}(g_n=∂g_n)
     return Ω, ∂Ω
 end

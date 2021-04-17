@@ -96,7 +96,7 @@ function compute_grad(ld::QuadLimbDark, b::S, r) where S
     (s1, Eofk, Em1mKdm), ∇s1 = compute_linear_grad(b, r; k2, kc, kc2, r2, b2, br, fourbr, sqbr, onembmr2, onembpr2, onembmr2inv, sqonembmr2)
 
     flux += ld.g_n[begin + 1] * s1
-    ∇flux = ∇flux + ld.g_n[begin + 1] * ∇s1
+    ∇flux += ld.g_n[begin + 1] * ∇s1
     dfdg2 = s1
 
     if ld.n_max == 1
@@ -110,7 +110,7 @@ function compute_grad(ld::QuadLimbDark, b::S, r) where S
     ## calculate quadratic term
     s2, ∇s2 = compute_quadratic_grad(b, r; s0, r2, b2, kap0, kite_area2, k2, ∇s0)
     flux += ld.g_n[begin + 2] * s2
-    ∇flux = ∇flux + ld.g_n[begin + 2] * ∇s2
+    ∇flux += ld.g_n[begin + 2] * ∇s2
     dfdg3 = s2
 
     dfdg1 -= flux * ld.norm * π
@@ -141,20 +141,20 @@ end
 
 function frule((_, Δu_n), ::Type{<:QuadLimbDark}, u_n::AbstractVector{T}) where T
     Ω = QuadLimbDark(u_n)
-    ∇g_n = SA[zero(T) zero(T) zero(T)
-              -one(T)  one(T) zero(T)
-                 -1.5     2.0  -0.25]
+    ∇g_n = SA[-one(T) -1.5
+               one(T)  2.0
+              zero(T) -0.25]
     
     # calculate flux normalization factor, which only depends on first two terms
     N = length(u_n)
     if N == 0
-        Δu_n_full = SA[0, 0, 0]
+        ∂g_n = @SVector zeros(T, 3)
     elseif N == 1
-        Δu_n_full = SA[0, u_n[begin], 0]
+        ∂g_n = SA[-Δu_n[begin], Δu_n[begin], zero(T)]
     else
-        Δu_n_full = SA[0, u_n[begin], u_n[begin + 1]]
+        Δu_n_full = SA[Δu_n[begin], Δu_n[begin + 1]]
+        ∂g_n = ∇g_n * Δu_n_full
     end
-    ∂g_n = ∇g_n * Δu_n_full
     ∂Ω = Composite{typeof(Ω)}(g_n=∂g_n)
     return Ω, ∂Ω
 end
@@ -164,9 +164,9 @@ function rrule(::Type{<:QuadLimbDark}, u_n::AbstractVector{T}; maxiter=100) wher
     Ω = QuadLimbDark(u_n)
     ∇g_n = SA[-one(T)  one(T) zero(T)
                  -1.5     2.0  -0.25]
-
+    N = length(u_n)
     function QuadLimbDark_pullback(Δld)
-        ∂u = ∇g_n * Δld.g_n
+        ∂u = @view(∇g_n[begin:begin+N-1, :]) * Δld.g_n
         return NO_FIELDS, ∂u
     end
     return Ω, QuadLimbDark_pullback
