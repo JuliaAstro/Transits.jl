@@ -1,4 +1,5 @@
 [deps]
+ChainRules = "082447d4-558c-5d27-93f4-14fc19e9eca2"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 Transits = "2e59a628-7bac-4d38-8059-3a73ba0928ab"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
