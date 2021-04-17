@@ -16,7 +16,7 @@ rs = range(0, 0.2, length=10) # radius ratio
 fluxes = @. ld(orbit, t, rs')
 ```
 
-![](../assets/limbdark.png)
+![](assets/limbdark.png)
 
 ## Integrated and Secondary Curves
 
@@ -33,7 +33,7 @@ flux = @. ld(orbit, t, 0.2)
 flux_int = @. ld(orbit, t, 0.2, texp) 
 ```
 
-![](../assets/integrated.png)
+![](assets/integrated.png)
 
 [`SecondaryLimbDark`](@ref) can be used to generate secondary eclipses given a surface brightness ratio
 
@@ -49,7 +49,7 @@ f = @. ld(orbit, t, rs')
 f_int = @. ld_int(orbit, t, rs', texp=0.3)
 ```
 
-![](../assets/secondary.png)
+![](assets/secondary.png)
 
 ## Using Units
 
@@ -84,4 +84,4 @@ grads = mapreduce(hcat, ts) do t
 end
 ```
 
-![](../assets/grads.png)
+![](assets/grads.png)
