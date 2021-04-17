@@ -62,3 +62,27 @@ orbit = SimpleOrbit(period=10u"d", duration=5u"hr")
 t = range(-6, 6, length=1000)u"hr"
 flux = @. ld(orbit, t, 0.1)
 ```
+
+## Gradients
+
+Gradients are provided in the form of [chain rules](https://github.com/JuliaDiff/ChinaRules.jl). The easiest way to access them is using an automatic differentiation (AD) library like [ForwardDiff.jl](https://github.com/JuliaDiff/ForwardDiff.jl) or [Zygote.jl](https://github.com/FluxML/Zygote.jl).
+
+```julia
+using Zygote
+
+ts = range(-1, 1, length=1000) # days from t0
+ror = 0.1
+u_n = [0.4, 0.26]
+
+orbit = SimpleOrbit(period=3, duration=1)
+lightcurve(X) = compute(PolynomialLimbDark(X[3:end]), orbit, X[1], X[2])
+
+# use Zygote for gradient
+flux = [lightcurve([t, ror, u_n...]) for t in ts]
+grads = mapreduce(hcat, ts) do t
+    grad = lightcurve'([t, ror, u_n...])
+    return grad === nothing ? zeros(4) : grad
+end
+```
+
+![](https://github.com/JuliaAstro/Transits.jl/raw/main/grads.png)
