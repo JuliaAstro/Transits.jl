@@ -4,6 +4,7 @@ using LinearAlgebra
 function compute_gn_jac(u_n::AbstractVector{T}) where T
     n = length(u_n) - 1
     g_n = zero(u_n)
+    # using `similar` in case u_n is e.g., `CuArray`
     dgdu = fill!(similar(u_n, n + 1, n + 1), zero(T))
 
     ## First: calculate the a_n terms (eqn. 10)
