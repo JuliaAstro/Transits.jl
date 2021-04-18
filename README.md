@@ -24,10 +24,10 @@ Flexible photometric transit curves with limb darkening. The goals of this packa
 in some order of importance
 
 - [ ] Finish writing `KeplerOrbit` (help wanted)
-- [x] Gradients using ChainRulesCore
-- [x] Gradient tests using ChainRulesTestUtils
+- [x] ~Gradients using ChainRulesCore~
+- [x] ~Gradient tests using ChainRulesTestUtils~
 - [x] ~Kipping prior distributions (with gradients) (help wanted)~
-- [x] documenation section "Introduction" describing transits and talking about science, very expository (help wanted)
+- [x] ~documenation section "Introduction" describing transits and talking about science, very expository (help wanted)~
 - [ ] Plotting functions (recreate ALFM 20 plots)
     * recipe for lightcurve which automatically makes a simple orbit and shows features
     * similar as above but special one for SecondaryLimbDark to side-by-side plot secondary
