@@ -25,36 +25,36 @@ function compute_gn_jac(u_n::AbstractVector{T}) where T
     for j in n:-1:2
         if j ≥ n - 1
             g_n[begin + j] = a_n[begin + j] / (j + 2)
-            for i in 0:n - 1
-                dgdu[begin + i + 1, begin + j] = dadu[begin + i + 1, begin + j] / (j + 2)
+            for i in 1:n
+                dgdu[begin + i, begin + j] = dadu[begin + i, begin + j] / (j + 2)
             end
         else
             g_n[begin + j] = a_n[begin + j] / (j + 2) + g_n[begin + j + 2]
-            for i in 0:n - 1
-                dgdu[begin + i + 1, begin + j] = dadu[begin + i + 1, begin + j] / (j + 2) + dgdu[begin + i + 1, begin + j + 2]
+            for i in 1:n
+                dgdu[begin + i, begin + j] = dadu[begin + i, begin + j] / (j + 2) + dgdu[begin + i, begin + j + 2]
             end
         end
     end
     if n ≥ 3
         g_n[begin + 1] = a_n[begin + 1] + 3 * g_n[begin + 3]
-        for i in 0:n - 1
-            dgdu[begin + i + 1, begin + 1] = dadu[begin + i + 1, begin + 1] + 3 * dgdu[begin + i + 1, begin + 3]
+        for i in 1:n
+            dgdu[begin + i, begin + 1] = dadu[begin + i, begin + 1] + 3 * dgdu[begin + i, begin + 3]
         end
     elseif n ≥ 1
         g_n[begin + 1] = a_n[begin + 1]
-        for i in 0:n - 1
-            dgdu[begin + i + 1, begin + 1] = dadu[begin + i + 1, begin + 1]
+        for i in 1:n
+            dgdu[begin + i, begin + 1] = dadu[begin + i, begin + 1]
         end
     end
     if n ≥ 2
         g_n[begin] = a_n[begin] + 2 * g_n[begin + 2]
-        for i in 0:n - 1
-            dgdu[begin + i + 1, begin] = dadu[begin + i + 1, begin] + 2 * dgdu[begin + i + 1, begin + 2]
+        for i in 1:n
+            dgdu[begin + i, begin] = dadu[begin + i, begin] + 2 * dgdu[begin + i, begin + 2]
         end
     else
         g_n[begin] = a_n[begin]
-        for i in 0:n - 1
-            dgdu[begin + i + 1, begin] = dadu[begin + i + 1, begin]
+        for i in 1:n
+            dgdu[begin + i, begin] = dadu[begin + i, begin]
         end
     end
 
@@ -383,4 +383,3 @@ function rrule(::Type{<:PolynomialLimbDark}, u::AbstractVector{S}; maxiter=100) 
     end
     return Ω, PolynomialLimbDark_pullback
 end
-
