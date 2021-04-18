@@ -108,7 +108,7 @@ function compute(ld::PolynomialLimbDark, b::S, r) where S
         end
         fac = 2 * r2 * onemr2
         for i in 2:ld.n_max
-            flux -= ld.g_n[i + 1] * fac
+            flux -= ld.g_n[begin + i] * fac
             fac *= sqrt1mr2
         end
         return flux * π * ld.norm
@@ -247,68 +247,6 @@ function compute_gn!(g_n::AbstractVector{T}, u_n) where T
     return g_n
 end
 
-compute_Mn_coeffs(n_max; kwargs...) = compute_Mn_coeffs(Float64, n_max, kwargs...)
-compute_Mn_coeffs(T, n_max; maxiter=100) = compute_Mn_coeffs!(zeros(T, 2, 4, maxiter), n_max)
-
-"""
-Compute the series expandsion coefficients for the `M_n` integrals. Need to compute from `n_max - 3:n_max`. Also split for the cases `k^2 < 1` and `k^2 ≥ 1`.
-"""
-function compute_Mn_coeffs!(Mn_coeff::AbstractArray{T,3}, n_max) where T
-    for k2 in (0, 1)
-        coeff = zero(T)
-        # loop over n_max to n_max - 3
-        for j in 0:3
-            # m is n_max to n_max - 3
-            m = n_max + j - 3
-            mhalf = 0.5 * m
-            if k2 < 1
-                coeff = sqrt(π) * exp(loggamma(mhalf + 1) - loggamma(mhalf + 1.5))
-                Mn_coeff[begin, begin + j, begin] = coeff
-                # loop over higher order terms until precision is reached
-                for i in 1:size(Mn_coeff, 3) - 1
-                    coeff *= (2 * i - 1)^2 / (2 * i * (1 + m + 2 * i))
-                    Mn_coeff[begin, begin + j, begin + i] = coeff
-                end
-            else
-                coeff = π
-                Mn_coeff[begin + 1, begin + j, begin] = coeff
-
-                # loop over higher order terms
-                jmax = iseven(m) ? m ÷ 2 : size(Mn_coeff, 3) - 1
-                for i in 1:jmax
-                    coeff *= (2 + m - 2 * i) * (1 - 2 * i) / (4 * i^2)
-                    Mn_coeff[begin + 1, begin + j, begin + i] = coeff
-                end
-            end
-        end
-    end
-    return Mn_coeff
-end
-
-
-compute_Nn_coeffs(n_max; kwargs...) = compute_Nn_coeffs(Float64, n_max, kwargs...)
-compute_Nn_coeffs(T, n_max; maxiter=100) = compute_Nn_coeffs!(zeros(T, 2, maxiter), n_max)
-
-"""
-Compute the series expandsion coefficients for the `N_n` integrals. Need to compute from `n_max - 3:n_max`. Only need the case `k^2 < 1`.
-"""
-function compute_Nn_coeffs!(Nn_coeff::AbstractMatrix{T}, n_max) where T
-    coeff = zero(T)
-    for j in 0:1
-        m = n_max + j - 1
-        mhalf = 0.5 * m
-        coeff = 0.5 * sqrt(π) * exp(loggamma(mhalf + 1) - loggamma(mhalf + 2.5))
-        Nn_coeff[begin + j, begin] = coeff
-        # now compute higher order terms until precision reached
-        for i in 1:size(Nn_coeff, 2) - 1
-            coeff *= (4 * i^2 - 1) / (2 * i * (3 + m + 2 * i))
-            Nn_coeff[begin + j, begin + i] = coeff
-        end
-    end
-
-    return Nn_coeff
-end
-
 ###
 ###   Computation helpers
 ###
@@ -333,91 +271,7 @@ function sqarea_triangle(p0, p1, p2)
     return sqarea
 end
 
-function upwardM!(arr; sqbr, n_max, sqonembmr2, onemr2mb2, sqarea, k2, kap0, Eofk, Em1mKdm, kite_area2)
-
-    Mn_four!(arr; kap0, sqbr, k2, Em1mKdm, onemr2mb2, kite_area2, Eofk, sqonembmr2)
-
-    for n in 4:n_max
-        arr[begin + n] = (2 * (n - 1) * onemr2mb2 * arr[begin + n - 2] + (n - 2) * sqarea * arr[begin + n - 4]) / n
-    end
-    return arr
-end
-
-function downwardM!(arr::AbstractVector{T}, Mn_coeff; n_max, sqbr, sqonembmr2, onemr2mb2, k, k2, sqarea, kap0, Eofk, Em1mKdm, kite_area2) where T
-
-    Mn_series!(arr, Mn_coeff; n_max, sqonembmr2, k, k2)
-
-    invsqarea = inv(sqarea)
-    # recurse downward
-    for m in n_max-4:-1:4
-        arr[begin + m] = ((m + 4) * arr[begin + m + 4] - 2 * (m + 3) *
-                      onemr2mb2 * arr[begin + m + 2]) * invsqarea / (m + 2)
-    end
-
-    # compute lowest four exactly
-    Mn_four!(arr; kap0, sqbr, k2, Em1mKdm, onemr2mb2, kite_area2, Eofk, sqonembmr2)
-
-    return arr
-end
-
-function Mn_four!(arr::AbstractVector{T}; kap0, sqbr, k2, Em1mKdm, onemr2mb2, kite_area2, Eofk, sqonembmr2) where T
-    # compute lowest four exactly
-    if k2 ≤ 1 # eqn 77,79
-        arr[begin] = kap0
-        arr[begin + 1] = 4 * sqbr * k2 * Em1mKdm
-        arr[begin + 2] = kap0 * onemr2mb2 + kite_area2
-        arr[begin + 3] = 8 * sqbr^3 * 2/3 * k2 * (Eofk + (3 * k2 - 2) * Em1mKdm)
-    else # eqn 78,80
-        arr[begin] = π
-        arr[begin + 1] = 2 * sqonembmr2 * Eofk
-        arr[begin + 2] = π * onemr2mb2
-        arr[begin + 3] = sqonembmr2^3 * 2/3 * ((3 - 2 / k2) * Eofk + Em1mKdm / k2)
-    end
-end
-
-function Mn_series!(Mn::AbstractVector{T}, Mn_coeff; n_max, sqonembmr2, k, k2) where T
-    # Use series expansion to compute M_n:
-    # Computing leading coefficient (n=0):
-    if k2 < 1
-        tol = eps(k2)
-        term = zero(T)
-        fac = k * sqonembmr2^(n_max - 3)
-        # now, compute higher order terms until precision reached
-        @inbounds for j in axes(Mn_coeff, 2)
-            # add leading term to m
-            val = Mn_coeff[begin, j, begin]
-            k2n = one(T)
-            # compute higher order terms
-            for coeff in @view Mn_coeff[begin, j, begin + 1:end]
-                k2n *= k2
-                term = k2n * coeff
-                val += term
-                abs(term) < tol && break
-            end
-            Mn[begin + n_max - 4 + j] = val * fac
-            fac *= sqonembmr2
-        end
-    else # k^2 >= 1
-        k2inv = inv(k2)
-        tol = eps(k2inv)
-        fac = sqonembmr2^(n_max - 3)
-        @inbounds for j in axes(Mn_coeff, 2)
-            val = Mn_coeff[begin + 1, j, begin]
-            k2n = 1
-            for coeff in @view Mn_coeff[begin + 1, j, begin + 1:end]
-                k2n *= k2inv
-                term = k2n * coeff
-                val += term
-                abs(term) < tol && break
-            end
-            Mn[begin + n_max - 4 + j] = val * fac
-            fac *= sqonembmr2
-        end
-    end
-    return Mn
-end
-
-function compute_uniform(b::T, r; sqarea, r2=r^2, b2=b^2, fourbrinv=inv(4*b*r)) where T
+function compute_uniform(b::T, r; sqarea, r2=r^2, b2=b^2, fourbrinv=inv(4 * b * r)) where T
     if b ≤ 1 - r
         flux = π * (1 - r2)
         kap0 = convert(T, π)
@@ -435,14 +289,14 @@ function compute_uniform(b::T, r; sqarea, r2=r^2, b2=b^2, fourbrinv=inv(4*b*r)) 
     return flux, kap0, kite_area2, kck
 end
 
-function compute_linear(b::T, r; k2, kc, kc2, onembmr2, onembpr2, onembmr2inv, r2=r^2, b2=b^2, br=b*r, fourbr=4*br, sqbr=sqrt(br)) where T
+function compute_linear(b::T, r; k2, kc, kc2, onembmr2, onembpr2, onembmr2inv, r2=r^2, b2=b^2, br=b * r, fourbr=4 * br, sqbr=sqrt(br)) where T
     if iszero(b) # case 10
         Λ1 = -2 * π * sqrt(1 - r2)^3
         Eofk = 0.5 * π
         Em1mKdm = 0.25 * π
     elseif b == r
         if r == 0.5 # case 6
-            Λ1 = π - 4 / 3 - 2 * (b - 0.5) + 6 * (r - 0.5)
+            Λ1 = π - 4 / 3
             Eofk = one(T)
             Em1mKdm = one(T)
         elseif r < 0.5 # case 5
@@ -470,7 +324,7 @@ function compute_linear(b::T, r; k2, kc, kc2, onembmr2, onembpr2, onembmr2inv, r
             Πofk, Eofk, Em1mKdm = cel(inv(k2), kc, p, 1 + μ, one(T), one(T), p + μ, kc2, zero(T))
             Λ1 = 2 * sqrt(onembmr2) * (onembpr2 * Πofk - (4 - 7 * r2 - b2) * Eofk) / 3
         else # case
-            Λ1 = 2 * acos(1 - 2 * r) - 2 * π * (r > 0.5) - (4/3 * (3 + 2 * r - 8 * r2) + 8 * (r + b - 1) * r) * sqrt(r * (1 - r))
+            Λ1 = 2 * acos(1 - 2 * r) - 2 * π * (r > 0.5) - (4 / 3 * (3 + 2 * r - 8 * r2) + 8 * (r + b - 1) * r) * sqrt(r * (1 - r))
             Eofk = one(T)
             Em1mKdm = one(T)
         end

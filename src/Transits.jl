@@ -1,5 +1,6 @@
 module Transits
 
+using ChainRulesCore
 using Reexport
 
 export AbstractLimbDark,
@@ -89,12 +90,14 @@ function compute(ld::AbstractLimbDark, orbit::AbstractOrbit, t, r)
     end
 end
 
-include("elliptic.jl")
-include("poly.jl")
-include("quad.jl")
+include("polynomial/elliptic.jl")
+include("polynomial/series.jl")
+include("polynomial/poly.jl")
+include("polynomial/poly-grads.jl")
+include("polynomial/quad.jl")
+include("polynomial/quad-grads.jl")
 include("integrated.jl")
 include("secondary.jl")
 include("distributions.jl")
-
 
 end
