@@ -24,11 +24,11 @@ Flexible photometric transit curves with limb darkening. The goals of this packa
 in some order of importance
 
 - [ ] Finish writing `KeplerOrbit` (help wanted)
-- [ ] Gradients using ChainRulesCore
-- [ ] Gradient tests using ChainRulesTestUtils
+- [x] ~Gradients using ChainRulesCore~
+- [x] ~Gradient tests using ChainRulesTestUtils~
 - [x] ~Kipping prior distributions (with gradients) (help wanted)~
-- [ ] documenation section "Introduction" describing transits and talking about science, very expository (help wanted)
-- [ ] Plotting functinos (recreate ALFM 20 plots)
+- [x] ~documenation section "Introduction" describing transits and talking about science, very expository (help wanted)~
+- [ ] Plotting functions (recreate ALFM 20 plots)
     * recipe for lightcurve which automatically makes a simple orbit and shows features
     * similar as above but special one for SecondaryLimbDark to side-by-side plot secondary
     * figure 3 and 6 can be written with recipe
@@ -73,7 +73,7 @@ rs = range(0, 0.2, length=10) # radius ratio
 fluxes = @. ld(orbit, t, rs')
 ```
 
-![](limbdark.png)
+![](docs/src/assets/limbdark.png)
 
 ## Integrated and Secondary Curves
 
@@ -90,7 +90,7 @@ flux = @. ld(orbit, t, 0.2)
 flux_int = @. ld(orbit, t, 0.2, texp)
 ```
 
-![](integrated.png)
+![](docs/src/assets/integrated.png)
 
 `SecondaryLimbDark` can be used to generate secondary eclipses given a surface brightness ratio
 
@@ -106,7 +106,7 @@ f = @. ld(orbit, t, rs')
 f_int = @. ld_int(orbit, t, rs', texp=0.3)
 ```
 
-![](secondary.png)
+![](docs/src/assets/secondary.png)
 
 ## Using Units
 

@@ -1,7 +1,7 @@
 
 using FastGaussQuadrature
 
-struct IntegratedLimbDark{LD<:AbstractLimbDark,WT,NT} <: AbstractLimbDark
+struct IntegratedLimbDark{LD <: AbstractLimbDark,WT,NT} <: AbstractLimbDark
     driver::LD
     order::Int
     nodes::NT
@@ -58,7 +58,7 @@ function IntegratedLimbDark(u::AbstractVector; kwargs...)
     return IntegratedLimbDark(driver; kwargs...)
 end
 
-compute(ld::IntegratedLimbDark, orbit::AbstractOrbit, t, r; texp=nothing) = 
+compute(ld::IntegratedLimbDark, orbit::AbstractOrbit, t, r; texp=nothing) =
     compute(ld, orbit, t, r, texp)
 
 function compute(ld::IntegratedLimbDark, orbit::AbstractOrbit, t, r, texp)
@@ -72,7 +72,7 @@ function compute(ld::IntegratedLimbDark, orbit::AbstractOrbit, t, r, texp)
     return 0.5 * flux
 end
 
-compute(ld::IntegratedLimbDark, orbit::AbstractOrbit, t, r, ::Nothing) = 
+compute(ld::IntegratedLimbDark, orbit::AbstractOrbit, t, r, ::Nothing) =
     compute(ld.driver, orbit, t, r)
 
 function Base.show(io::IO, ld::IntegratedLimbDark{L1}) where L1

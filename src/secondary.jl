@@ -1,6 +1,6 @@
 
 
-struct SecondaryLimbDark{LD1<:AbstractLimbDark,LD2<:AbstractLimbDark,T} <: AbstractLimbDark
+struct SecondaryLimbDark{LD1 <: AbstractLimbDark,LD2 <: AbstractLimbDark,T} <: AbstractLimbDark
     primary_driver::LD1
     secondary_driver::LD2
     brightness_ratio::T
@@ -59,7 +59,7 @@ function compute(ld::SecondaryLimbDark, orbit::AbstractOrbit, t, ror; kwargs...)
     return (f1 + flux_ratio * f2) / (1 + flux_ratio)
 end
 
-function Base.show(io::IO, ld::SecondaryLimbDark{L1, L2}) where {L1, L2}
+function Base.show(io::IO, ld::SecondaryLimbDark{L1,L2}) where {L1,L2}
     r = ld.brightness_ratio
     np = L1.name.name
     ns = L2.name.name
