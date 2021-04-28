@@ -69,7 +69,7 @@ function QuadLimbDark(u::AbstractVector{T}) where T
     g_n = compute_gn(u_n)
 
     # calculate flux normalization factor, which only depends on first two terms
-    norm = inv(π * (g_n[begin] + 2/3 * g_n[begin + 1]))
+    norm = inv(π * (g_n[begin] + 2 / 3 * g_n[begin + 1]))
 
     return QuadLimbDark(n_max, u_n, g_n, norm)
 end
@@ -93,7 +93,7 @@ function compute(ld::QuadLimbDark, b::S, r) where S
         sqrt1mr2 = sqrt(onemr2)
 
         # annular ellipse
-        flux = ld.g_n[begin] * onemr2 + 2/3 * ld.g_n[begin + 1] * sqrt1mr2^3
+        flux = ld.g_n[begin] * onemr2 + 2 / 3 * ld.g_n[begin + 1] * sqrt1mr2^3
         if ld.n_max > 1
             flux -= ld.g_n[begin + 2] * 2 * r2 * onemr2
         end

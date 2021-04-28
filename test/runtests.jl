@@ -1,4 +1,6 @@
 using PyCall
+using ChainRulesCore
+using ChainRulesTestUtils
 using QuadGK
 using StableRNGs
 using Transits
@@ -26,4 +28,6 @@ rng = StableRNG(2752)
     include("orbits/solvers.jl")
     include("poly.jl")
     include("show.jl")
+    include("distributions.jl")
+    include("grads.jl")
 end
