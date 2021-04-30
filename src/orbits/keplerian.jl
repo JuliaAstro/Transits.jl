@@ -83,14 +83,12 @@ function normalize_inputs(
     return aRₛ, b, ecc, P, t₀, tₚ, t_ref
 end
 
-function KeplerianOrbit(ρₛ, Rₛ, P, ecc, t₀, incl)
+function _KeplerianOrbit(ρₛ, Rₛ, P, ecc, t₀, incl, Ω, ω)
     # Apply domain specific unit conversions
     ρₛ isa Real && (ρₛ = convert_ρₛ(ρₛ))
     G = P isa Real ? G_nom : G_unit
 
     # Compute remaining system parameters
-    Ω = 0.0
-    ω = 0.0
     aRₛ = compute_aRₛ(ρₛ, P, G)
     a = compute_a(ρₛ, P, Rₛ, G)
     b = compute_b(ρₛ, P, sincos(incl), ecc, ω, G)
@@ -108,16 +106,13 @@ function KeplerianOrbit(ρₛ, Rₛ, P, ecc, t₀, incl)
     return KeplerianOrbit(a, aRₛ, b, ecc, P, ρₛ, Rₛ, n, t₀, tₚ, t_ref, incl, Ω, ω, M₀,
                           Mₛ, aₛ, Mₚ, aₚ)
 end
-
-function KeplerianOrbit(aRₛ, P, b, t₀, ecc)
+function _KeplerianOrbit(aRₛ, P, incl, t₀, ecc, Ω, ω)
     # Apply domain specific unit conversions
     G = P isa Real ? G_nom : G_unit
 
     # Compute remaining system parameters
-    Ω = 0.0
-    ω = 0.0
     ρₛ = compute_ρₛ(aRₛ, P, G)
-    incl = compute_incl(aRₛ, b, ecc, sincos(ω))
+    b = compute_b(aRₛ, sincos(incl), ecc, ω)
     M₀ = compute_M₀(ecc, ω)
     n = 2.0 * π / P
     tₚ = t₀ - M₀ / n
@@ -132,6 +127,25 @@ function KeplerianOrbit(aRₛ, P, b, t₀, ecc)
     return KeplerianOrbit(a, aRₛ, b, ecc, P, ρₛ, Rₛ, n, t₀, tₚ, t_ref, incl, Ω, ω, M₀,
                           Mₛ, aₛ, Mₚ, aₚ)
 end
+
+function KeplerianOrbit(p)
+    params = keys(p)
+    if :ρₛ ∈ params
+        return _KeplerianOrbit(p.ρₛ, p.Rₛ, p.P, p.ecc, p.t₀, p.incl, p.Ω, p.ω)
+    elseif :aRₛ ∈ params
+        if :incl ∈ params
+            return _KeplerianOrbit(p.aRₛ, p.P, p.incl, p.t₀, p.ecc, p.Ω, p.ω)
+        elseif :b ∈ params
+            incl = compute_incl(p.aRₛ, p.b, p.ecc, sincos(p.ω))
+            return _KeplerianOrbit(p.aRₛ, p.P, incl, p.t₀, p.ecc, p.Ω, p.ω)
+        else
+            throw(ArgumentError("Either incl or b must be specified if using aRₛ"))
+        end
+    else
+        throw(ArgumentError("Please specify either ρₛ or aRₛ"))
+    end
+end
+
 
 #############
 # Orbit logic
