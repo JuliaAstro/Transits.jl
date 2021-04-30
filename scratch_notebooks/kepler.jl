@@ -25,25 +25,28 @@ TableOfContents(depth=6)
 md"## Unitless examples"
 
 # ╔═╡ e54167b0-55f3-426a-b7ac-a93e8565297f
-make_orbit_ρₛ() = KeplerianOrbit((
-	ρₛ = 2.0,
-	Rₛ = 0.5,
-	P = 2.0,
-	ecc = 0.0,
-	t₀ = 0.0,
-	incl = 90.0 * π / 180.0,
-	Ω = 0.0,
-	ω = 0.0,
-))
-
-# ╔═╡ 80453f79-a5c1-4b1f-bc25-4f075fbb8d90
-orbit_ρₛ = make_orbit_ρₛ()
+begin
+	make_orbit_ρₛ() = KeplerianOrbit((
+		ρₛ = 2.0,
+		Rₛ = 0.5,
+		P = 2.0,
+		ecc = 0.0,
+		t₀ = 0.0,
+		incl = π / 2.0,
+		#b = 0.0,
+		Ω = 0.0,
+		ω = 0.0,
+	))
+	
+	orbit_ρₛ = make_orbit_ρₛ()
+end
 
 # ╔═╡ a6af8efb-ae5e-4f5c-af72-a8687d9bac29
 make_orbit_aRₛ() = KeplerianOrbit((
 	aRₛ = 7.5,
 	P = 2.0,
-	b = 0.0,
+	incl = π / 2.0,
+	# b = 0.0,
 	t₀ = 0.0,
 	ecc = 0.0,
 	Ω = 0.0,
@@ -93,7 +96,6 @@ end
 # ╟─29f28a74-77f8-11eb-2b70-dd1462a347fc
 # ╟─bddb767e-77f8-11eb-2692-ad86467f0c81
 # ╠═e54167b0-55f3-426a-b7ac-a93e8565297f
-# ╠═80453f79-a5c1-4b1f-bc25-4f075fbb8d90
 # ╠═a6af8efb-ae5e-4f5c-af72-a8687d9bac29
 # ╠═f0c2b1b2-b851-4f00-8899-6cf871c190d5
 # ╠═497322b7-5ff9-4699-8d98-677db5a14061

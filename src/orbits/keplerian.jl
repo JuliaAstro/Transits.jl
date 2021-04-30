@@ -91,7 +91,7 @@ function _KeplerianOrbit(ρₛ, Rₛ, P, ecc, t₀, incl, Ω, ω)
     # Compute remaining system parameters
     aRₛ = compute_aRₛ(ρₛ, P, G)
     a = compute_a(ρₛ, P, Rₛ, G)
-    b = compute_b(ρₛ, P, sincos(incl), ecc, ω, G)
+    b = compute_b(ρₛ, P, G, sincos(incl), ecc, ω)
     n = 2.0 * π / P
     M₀ = compute_M₀(ecc, ω)
     tₚ = t₀ - M₀ / n
@@ -131,15 +131,23 @@ end
 function KeplerianOrbit(p)
     params = keys(p)
     if :ρₛ ∈ params
-        return _KeplerianOrbit(p.ρₛ, p.Rₛ, p.P, p.ecc, p.t₀, p.incl, p.Ω, p.ω)
+        if (:incl ∈ params) & (:b ∉ params)
+            return _KeplerianOrbit(p.ρₛ, p.Rₛ, p.P, p.ecc, p.t₀, p.incl, p.Ω, p.ω)
+        elseif (:b ∈ params) & (:incl ∉ params)
+            G = p.P isa Real ? G_nom : G_unit
+            incl = compute_incl(p.ρₛ, p.P, G, p.b, p.ecc, sincos(p.ω))
+            return _KeplerianOrbit(p.ρₛ, p.Rₛ, p.P, p.ecc, p.t₀, incl, p.Ω, p.ω)
+        else
+            throw(ArgumentError("Either incl or b must be specified"))
+        end
     elseif :aRₛ ∈ params
-        if :incl ∈ params
+        if (:incl ∈ params) & (:b ∉ params)
             return _KeplerianOrbit(p.aRₛ, p.P, p.incl, p.t₀, p.ecc, p.Ω, p.ω)
-        elseif :b ∈ params
+        elseif (:b ∈ params) & (:incl ∉ params)
             incl = compute_incl(p.aRₛ, p.b, p.ecc, sincos(p.ω))
             return _KeplerianOrbit(p.aRₛ, p.P, incl, p.t₀, p.ecc, p.Ω, p.ω)
         else
-            throw(ArgumentError("Either incl or b must be specified if using aRₛ"))
+            throw(ArgumentError("Either incl or b must be specified"))
         end
     else
         throw(ArgumentError("Please specify either ρₛ or aRₛ"))
@@ -172,12 +180,13 @@ function compute_b(aRₛ, sincos_incl, ecc, ω)
     incl_factor_inv  = (1.0 - ecc^2.0) / (1.0 + ecc * sin_ω)
     return aRₛ * sincos_incl[2] * incl_factor_inv
 end
-compute_b(ρₛ, P, sincos_incl, ecc, ω, G) = compute_b(compute_aRₛ(ρₛ, P, G), sincos_incl, ecc, ω)
+compute_b(ρₛ, P, G, sincos_incl, ecc, ω) = compute_b(compute_aRₛ(ρₛ, P, G), sincos_incl, ecc, ω)
 
 # Inclination
 function compute_incl(aRₛ, b, ecc, sincosω)
     return acos((b/aRₛ) * (1.0 + ecc*sincosω[1])/(1.0 - ecc^2))
 end
+compute_incl(ρₛ, P, G, b, ecc, sincosω) = compute_incl(compute_aRₛ(ρₛ, P, G), b, ecc, sincosω)
 
 ###########
 # RV params
