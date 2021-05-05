@@ -2,7 +2,7 @@ module Orbits
 
 using StaticArrays
 
-export SimpleOrbit, KeplerianOrbit
+export SimpleOrbit, KeplerianOrbit, KeplerianOrbit_KC, KeplerianOrbit_KD
 
 abstract type AbstractOrbit end
 

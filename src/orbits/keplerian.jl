@@ -1,6 +1,8 @@
 using AstroLib: trueanom, kepler_solver
 using PhysicalConstants
 using Unitful, UnitfulAstro
+using KeywordCalls
+using KeywordDispatch
 
 # Domain specific unit conversions / Constants
 const G_nom = 2942.2062175044193 # Rsun^3/Msun/d^2
@@ -153,6 +155,18 @@ function KeplerianOrbit(p)
         throw(ArgumentError("Please specify either ρₛ or aRₛ"))
     end
 end
+
+# KeywordCalls.jl
+KeplerianOrbit_KC(nt::NamedTuple{(:ρₛ, :Rₛ, :P, :ecc, :t₀, :incl, :Ω, :ω)}) = _KeplerianOrbit(
+    nt.ρₛ, nt.Rₛ, nt.P, nt.ecc, nt.t₀, nt.incl, nt.Ω, nt.ω
+)
+@kwcall KeplerianOrbit_KC(ρₛ, Rₛ, P, ecc, t₀, incl, Ω, ω)
+
+# KeywordDispatch.jl
+@kwdispatch KeplerianOrbit_KD()
+@kwmethod KeplerianOrbit_KD(;ρₛ, Rₛ, P, ecc, t₀, incl, Ω, ω) = _KeplerianOrbit(
+    ρₛ, Rₛ, P, ecc, t₀, incl, Ω, ω
+)
 
 
 #############
