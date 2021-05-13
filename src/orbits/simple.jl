@@ -33,7 +33,7 @@ end
 period(orbit::SimpleOrbit) = orbit.period
 duration(orbit::SimpleOrbit) = orbit.duration
 
-relative_time(orbit::SimpleOrbit, t) = (t - orbit.ref_time) % period(orbit) - orbit.half_period
+relative_time(orbit::SimpleOrbit, t) = mod(t - orbit.ref_time, period(orbit)) - orbit.half_period
 
 function relative_position(orbit::SimpleOrbit, t)
     Δt = relative_time(orbit, t)
