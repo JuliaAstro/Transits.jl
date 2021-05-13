@@ -24,7 +24,7 @@ Circular orbit parameterized by the basic observables of a transiting system.
 function SimpleOrbit(;period, duration, t0=zero(period), b=0.0, r_star=1.0)
     half_period = 0.5 * period
     duration > half_period && error("duration cannot be longer than half the period")
-    speed = 2 * sqrt(1 - b^2) / duration
+    speed = 2.0 * sqrt(1.0 - b^2.0) / duration
     ref_time =  t0 - half_period
     # normalize time types
     period, t0, duration, half_period, ref_time = promote(
@@ -43,7 +43,7 @@ function relative_position(orbit::SimpleOrbit, t)
     Δt = relative_time(orbit, t)
     x = orbit.speed * Δt
     y = orbit.b
-    z = abs(Δt) < 0.5 * orbit.duration ? one(x) : -one(x)
+    z = sign(Δt + orbit.half_period/2.0) # Start at t₀
     return SA[x*orbit.r_star, y*orbit.r_star, z]
 end
 
