@@ -37,14 +37,14 @@ end
 period(orbit::SimpleOrbit) = orbit.period
 duration(orbit::SimpleOrbit) = orbit.duration
 
-relative_time(orbit::SimpleOrbit, t) = mod(t - orbit.ref_time, period(orbit)) - orbit.half_period
+relative_time(orbit::SimpleOrbit, t) = mod(t - orbit.ref_time, orbit.period) - orbit.half_period
 
 function relative_position(orbit::SimpleOrbit, t)
     Δt = relative_time(orbit, t)
     x = orbit.speed * Δt
-    y = orbit.b
-    z = sign(Δt + orbit.half_period/2.0) # Start at t₀
-    return SA[x*orbit.r_star, y*orbit.r_star, z]
+    y = orbit.b * orbit.r_star
+    z = abs(Δt) < 0.5 * orbit.duration ? one(x) : -one(x)
+    return SA[x, y, z]
 end
 
 # TODO: if texp, tol += 0.5 * texp
