@@ -17,4 +17,5 @@ rng = StableRNG(2752)
     include("show.jl")
     include("distributions.jl")
     include("grads.jl")
+    include("orbits/simple.jl")
 end
