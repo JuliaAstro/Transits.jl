@@ -19,7 +19,7 @@ Circular orbit parameterized by the basic observables of a transiting system.
 * `t0` - The midpoint time of the reference transit, similar units as `period`
 * `b` - The impact parameter of the orbit, unitless
 """
-function SimpleOrbit(;period, duration, t0=0.0, b=0.0)
+function SimpleOrbit(;period, duration, t0=zero(period), b=0.0)
     half_period = 0.5 * period
     duration > half_period && error("duration cannot be longer than half the period")
     speed = 2.0 * sqrt(1.0 - b^2.0) / duration
