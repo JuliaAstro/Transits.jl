@@ -22,7 +22,7 @@ Circular orbit parameterized by the basic observables of a transiting system.
 function SimpleOrbit(;period, duration, t0=zero(period), b=0.0)
     half_period = 0.5 * period
     duration > half_period && error("duration cannot be longer than half the period")
-    speed = 2.0 * sqrt(1.0 - b^2.0) / duration
+    speed = 2.0 * sqrt(1.0 - b^2) / duration
     ref_time =  t0 - half_period
     # normalize time types
     period, t0, duration, half_period, ref_time = promote(
