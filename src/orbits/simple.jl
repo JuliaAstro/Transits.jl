@@ -62,9 +62,7 @@ function flip(orbit::SimpleOrbit, ror)
     b = orbit.b / ror
     speed = orbit.speed / ror
     ref_time = orbit.t0
-    return SimpleOrbit(
-        orbit.period, t0, b, orbit.duration, speed, orbit.half_period, ref_time
-    )
+    return SimpleOrbit(orbit.period, t0, b, orbit.duration, speed, orbit.half_period, ref_time)
 end
 
 function Base.show(io::IO, orbit::SimpleOrbit)
