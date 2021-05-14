@@ -1,4 +1,4 @@
-using Transits.Orbits: relative_position, in_transit
+using Transits.Orbits: relative_position
 
 @testset "simple orbit" begin
     period = 3.456
@@ -16,9 +16,9 @@ using Transits.Orbits: relative_position, in_transit
     @test orbit.ref_time == -0.278
     @test m ≈ m0
 
-    idxs = in_transit(orbit, t)
-    @test all(bs[idxs] .≤ 1.0)
-    @test all(zs[idxs] .> 0.0)
+    #idxs = in_transit(orbit, t)
+    #@test all(bs[idxs] .≤ 1.0)
+    #@test all(zs[idxs] .> 0.0)
 
     # TODO: Do we want this?
     #pos  = @. star_position(orbit, t)
