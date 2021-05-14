@@ -25,9 +25,7 @@ function SimpleOrbit(;period, duration, t0=zero(period), b=0.0)
     speed = 2.0 * sqrt(1.0 - b^2) / duration
     ref_time =  t0 - half_period
     # normalize time types
-    period, t0, duration, half_period, ref_time = promote(
-    period, t0, duration, half_period, ref_time
-    )
+	period, t0, duration, half_period, ref_time = promote(period, t0, duration, half_period, ref_time)
     SimpleOrbit(period, t0, b, duration, speed, half_period, ref_time)
 end
 
