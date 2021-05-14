@@ -70,9 +70,7 @@ function Base.show(io::IO, orbit::SimpleOrbit)
     P = orbit.period
     b = orbit.b
     t0 = orbit.t0
-    print(io,
-        "SimpleOrbit(P=$P, T=$T, t0=$t0, b=$b)"
-    )
+    print(io, "SimpleOrbit(P=$P, T=$T, t0=$t0, b=$b)")
 end
 
 function Base.show(io::IO, ::MIME"text/plain", orbit::SimpleOrbit)
