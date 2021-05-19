@@ -225,14 +225,14 @@ end
 # Finds the position `r` of the planet along its orbit after rotating
 # through the true anomaly `ν`, then transforms this from the
 # orbital plan to the equatorial plane
-# a_rel: aRₛ, aₛ / Rₛ, or aₚ / Rₛ
+# separation: aRₛ, aₛ / Rₛ, or aₚ / Rₛ
 # TODO: consider moving this to a separate orbital calculations package in the future
-function _position(orbit, a_rel, t)
+function _position(orbit, separation, t)
     sin_ν, cos_ν = compute_true_anomaly(orbit, t)
     if iszero(orbit.ecc)
-        r = a_rel
+        r = separation
     else
-        r = a_rel * (1 - orbit.ecc^2) / (1 + orbit.ecc * cos_ν)
+        r = separation * (1 - orbit.ecc^2) / (1 + orbit.ecc * cos_ν)
     end
     return rotate_vector(orbit, r * cos_ν, r * sin_ν)
 end
@@ -243,10 +243,10 @@ relative_position(orbit::KeplerianOrbit, t) = _position(orbit, -orbit.aRₛ, t)
 # Returns sin(ν), cos(ν)
 function compute_true_anomaly(orbit::KeplerianOrbit, t)
     M = (t - orbit.t₀ - orbit.t_ref) * orbit.n
-    E = kepler_solver(M, orbit.ecc)
     if iszero(orbit.ecc)
         return sincos(M)
     else
+        E = kepler_solver(M, orbit.ecc)
         return sincos(trueanom(E, orbit.ecc))
     end
 end
