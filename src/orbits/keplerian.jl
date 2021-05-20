@@ -3,6 +3,7 @@ using PhysicalConstants
 using Unitful, UnitfulAstro
 using KeywordCalls
 using KeywordDispatch
+using Rotations
 
 # Domain specific unit conversions / Constants
 const G_nom = 2942.2062175044193 # Rsun^3/Msun/d^2
@@ -161,14 +162,14 @@ KeplerianOrbit_KC(nt::NamedTuple{(:ρₛ, :Rₛ, :P, :ecc, :t₀, :incl, :Ω, :�
     nt.ρₛ, nt.Rₛ, nt.P, nt.ecc, nt.t₀, nt.incl, nt.Ω, nt.ω
 )
 @kwcall KeplerianOrbit_KC(ρₛ, Rₛ, P, ecc, t₀, incl, Ω, ω)
-@kwalias KeplerianOrbit_KC [
-    rho_s => ρₛ,
-    R_s => Rₛ,
-    period => P,
-    t0 => t₀,
-    Omega => Ω,
-    omega => ω,
-]
+#@kwalias KeplerianOrbit_KC [
+#    rho_s => ρₛ,
+#    R_s => Rₛ,
+#    period => P,
+#    t0 => t₀,
+#    Omega => Ω,
+#    omega => ω,
+#]
 
 # KeywordDispatch.jl
 @kwdispatch KeplerianOrbit_KD()
@@ -241,7 +242,10 @@ function _position(orbit, separation, t)
     else
         r = separation * (1 - orbit.ecc^2) / (1 + orbit.ecc * cos_ν)
     end
-    return rotate_vector(orbit, r * cos_ν, r * sin_ν)
+    # Transform from orbital plane to equatorial plane
+    X = SA[r * cos_ν, r * sin_ν, zero(r)]
+    R = RotZXZ(orbit.Ω, -orbit.incl, orbit.ω)
+    return R * X
 end
 _star_position(orb, Rₛ, t) = _position.(orb, orb.aₛ / Rₛ, t)
 _planet_position(orb, Rₛ, t) = _position.(orb, orb.aₚ / Rₛ, t)
@@ -256,28 +260,6 @@ function compute_true_anomaly(orbit::KeplerianOrbit, t)
         E = kepler_solver(M, orbit.ecc)
         return sincos(trueanom(E, orbit.ecc))
     end
-end
-
-# Transform from orbital plane to equatorial plane
-function rotate_vector(orbit::KeplerianOrbit, x, y)
-    sin_incl, cos_incl = sincos(orbit.incl)
-    sin_Ω, cos_Ω = sincos(orbit.Ω)
-    sin_ω, cos_ω = sincos(orbit.ω)
-
-    # Rotate about z0 axis by ω
-    x1 = cos_ω * x - sin_ω * y
-    y1 = sin_ω * x + cos_ω * y
-
-    # Rotate about x1 axis by -incl
-    x2 = x1
-    y2 = cos_incl * y1
-    Z = -sin_incl * y1
-
-    # Rotate about z2 axis by Ω
-    X = cos_Ω * x2 - sin_Ω * y2
-    Y = sin_Ω * x2 + cos_Ω * y2
-
-    return SA[X, Y, Z]
 end
 
 flip(orbit::KeplerianOrbit, Rₚ) = KeplerianOrbit(
