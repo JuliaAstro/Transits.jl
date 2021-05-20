@@ -1,16 +1,11 @@
-using PyCall
 using ChainRulesCore
 using ChainRulesTestUtils
 using QuadGK
 using StableRNGs
 using Transits
 using Test
+using JLD2
 #using Unitful, UnitfulAstro
-
-py"""
-import numpy as np
-from batman import _rsky
-"""
 
 # Numpy version of `isapprox`
 allclose(a, b; rtol=1e-5, atol=1e-8) = all(@. abs(a - b) ≤ (atol + rtol*abs(b)))

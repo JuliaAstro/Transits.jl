@@ -1,6 +1,5 @@
 using Transits.Orbits: KeplerianOrbit, flip,
                        _star_position, _planet_position, relative_position
-using Unitful, UnitfulAstro
 
 function compute_r(orbit, t)
     pos = relative_position.(orbit, t)
@@ -15,53 +14,10 @@ end
 
 @testset "KeplerianOrbit: sky coords" begin
     # Comparison coords from `batman`
-    py"""
-    sky_coords = {}
+    sky_coords = load("./python_code/test_data/KeplerianOrbit_sky_coords.jld2")
 
-    def sky_coords():
-        t = np.linspace(-100, 100, 1_000)
-
-        t0, period, a, e, omega, incl = (
-            x.flatten()
-            for x in np.meshgrid(
-                np.linspace(-5.0, 5.0, 2),
-                np.exp(np.linspace(np.log(5.0), np.log(50.0), 3)),
-                np.linspace(50.0, 100.0, 2),
-                np.linspace(0.0, 0.9, 5),
-                np.linspace(-np.pi, np.pi, 3),
-                np.arccos(np.linspace(0, 1, 5)[:-1]),
-            )
-        )
-
-        r_batman = np.empty((len(t), len(t0)))
-
-        for i in range(len(t0)):
-            r_batman[:, i] = _rsky._rsky(
-                t, t0[i], period[i], a[i], incl[i], e[i], omega[i], 1, 1
-            )
-
-        m = r_batman < 100.0
-
-        return {
-            "m_sum" : m.sum(),
-            "r_batman" : r_batman,
-            "m" : m,
-            "t" : t,
-            "t0" : t0,
-            "period" : period,
-            "a" : a,
-            "e" : e,
-            "omega" : omega,
-            "incl" : incl,
-        }
-    """
-    sky_coords = py"sky_coords"()
-
-    # Return length(t) × (x; y; z) matrix
-    function compute_xyz(orbit, t)
-        pos = relative_position.(orbit, t)
-        return reduce(hcat, pos)'
-    end
+    # Convert vector of vectors -> matrix
+    as_matrix(pos) = reinterpret(reshape, Float64, pos) |> permutedims
 
     # Create comparison orbits from Transits.jl
     orbits = [
@@ -78,11 +34,13 @@ end
     ]
 
     # Compute coords
+    t = sky_coords["t"]
     x = Matrix{Float64}(undef, length(sky_coords["t"]), length(sky_coords["t0"]))
     y = similar(x)
     z = similar(x)
     for (orbit, x_i, y_i, z_i) in zip(orbits, eachcol(x), eachcol(y), eachcol(z))
-        a, b, c = eachcol(compute_xyz(orbit, sky_coords["t"]))
+        pos = relative_position.(orbit, t) |> as_matrix
+        a, b, c = eachcol(pos)
         x_i .= a
         y_i .= b
         z_i .= c

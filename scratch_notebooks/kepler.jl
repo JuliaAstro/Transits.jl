@@ -19,10 +19,10 @@ begin
 end
 
 # ╔═╡ 83ed04a9-1913-4b40-afaa-01fa8ecdacd2
-using StaticArrays
+using PyCall
 
-# ╔═╡ 65dabdc0-b67d-4454-9767-4b9b94d2a11d
-using Rotations
+# ╔═╡ ac6865fa-47c4-4315-8a4a-398c7909c772
+using JLD2
 
 # ╔═╡ 29f28a74-77f8-11eb-2b70-dd1462a347fc
 TableOfContents(depth=6)
@@ -134,74 +134,73 @@ separations = 3
 # ╔═╡ 6a0e0647-eeb7-491e-b54d-ea8026bad8ed
 time = 5:10
 
-# ╔═╡ e5eb611d-e038-40a7-b8d7-b5c957733ce5
-function _position(orbit, separation, t)
-    sin_ν, cos_ν = Orbits.compute_true_anomaly(orbit, t)
-    if iszero(orbit.ecc)
-        r = separation
-    else
-        r = separation * (1 - orbit.ecc^2) / (1 + orbit.ecc * cos_ν)
-    end
-    X = SA[r * cos_ν, r * sin_ν, zero(r)]
-    R = RotZXZ(orbit.ω, -orbit.incl, orbit.Ω)
-    return R * X
+# ╔═╡ d9e844b7-d4fa-4ad9-a24f-43da86550560
+plot(pos_manual[:, 3] - pos_rotations[:, 3], label="Δz")
+
+# ╔═╡ 5f2c2e95-8962-4b52-8de8-70f186475cb4
+begin
+	py"""
+	import numpy as np
+	from batman import _rsky
+	
+	sky_coords = {}
+	def sky_coords():
+		t = np.linspace(-100, 100, 1_000)
+	
+		t0, period, a, e, omega, incl = (
+			x.flatten()
+			for x in np.meshgrid(
+				np.linspace(-5.0, 5.0, 2),
+				np.exp(np.linspace(np.log(5.0), np.log(50.0), 3)),
+				np.linspace(50.0, 100.0, 2),
+				np.linspace(0.0, 0.9, 5),
+				np.linspace(-np.pi, np.pi, 3),
+				np.arccos(np.linspace(0, 1, 5)[:-1]),
+			)
+		)
+	
+		r_batman = np.empty((len(t), len(t0)))
+	
+		for i in range(len(t0)):
+			r_batman[:, i] = _rsky._rsky(
+				t, t0[i], period[i], a[i], incl[i], e[i], omega[i], 1, 1
+			)
+	
+		m = r_batman < 100.0
+	
+		return {
+			"m_sum" : m.sum().item(), # Save native Int format
+			"r_batman" : r_batman,
+			"m" : m,
+			"t" : t,
+			"t0" : t0,
+			"period" : period,
+			"a" : a,
+			"e" : e,
+			"omega" : omega,
+			"incl" : incl,
+		}
+	"""
+	sky_coords = py"sky_coords"()
 end
+
+# ╔═╡ 02de37b8-d463-44df-9b69-f894f5efa6ee
+
+
+# ╔═╡ 5e1ceabb-c387-4ed9-ab68-b067a3f1aa92
+load("../python_code/test_data/KeplerianOrbit_sky_coords.jld2")
 
 # ╔═╡ 71b217e6-1b19-4e70-b0cd-1ff0637892db
 as_matrix(pos) = reinterpret(reshape, Float64, pos) |> permutedims
 
-# ╔═╡ c66c0150-8da0-4ad0-b589-ddc7d1c81a0d
-pos_manual = Orbits._position.(orbit_ρₛ, separations, time) |> as_matrix
+# ╔═╡ 1785b074-4b48-469f-88d1-0dcc84703f49
+pos = Orbits.relative_position.(orbit_ρₛ, t) |> as_matrix
 
-# ╔═╡ b2b5d53b-8e6d-46c8-93b7-c0e0c9d8a425
-pos_rotations = _position.(orbit_ρₛ, separations, time) |> as_matrix
+# ╔═╡ 92e87956-d801-426a-a375-3eec4d6f70d2
+a, b, c = eachcol(pos)
 
-# ╔═╡ 4e1ae817-3d86-4ea2-a66b-1f2b18f67d9b
-pos_manual == pos_rotations
-
-# ╔═╡ d9e844b7-d4fa-4ad9-a24f-43da86550560
-plot(pos_manual[:, 3] - pos_rotations[:, 3], label="Δz")
-
-# ╔═╡ 1c0a49d5-739c-43b5-b8ee-0ac8d20d4048
-plot(rotations - manual)
-
-# ╔═╡ 08b0d3c2-1cee-4a21-ac68-80116d832d9d
-function rotate_vector_manual(i, ω, Ω, x, y)
-    sin_incl, cos_incl = sincos(i)
-    sin_Ω, cos_Ω = sincos(Ω)
-    sin_ω, cos_ω = sincos(ω)
-
-    # Rotate about z0 axis by ω
-    x1 = cos_ω * x - sin_ω * y
-    y1 = sin_ω * x + cos_ω * y
-
-    # Rotate about x1 axis by -incl
-    x2 = x1
-    y2 = cos_incl * y1
-    Z = -sin_incl * y1
-
-    # Rotate about z2 axis by Ω
-    X = cos_Ω * x2 - sin_Ω * y2
-    Y = sin_Ω * x2 + cos_Ω * y2
-
-    return SA[X, Y, Z]
-end
-
-# ╔═╡ ad1d9770-8eeb-4b3c-a8e2-2c73be3c9b74
-function rotate_vector_Rotations(i, ω, Ω, x, y)
-	X = SA[x, y, zero(x)]
-    R = RotZXZ(Ω, -i, ω)
-	return R * X
-end
-
-# ╔═╡ 20f770bd-b9ed-4d8e-a7df-f31b24226e1a
-inputs = π/3, 0, 0.1, 3.7, 4
-
-# ╔═╡ 04412ecf-d080-4fbf-aabf-4727743b311a
-rotate_vector_manual(inputs...)
-
-# ╔═╡ ca1474c6-66e6-494c-9a69-971036fa8099
-rotate_vector_Rotations(inputs...)
+# ╔═╡ 5b0c03d7-150d-477c-9eae-3df9e46fcd3a
+c
 
 # ╔═╡ Cell order:
 # ╟─29f28a74-77f8-11eb-2b70-dd1462a347fc
@@ -221,17 +220,13 @@ rotate_vector_Rotations(inputs...)
 # ╠═96dc6baf-cc69-4797-a4ac-784feb6897bb
 # ╠═b4dc2635-5a2d-4834-9756-d7a26c007568
 # ╠═6a0e0647-eeb7-491e-b54d-ea8026bad8ed
-# ╠═c66c0150-8da0-4ad0-b589-ddc7d1c81a0d
-# ╠═b2b5d53b-8e6d-46c8-93b7-c0e0c9d8a425
-# ╠═4e1ae817-3d86-4ea2-a66b-1f2b18f67d9b
 # ╠═d9e844b7-d4fa-4ad9-a24f-43da86550560
-# ╠═e5eb611d-e038-40a7-b8d7-b5c957733ce5
 # ╠═83ed04a9-1913-4b40-afaa-01fa8ecdacd2
+# ╠═5f2c2e95-8962-4b52-8de8-70f186475cb4
+# ╠═ac6865fa-47c4-4315-8a4a-398c7909c772
+# ╠═02de37b8-d463-44df-9b69-f894f5efa6ee
+# ╠═5e1ceabb-c387-4ed9-ab68-b067a3f1aa92
+# ╠═1785b074-4b48-469f-88d1-0dcc84703f49
+# ╠═92e87956-d801-426a-a375-3eec4d6f70d2
+# ╠═5b0c03d7-150d-477c-9eae-3df9e46fcd3a
 # ╠═71b217e6-1b19-4e70-b0cd-1ff0637892db
-# ╠═1c0a49d5-739c-43b5-b8ee-0ac8d20d4048
-# ╠═65dabdc0-b67d-4454-9767-4b9b94d2a11d
-# ╠═08b0d3c2-1cee-4a21-ac68-80116d832d9d
-# ╠═ad1d9770-8eeb-4b3c-a8e2-2c73be3c9b74
-# ╠═20f770bd-b9ed-4d8e-a7df-f31b24226e1a
-# ╠═04412ecf-d080-4fbf-aabf-4727743b311a
-# ╠═ca1474c6-66e6-494c-9a69-971036fa8099
