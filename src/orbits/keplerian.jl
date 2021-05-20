@@ -161,13 +161,20 @@ KeplerianOrbit_KC(nt::NamedTuple{(:ρₛ, :Rₛ, :P, :ecc, :t₀, :incl, :Ω, :�
     nt.ρₛ, nt.Rₛ, nt.P, nt.ecc, nt.t₀, nt.incl, nt.Ω, nt.ω
 )
 @kwcall KeplerianOrbit_KC(ρₛ, Rₛ, P, ecc, t₀, incl, Ω, ω)
+@kwalias KeplerianOrbit_KC [
+    rho_s => ρₛ,
+    R_s => Rₛ,
+    period => P,
+    t0 => t₀,
+    Omega => Ω,
+    omega => ω,
+]
 
 # KeywordDispatch.jl
 @kwdispatch KeplerianOrbit_KD()
 @kwmethod KeplerianOrbit_KD(;ρₛ, Rₛ, P, ecc, t₀, incl, Ω, ω) = _KeplerianOrbit(
     ρₛ, Rₛ, P, ecc, t₀, incl, Ω, ω
 )
-
 
 #############
 # Orbit logic

@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.14.4
+# v0.14.5
 
 using Markdown
 using InteractiveUtils
@@ -17,9 +17,6 @@ begin
 	using UnitfulAstro
 	using BenchmarkTools
 end
-
-# ╔═╡ bef5c239-6f93-4377-9fd8-37400c52b3ea
-using KeywordCalls
 
 # ╔═╡ 29f28a74-77f8-11eb-2b70-dd1462a347fc
 TableOfContents(depth=6)
@@ -42,9 +39,9 @@ begin
 	))
 	
 	make_orbit_ρₛ_KC() = KeplerianOrbit_KC(
-		ρₛ = 2.0,
+		rho_s = 2.0,
 		Rₛ = 0.5,
-		P = 2.0,
+		period = 2.0,
 		ecc = 0.0,
 		t₀ = 0.0,
 		incl = π / 2.0,
@@ -81,24 +78,6 @@ make_orbit_aRₛ() = KeplerianOrbit((
 	Ω = 0.0,
 	ω = 0.0,
 ))
-
-# ╔═╡ 5825aaca-dfb7-4fdd-9dd5-992990b00276
-f(nt::NamedTuple{(:a, :b)}) = nt.a, nt.b
-
-# ╔═╡ 5455123b-0757-4bd0-9298-78fa800b705b
-f(nt::NamedTuple{(:α, :β)}) = nt.α, nt.β
-
-# ╔═╡ 8e69af99-fc97-4273-9a0d-ff087b37b8a9
-@kwcall f(a, b)
-
-# ╔═╡ 0b635f09-3256-4a09-9bf3-e650b160d68d
-@kwcall f(α, β)
-
-# ╔═╡ 6e876947-3dfb-4b39-be94-800c71fa3845
-f(a=1, b=2)
-
-# ╔═╡ d9901424-d32a-48b7-a506-1cf6a1792606
-f(α=1, β=2)
 
 # ╔═╡ f0c2b1b2-b851-4f00-8899-6cf871c190d5
 make_orbit_aRₛ()
@@ -145,13 +124,6 @@ end
 # ╟─bddb767e-77f8-11eb-2692-ad86467f0c81
 # ╠═e54167b0-55f3-426a-b7ac-a93e8565297f
 # ╠═a6af8efb-ae5e-4f5c-af72-a8687d9bac29
-# ╠═bef5c239-6f93-4377-9fd8-37400c52b3ea
-# ╠═5825aaca-dfb7-4fdd-9dd5-992990b00276
-# ╠═5455123b-0757-4bd0-9298-78fa800b705b
-# ╠═8e69af99-fc97-4273-9a0d-ff087b37b8a9
-# ╠═0b635f09-3256-4a09-9bf3-e650b160d68d
-# ╠═6e876947-3dfb-4b39-be94-800c71fa3845
-# ╠═d9901424-d32a-48b7-a506-1cf6a1792606
 # ╠═f0c2b1b2-b851-4f00-8899-6cf871c190d5
 # ╠═497322b7-5ff9-4699-8d98-677db5a14061
 # ╠═b7eb5e36-b4a2-43a8-934d-b76adb794f9f
