@@ -86,7 +86,7 @@ function normalize_inputs(
     return aRₛ, b, ecc, P, t₀, tₚ, t_ref
 end
 
-function _KeplerianOrbit(ρₛ, Rₛ, P, ecc, t₀, incl, Ω, ω)
+function KeplerianOrbit(ρₛ, Rₛ, P, ecc, t₀, incl, Ω, ω)
     # Apply domain specific unit conversions
     ρₛ isa Real && (ρₛ = convert_ρₛ(ρₛ))
     G = P isa Real ? G_nom : G_unit
@@ -109,7 +109,8 @@ function _KeplerianOrbit(ρₛ, Rₛ, P, ecc, t₀, incl, Ω, ω)
     return KeplerianOrbit(a, aRₛ, b, ecc, P, ρₛ, Rₛ, n, t₀, tₚ, t_ref, incl, Ω, ω, M₀,
                           Mₛ, aₛ, Mₚ, aₚ)
 end
-function _KeplerianOrbit(aRₛ, P, incl, t₀, ecc, Ω, ω)
+
+function KeplerianOrbit(aRₛ, P, incl, t₀, ecc, Ω, ω)
     # Apply domain specific unit conversions
     G = P isa Real ? G_nom : G_unit
 
@@ -131,24 +132,24 @@ function _KeplerianOrbit(aRₛ, P, incl, t₀, ecc, Ω, ω)
                           Mₛ, aₛ, Mₚ, aₚ)
 end
 
-function KeplerianOrbit(p)
-    params = keys(p)
+function KeplerianOrbit(nt::NamedTuple{(:ρₛ, :Rₛ, :P, :ecc, :t₀, :incl, :Ω, :ω)})
+    params = keys(nt)
     if :ρₛ ∈ params
         if (:incl ∈ params) & (:b ∉ params)
-            return _KeplerianOrbit(p.ρₛ, p.Rₛ, p.P, p.ecc, p.t₀, p.incl, p.Ω, p.ω)
+            return KeplerianOrbit(nt.ρₛ, nt.Rₛ, nt.P, nt.ecc, nt.t₀, nt.incl, nt.Ω, nt.ω)
         elseif (:b ∈ params) & (:incl ∉ params)
-            G = p.P isa Real ? G_nom : G_unit
-            incl = compute_incl(p.ρₛ, p.P, G, p.b, p.ecc, sincos(p.ω))
-            return _KeplerianOrbit(p.ρₛ, p.Rₛ, p.P, p.ecc, p.t₀, incl, p.Ω, p.ω)
+            G = nt.P isa Real ? G_nom : G_unit
+            incl = compute_incl(nt.ρₛ, nt.P, G, nt.b, nt.ecc, sincos(nt.ω))
+            return KeplerianOrbit(nt.ρₛ, nt.Rₛ, nt.P, nt.ecc, nt.t₀, incl, nt.Ω, nt.ω)
         else
             throw(ArgumentError("Either incl or b must be specified"))
         end
     elseif :aRₛ ∈ params
         if (:incl ∈ params) & (:b ∉ params)
-            return _KeplerianOrbit(p.aRₛ, p.P, p.incl, p.t₀, p.ecc, p.Ω, p.ω)
+            return KeplerianOrbit(nt.aRₛ, nt.P, nt.incl, nt.t₀, nt.ecc, nt.Ω, nt.ω)
         elseif (:b ∈ params) & (:incl ∉ params)
-            incl = compute_incl(p.aRₛ, p.b, p.ecc, sincos(p.ω))
-            return _KeplerianOrbit(p.aRₛ, p.P, incl, p.t₀, p.ecc, p.Ω, p.ω)
+            incl = compute_incl(nt.aRₛ, nt.b, nt.ecc, sincos(nt.ω))
+            return KeplerianOrbit(nt.aRₛ, nt.P, incl, nt.t₀, nt.ecc, nt.Ω, nt.ω)
         else
             throw(ArgumentError("Either incl or b must be specified"))
         end
@@ -157,25 +158,15 @@ function KeplerianOrbit(p)
     end
 end
 
-# KeywordCalls.jl
-KeplerianOrbit_KC(nt::NamedTuple{(:ρₛ, :Rₛ, :P, :ecc, :t₀, :incl, :Ω, :ω)}) = _KeplerianOrbit(
-    nt.ρₛ, nt.Rₛ, nt.P, nt.ecc, nt.t₀, nt.incl, nt.Ω, nt.ω
-)
-@kwcall KeplerianOrbit_KC(ρₛ, Rₛ, P, ecc, t₀, incl, Ω, ω)
-#@kwalias KeplerianOrbit_KC [
-#    rho_s => ρₛ,
-#    R_s => Rₛ,
-#    period => P,
-#    t0 => t₀,
-#    Omega => Ω,
-#    omega => ω,
-#]
-
-# KeywordDispatch.jl
-@kwdispatch KeplerianOrbit_KD()
-@kwmethod KeplerianOrbit_KD(;ρₛ, Rₛ, P, ecc, t₀, incl, Ω, ω) = _KeplerianOrbit(
-    ρₛ, Rₛ, P, ecc, t₀, incl, Ω, ω
-)
+@kwcall KeplerianOrbit(ρₛ, Rₛ, P, ecc, t₀, incl, Ω, ω)
+@kwalias KeplerianOrbit [
+    rho_s => ρₛ,
+    R_s => Rₛ,
+    period => P,
+    t0 => t₀,
+    Omega => Ω,
+    omega => ω,
+]
 
 #############
 # Orbit logic
