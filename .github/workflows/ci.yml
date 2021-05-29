@@ -39,7 +39,7 @@ jobs:
             ${{ runner.os }}-test-
             ${{ runner.os }}-
       - name: "Install KeywordCalls branch"
-        run: julia --project=. -e 'using Pkg; pkg"add KeywordCalls#cs-instance-type"; Pkg.instantiate()'
+        run: julia --project=. -e 'using Pkg; Pkg.add(PackageSpec(name="KeywordCalls", rev="cs-instance-type"))'
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
       - uses: julia-actions/julia-processcoverage@v1
