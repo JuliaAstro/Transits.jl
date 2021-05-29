@@ -71,6 +71,7 @@ end
         Ω = 0.0,
         ω = 0.0,
     )
+
     b_aRₛ = @benchmark KeplerianOrbit(
         aRₛ = 7.5,
         P = 2.0,
