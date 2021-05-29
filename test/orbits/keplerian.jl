@@ -21,7 +21,7 @@ end
 
     # Create comparison orbits from Transits.jl
     orbits = [
-        KeplerianOrbit((
+        KeplerianOrbit(
             aRₛ = sky_coords["a"][i],
             P = sky_coords["period"][i],
             incl = sky_coords["incl"][i],
@@ -29,7 +29,7 @@ end
             ecc = sky_coords["e"][i],
             Ω = 0.0,
             ω = sky_coords["omega"][i],
-        ))
+        )
         for i in 1:length(sky_coords["t0"])
     ]
 
