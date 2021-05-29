@@ -1,3 +1,4 @@
+using BenchmarkTools
 using Transits.Orbits: KeplerianOrbit, flip,
                        _star_position, _planet_position, relative_position
 
@@ -57,6 +58,33 @@ end
     @test all(z[m] .> 0)
     no_transit = @. (z[!(m)] < 0) | (r[!(m)] > 2)
     @test all(no_transit)
+end
+
+@testset "KeplerianOrbit: construction" begin
+    b_ρₛ = @benchmark KeplerianOrbit(
+        ρₛ = 2.0,
+        Rₛ = 0.5,
+        period = 2.0,
+        ecc = 0.0,
+        t₀ = 0.0,
+        incl = π / 2.0,
+        Ω = 0.0,
+        ω = 0.0,
+    )
+    b_aRₛ = @benchmark KeplerianOrbit(
+        aRₛ = 7.5,
+        P = 2.0,
+        incl = π / 2.0,
+        t₀ = 0.0,
+        ecc = 0.0,
+        Ω = 0.0,
+        ω = 0.0,
+    )
+
+    @test b_ρₛ.allocs == b_ρₛ.memory == 0
+    @test median(b_ρₛ.times) ≤ 500 # ns
+    @test b_aRₛ.allocs == b_aRₛ.memory == 0
+    @test median(b_aRₛ.times) ≤ 500 # ns
 end
 
 #=
