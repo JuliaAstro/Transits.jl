@@ -82,7 +82,7 @@ end
         ω = 0.0,
     )
 
-    if v"1.5" < Base.VERSION < v"1.7"
+    if v"1.6" ≤ Base.VERSION < v"1.7-"
         @test b_ρₛ.allocs == b_ρₛ.memory == 0
         @test median(b_ρₛ.times) ≤ 500 # ns
         @test b_aRₛ.allocs == b_aRₛ.memory == 0
