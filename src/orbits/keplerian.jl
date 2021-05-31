@@ -179,13 +179,13 @@ end
 # Star density
 compute_rho_s(aR_s, period, G_nom) = (3.0 * π / (G_nom * period^2.0)) * aR_s^3.0
 compute_rho_s(aR_s, period, G::typeof(G_unit)) = (3.0 * π / (G * period^2.0)) * aR_s^3.0
-compute_rho_s(a, period, R_s, G) = compute_rho_s(aR_s(a, R_s), period, G)
+compute_rho_s(a, period, R_s, G) = compute_rho_s(compute_aR_s(a, R_s), period, G)
 
 # Semi-major axis / star radius ratio
 compute_aR_s(a, R_s) = a / R_s
 compute_aR_s(rho_s, period, G_nom) = cbrt(G_nom * period^2.0 * rho_s / (3.0 * π))
 compute_aR_s(rho_s, period, G::typeof(G_unit)) = cbrt(G * period^2.0 * rho_s / (3.0 * π))
-compute_aR_s(a, period, R_s, G) = aR_s(compute_rho_s(a, period, R_s, G), period)
+compute_aR_s(a, period, R_s, G) = compute_aR_s(compute_rho_s(a, period, R_s, G), period)
 
 # Semi-major axis
 compute_a(aR_s, R_s) = aR_s * R_s

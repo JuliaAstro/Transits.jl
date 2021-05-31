@@ -1,6 +1,7 @@
 using BenchmarkTools
 using Unitful, UnitfulAstro
 using Transits.Orbits: KeplerianOrbit, flip,
+                       compute_rho_s, compute_aR_s, compute_a, compute_incl,
                        _star_position, _planet_position, relative_position
 
 function compute_r(orbit, t)
@@ -104,23 +105,30 @@ end
         ω = 0.0u"°",
     )
 
+    # Units
+    @test median(b_ρₛ_units.times) ≤ 50_000 # ns
+    @test b_ρₛ_units.allocs ≤ 500
+    @test median(b_aRₛ_units.times) ≤ 50_000   # ns
+    @test b_aRₛ_units.allocs ≤ 500
+
     if v"1.6" ≤ Base.VERSION < v"1.7-"
         @test b_ρₛ.allocs == b_ρₛ.memory == 0
         @test median(b_ρₛ.times) ≤ 500 # ns
-
-        @test b_ρₛ_units.allocs ≤ 500
-        @test median(b_ρₛ_units.times) ≤ 50_000 # ns
-
         @test b_aRₛ.allocs == b_aRₛ.memory == 0
         @test median(b_aRₛ.times) ≤ 500 # ns
-
-        @test b_aRₛ_units.allocs ≤ 500
-        @test median(b_aRₛ_units.times) ≤ 50_000   # ns
     else
         # TODO: investigate performance regression
         @test median(b_ρₛ.times) ≤ 10_000 # ns
         @test median(b_aRₛ.times) ≤ 10_000 # ns
     end
+end
+
+@testset "KeplerianOrbit: helper functions" begin
+    a, R_s, aR_s = 2.0, 4.0, 0.5
+    P, G_nom = √π, 1.0
+    @test compute_a(aR_s, R_s) ≈ a
+    @test compute_aR_s(a, R_s) ≈ aR_s
+    @test compute_rho_s(aR_s, P, G_nom) ≈ 3.0 * aR_s^3
 end
 
 #=
