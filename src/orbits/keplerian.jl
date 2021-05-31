@@ -29,6 +29,7 @@ Keplerian orbit parameterized by the basic observables of a transiting 2-body sy
 * `omega`/`ω` - The argument of periapsis, same units as `Omega`.
 """
 struct KeplerianOrbit{T,L,D,R,A,I,M} <: AbstractOrbit
+    # Transit params
     a::L
     aR_s::R
     b::R
@@ -40,9 +41,13 @@ struct KeplerianOrbit{T,L,D,R,A,I,M} <: AbstractOrbit
     t_0::T
     t_p::T
     t_ref::T
+
+    # Euler angles
     incl::A
     Omega::R
     omega::R
+
+    # RV params
     M₀::R
     M_s::M
     a_s::L

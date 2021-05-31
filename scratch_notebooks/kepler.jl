@@ -7,19 +7,14 @@ using InteractiveUtils
 # ╔═╡ 208b00e9-4d97-4f80-81d1-1b8346b50f83
 begin
 	using Revise
+	using Transits
 	using PlutoUI
 	using Transits
 	using CairoMakie
+	using Measurements
+	using Unitful
+	using UnitfulAstro
 end
-
-# ╔═╡ d36a578d-70dc-45be-b333-ab108b701e77
-using KeywordCalls
-
-# ╔═╡ 29f28a74-77f8-11eb-2b70-dd1462a347fc
-TableOfContents(depth=6)
-
-# ╔═╡ bddb767e-77f8-11eb-2692-ad86467f0c81
-md"## Unitless examples"
 
 # ╔═╡ da4c42b9-a22b-435d-8c1d-c4b93a9cd411
 KeplerianOrbit(
@@ -33,6 +28,30 @@ KeplerianOrbit(
 	ω = 0.0,
 )
 
+# ╔═╡ cdda90a8-6f94-4c84-9557-27db687d80e9
+KeplerianOrbit(
+	ρₛ = 2.0,
+	Rₛ = 0.5,
+	period = 2.0,
+	ecc = 0.0,
+	t₀ = 0.0,
+	
+	incl = 90.,
+	Ω = 0.,
+	ω = 0.,
+)
+
+# ╔═╡ ed6dc004-42a8-472a-a3ea-c7d1abbda868
+struct yee{A, B}
+	a::A
+	b::B
+	c::B
+	d::B
+end
+
+# ╔═╡ fe384a90-d142-4414-a2e5-23ce426af513
+yee(1, 2, 3, 4)
+
 # ╔═╡ 7f40987b-ef60-4786-8639-2100628c4595
 KeplerianOrbit(
 	aRₛ = 7.5,
@@ -45,9 +64,9 @@ KeplerianOrbit(
 )
 
 # ╔═╡ Cell order:
-# ╟─29f28a74-77f8-11eb-2b70-dd1462a347fc
-# ╟─bddb767e-77f8-11eb-2692-ad86467f0c81
 # ╠═da4c42b9-a22b-435d-8c1d-c4b93a9cd411
+# ╠═cdda90a8-6f94-4c84-9557-27db687d80e9
+# ╠═ed6dc004-42a8-472a-a3ea-c7d1abbda868
+# ╠═fe384a90-d142-4414-a2e5-23ce426af513
 # ╠═7f40987b-ef60-4786-8639-2100628c4595
-# ╠═d36a578d-70dc-45be-b333-ab108b701e77
 # ╠═208b00e9-4d97-4f80-81d1-1b8346b50f83
