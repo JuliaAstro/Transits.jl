@@ -1,4 +1,5 @@
 using BenchmarkTools
+using Unitful, UnitfulAstro
 using Transits.Orbits: KeplerianOrbit, flip,
                        _star_position, _planet_position, relative_position
 
@@ -72,6 +73,17 @@ end
         ω = 0.0,
     )
 
+    b_ρₛ_units = @benchmark KeplerianOrbit(
+        ρₛ = 2.0u"g/cm^3",
+        Rₛ = 0.5u"Rsun",
+        period = 2.0u"d",
+        ecc = 0.0,
+        t₀ = 0.0u"d",
+        incl = 90.0u"°",
+        Ω = 0.0u"°",
+        ω = 0.0u"°",
+    )
+
     b_aRₛ = @benchmark KeplerianOrbit(
         aRₛ = 7.5,
         P = 2.0,
@@ -82,11 +94,28 @@ end
         ω = 0.0,
     )
 
+    b_aRₛ_units = @benchmark KeplerianOrbit(
+        aRₛ = 7.5,
+        P = 2.0u"d",
+        incl = 90.0u"°",
+        t₀ = 0.0u"d",
+        ecc = 0.0,
+        Ω = 0.0u"°",
+        ω = 0.0u"°",
+    )
+
     if v"1.6" ≤ Base.VERSION < v"1.7-"
         @test b_ρₛ.allocs == b_ρₛ.memory == 0
         @test median(b_ρₛ.times) ≤ 500 # ns
+
+        @test b_ρₛ_units.allocs ≤ 500
+        @test median(b_ρₛ_units.times) ≤ 50_000 # ns
+
         @test b_aRₛ.allocs == b_aRₛ.memory == 0
         @test median(b_aRₛ.times) ≤ 500 # ns
+
+        @test b_aRₛ_units.allocs ≤ 500
+        @test median(b_aRₛ_units.times) ≤ 50_000   # ns
     else
         # TODO: investigate performance regression
         @test median(b_ρₛ.times) ≤ 10_000 # ns

@@ -44,8 +44,8 @@ struct KeplerianOrbit{T,L,D,R,A,I,M} <: AbstractOrbit
 
     # Euler angles
     incl::A
-    Omega::R
-    omega::R
+    Omega::A
+    omega::A
 
     # RV params
     M₀::R
