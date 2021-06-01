@@ -137,28 +137,22 @@ function KeplerianOrbit(aR_s, period, incl, t_0, ecc, Omega, omega)
 end
 
 function KeplerianOrbit(nt::NamedTuple{(:rho_s, :R_s, :period, :ecc, :t_0, :incl, :Omega, :omega)})
-    params = keys(nt)
-    if (:incl ∈ params) & (:b ∉ params)
-        return KeplerianOrbit(nt.rho_s, nt.R_s, nt.period, nt.ecc, nt.t_0, nt.incl, nt.Omega, nt.omega)
-    elseif (:b ∈ params) & (:incl ∉ params)
-        G = nt.period isa Real ? G_nom : G_unit
-        incl = compute_incl(nt.rho_s, nt.period, G, nt.b, nt.ecc, sincos(nt.omega))
-        return KeplerianOrbit(nt.rho_s, nt.R_s, nt.period, nt.ecc, nt.t_0, incl, nt.Omega, nt.omega)
-    else
-        throw(ArgumentError("Either incl or b must be specified"))
-    end
+    return KeplerianOrbit(nt.rho_s, nt.R_s, nt.period, nt.ecc, nt.t_0, nt.incl, nt.Omega, nt.omega)
+end
+
+function KeplerianOrbit(nt::NamedTuple{(:rho_s, :R_s, :period, :ecc, :t_0, :b, :Omega, :omega)})
+    G = nt.period isa Real ? G_nom : G_unit
+    incl = compute_incl(nt.rho_s, nt.period, G, nt.b, nt.ecc, sincos(nt.omega))
+    return KeplerianOrbit(nt.rho_s, nt.R_s, nt.period, nt.ecc, nt.t_0, incl, nt.Omega, nt.omega)
 end
 
 function KeplerianOrbit(nt::NamedTuple{(:aR_s, :period, :incl, :t_0, :ecc, :Omega, :omega)})
-    params = keys(nt)
-    if (:incl ∈ params) & (:b ∉ params)
-        return KeplerianOrbit(nt.aR_s, nt.period, nt.incl, nt.t_0, nt.ecc, nt.Omega, nt.omega)
-    elseif (:b ∈ params) & (:incl ∉ params)
-        incl = compute_incl(nt.aR_s, nt.b, nt.ecc, sincos(nt.omega))
-        return KeplerianOrbit(nt.aR_s, nt.period, incl, nt.t_0, nt.ecc, nt.Omega, nt.omega)
-    else
-        throw(ArgumentError("Either incl or b must be specified"))
-    end
+    return KeplerianOrbit(nt.aR_s, nt.period, nt.incl, nt.t_0, nt.ecc, nt.Omega, nt.omega)
+end
+
+function KeplerianOrbit(nt::NamedTuple{(:aR_s, :period, :b, :t_0, :ecc, :Omega, :omega)})
+    incl = compute_incl(nt.aR_s, nt.b, nt.ecc, sincos(nt.omega))
+    return KeplerianOrbit(nt.aR_s, nt.period, incl, nt.t_0, nt.ecc, nt.Omega, nt.omega)
 end
 
 @kwcall KeplerianOrbit(rho_s, R_s, period, ecc, t_0, incl, Omega, omega)

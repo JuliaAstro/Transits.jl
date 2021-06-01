@@ -131,6 +131,9 @@ end
     @test compute_rho_s(aR_s, P, G_nom) ≈ 3.0 * aR_s^3
 end
 
+@testset "KeplerianOrbit: valid inputs" begin
+end
+
 #=
 @testset "KeplerianOrbit: small star" begin
     # Model inputs
