@@ -185,7 +185,7 @@ compute_aR_s(rho_s, period, G::typeof(G_unit)) = cbrt(G * period^2.0 * rho_s / (
 
 # Semi-major axis
 compute_a(aR_s, R_s) = aR_s * R_s
-compute_a(M_tot, period, G) = cbrt(G * M_tot * period^2 / (4.0 * π^2))
+#compute_a(M_tot, period, G) = cbrt(G * M_tot * period^2 / (4.0 * π^2))
 compute_a(rho_s, period, R_s, G) = compute_a(compute_aR_s(rho_s, period, G), R_s)
 
 # Impact parameter
@@ -205,7 +205,7 @@ compute_incl(rho_s, period, G, b, ecc, sincosomega) = compute_incl(compute_aR_s(
 ###########
 # RV params
 ###########
-compute_M_tot(a, period, G) = 4.0 * π^2.0 * a^3.0 / (G * period^2.0)
+#compute_M_tot(a, period, G) = 4.0 * π^2.0 * a^3.0 / (G * period^2.0)
 
 #function compute_RV_params(rho_s, R_s, a, period, G; M_p = zero(typeof(rho_s * R_s^3.0)))
 #    M_tot = compute_M_tot(a, period, G)
@@ -215,12 +215,6 @@ compute_M_tot(a, period, G) = 4.0 * π^2.0 * a^3.0 / (G * period^2.0)
 #    return M_s, a_s, M_p, a_p
 #end
 
-function compute_M_0(ecc, omega)
-    sin_omega, cos_omega = sincos(omega)
-    E₀ = 2.0 * atan(√(1.0 - ecc) * cos_omega, √(1.0 + ecc) * (1.0 + sin_omega))
-    M_0 = E₀ - ecc * sin(E₀)
-    return M_0
-end
 
 # Finds the position `r` of the planet along its orbit after rotating
 # through the true anomaly `ν`, then transforms this from the
@@ -252,6 +246,13 @@ function compute_true_anomaly(orbit::KeplerianOrbit, t)
         E = kepler_solver(M, orbit.ecc)
         return sincos(trueanom(E, orbit.ecc))
     end
+end
+
+function compute_M_0(ecc, omega)
+    sin_omega, cos_omega = sincos(omega)
+    E₀ = 2.0 * atan(√(1.0 - ecc) * cos_omega, √(1.0 + ecc) * (1.0 + sin_omega))
+    M_0 = E₀ - ecc * sin(E₀)
+    return M_0
 end
 
 #flip(orbit::KeplerianOrbit, Rₚ) = KeplerianOrbit(
