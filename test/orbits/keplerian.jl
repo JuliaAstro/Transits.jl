@@ -63,7 +63,7 @@ end
     @test all(no_transit)
 end
 
-@testset "KeplerianOrbit: construction" begin
+@testset "KeplerianOrbit: construction performance" begin
     b_ρₛ = @benchmark KeplerianOrbit(
         ρₛ = 2.0,
         Rₛ = 0.5,
@@ -139,6 +139,44 @@ end
 end
 
 @testset "KeplerianOrbit: valid inputs" begin
+    @test KeplerianOrbit(
+        ρₛ = 2.0,
+        Rₛ = 0.5,
+        period = 2.0,
+        ecc = 0.0,
+        t₀ = 0.0,
+        incl = π / 2.0,
+        Ω = 0.0,
+        ω = 0.0,
+    ) ===
+    KeplerianOrbit(
+        ρₛ = 2.0,
+        Rₛ = 0.5,
+        period = 2.0,
+        ecc = 0.0,
+        t₀ = 0.0,
+        b = 0.0,
+        Ω = 0.0,
+        ω = 0.0,
+    )
+    @test KeplerianOrbit(
+        aRₛ = 7.5,
+        P = 2.0,
+        incl = π / 2.0,
+        t₀ = 0.0,
+        ecc = 0.0,
+        Ω = 0.0,
+        ω = 0.0,
+    ) ===
+    KeplerianOrbit(
+        aRₛ = 7.5,
+        P = 2.0,
+        b = 0.0,
+        t₀ = 0.0,
+        ecc = 0.0,
+        Ω = 0.0,
+        ω = 0.0,
+    )
 end
 
 #=

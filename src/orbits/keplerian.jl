@@ -159,7 +159,9 @@ function KeplerianOrbit(nt::NamedTuple{(:aR_s, :period, :b, :t_0, :ecc, :Omega, 
 end
 
 @kwcall KeplerianOrbit(rho_s, R_s, period, ecc, t_0, incl, Omega, omega)
+@kwcall KeplerianOrbit(rho_s, R_s, period, ecc, t_0, b, Omega, omega)
 @kwcall KeplerianOrbit(aR_s, period, incl, t_0, ecc, Omega, omega)
+@kwcall KeplerianOrbit(aR_s, period, b, t_0, ecc, Omega, omega)
 @kwalias KeplerianOrbit [
     ρₛ => rho_s,
     aRₛ => aR_s,
