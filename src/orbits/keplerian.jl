@@ -182,7 +182,6 @@ compute_rho_s(a, period, R_s, G) = compute_rho_s(compute_aR_s(a, R_s), period, G
 compute_aR_s(a, R_s) = a / R_s
 compute_aR_s(rho_s, period, G_nom) = cbrt(G_nom * period^2.0 * rho_s / (3.0 * π))
 compute_aR_s(rho_s, period, G::typeof(G_unit)) = cbrt(G * period^2.0 * rho_s / (3.0 * π))
-compute_aR_s(a, period, R_s, G) = compute_aR_s(compute_rho_s(a, period, R_s, G), period)
 
 # Semi-major axis
 compute_a(aR_s, R_s) = aR_s * R_s
@@ -240,8 +239,8 @@ function _position(orbit, separation, t)
     R = RotZXZ(orbit.Omega, -orbit.incl, orbit.omega)
     return R * X
 end
-_star_position(orb, R_s, t) = _position.(orb, orb.a_s / R_s, t)
-_planet_position(orb, R_s, t) = _position.(orb, orb.a_p / R_s, t)
+#_star_position(orb, R_s, t) = _position.(orb, orb.a_s / R_s, t)
+#_planet_position(orb, R_s, t) = _position.(orb, orb.a_p / R_s, t)
 relative_position(orbit::KeplerianOrbit, t) = _position(orbit, -orbit.aR_s, t)
 
 # Returns sin(ν), cos(ν)

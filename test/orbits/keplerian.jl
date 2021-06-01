@@ -2,7 +2,8 @@ using BenchmarkTools
 using Unitful, UnitfulAstro
 using Transits.Orbits: KeplerianOrbit, flip,
                        compute_rho_s, compute_aR_s, compute_a, compute_incl,
-                       _star_position, _planet_position, relative_position
+                       relative_position
+                       #_star_position, _planet_position
 
 function compute_r(orbit, t)
     pos = relative_position.(orbit, t)
