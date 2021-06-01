@@ -106,9 +106,9 @@ end
     )
 
     # Units
-    @test median(b_ρₛ_units.times) ≤ 50_000 # ns
+    @test median(b_ρₛ_units.times) ≤ 100_000 # ns
     @test b_ρₛ_units.allocs ≤ 500
-    @test median(b_aRₛ_units.times) ≤ 50_000   # ns
+    @test median(b_aRₛ_units.times) ≤ 100_000   # ns
     @test b_aRₛ_units.allocs ≤ 500
 
     if v"1.6" ≤ Base.VERSION < v"1.7-"
@@ -125,13 +125,14 @@ end
 
 @testset "KeplerianOrbit: helper functions" begin
     a, R_s, aR_s = 2.0, 4.0, 0.5
-    P, G_nom = √π, 1.0
+    period, G_nom = √π, 1.0
     b = 0.0
     ecc = 0.0
     sincosomega = (1.0, 0.0)
     @test compute_a(aR_s, R_s) ≈ a
     @test compute_aR_s(a, R_s) ≈ aR_s
-    @test compute_rho_s(aR_s, P, G_nom) ≈ 3.0 * aR_s^3
+    @test compute_rho_s(aR_s, period, G_nom) ≈ 3.0 * aR_s^3
+    @test compute_rho_s(a, period, R_s, G_nom) ≈ 3.0 * (a/R_s)^3
     @test compute_incl(aR_s, b, ecc, sincosomega) == π/2.0
 end
 

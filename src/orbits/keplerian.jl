@@ -28,7 +28,7 @@ Keplerian orbit parameterized by the basic observables of a transiting 2-body sy
 * `Omega`/`Ω` - The longitude of the ascending node, same units as `incl`.
 * `omega`/`ω` - The argument of periapsis, same units as `Omega`.
 """
-struct KeplerianOrbit{T,L,D,R,A,I,M} <: AbstractOrbit
+struct KeplerianOrbit{T,L,D,R,A,I} <: AbstractOrbit
     # Transit params
     a::L
     aR_s::R
@@ -41,6 +41,7 @@ struct KeplerianOrbit{T,L,D,R,A,I,M} <: AbstractOrbit
     t_0::T
     t_p::T
     t_ref::T
+    M_0::R
 
     # Euler angles
     incl::A
@@ -48,33 +49,34 @@ struct KeplerianOrbit{T,L,D,R,A,I,M} <: AbstractOrbit
     omega::A
 
     # RV params
-    M₀::R
-    M_s::M
-    a_s::L
-    M_p::M
-    a_p::L
+    #M_s::M
+    #a_s::L
+    #M_p::M
+    #a_p::L
 end
 
-function normalize_inputs(a, aR_s, b, ecc, period, R_s, t_0, t_p, t_ref, M_s, a_s, M_p, a_p)
+function normalize_inputs(a, aR_s, b, ecc, period, R_s, t_0, t_p, t_ref)#, M_s, a_s, M_p, a_p)
     # Normalize unitless types
     aR_s, b, ecc = promote(aR_s, b, ecc)
 
     # Normalize quantities
     if !(period isa Real)
-        a, a_s, a_p, R_s, = uconvert.(u"Rsun", (a, a_s, a_p, R_s))
-        M_s, M_p = uconvert.(u"Msun", (M_s, M_p))
+        a, R_s, = uconvert.(u"Rsun", (a, R_s))
+        #a, a_s, a_p, R_s, = uconvert.(u"Rsun", (a, a_s, a_p, R_s))
+        #M_s, M_p = uconvert.(u"Msun", (M_s, M_p))
         period, t_0, t_p, t_ref = uconvert.(u"d", (period, t_0, t_p, t_ref))
     else
-        a, a_s, a_p, R_s = promote(a, a_s, a_p, R_s)
+        a, R_s = promote(a, R_s)
+        #a, a_s, a_p, R_s = promote(a, a_s, a_p, R_s)
         period, t_0, t_p, t_ref = promote(period, t_0, t_p, t_ref)
     end
 
-    return a, aR_s, b, ecc, period, R_s, t_0, t_p, t_ref, M_s, a_s, M_p, a_p
+    return a, aR_s, b, ecc, period, R_s, t_0, t_p, t_ref#, M_s, a_s, M_p, a_p
 end
 
 function normalize_inputs(
     a::T, aR_s, b, ecc, period, R_s::T,
-    t_0, t_p, t_ref, M_s::T, a_s::T, M_p::T, a_p::T
+    t_0, t_p, t_ref#, M_s::T, a_s::T, M_p::T, a_p::T
     ) where {T <: Nothing}
 
     # Normalize unitless types
@@ -100,18 +102,18 @@ function KeplerianOrbit(rho_s, R_s, period, ecc, t_0, incl, Omega, omega)
     a = compute_a(rho_s, period, R_s, G)
     b = compute_b(rho_s, period, G, sincos(incl), ecc, omega)
     n = 2.0 * π / period
-    M₀ = compute_M₀(ecc, omega)
-    t_p = t_0 - M₀ / n
+    M_0 = compute_M_0(ecc, omega)
+    t_p = t_0 - M_0 / n
     t_ref = t_p - t_0
-    M_s, a_s, M_p, a_p = compute_RV_params(rho_s, R_s, a, period, G)
+    #M_s, a_s, M_p, a_p = compute_RV_params(rho_s, R_s, a, period, G)
 
     # Normalize inputs
-    a, aR_s, b, ecc, period, R_s, t_0, t_p, t_ref, M_s, a_s, M_p, a_p = normalize_inputs(
-        a, aR_s, b, ecc, period, R_s, t_0, t_p, t_ref, M_s, a_s, M_p, a_p
+    a, aR_s, b, ecc, period, R_s, t_0, t_p, t_ref = normalize_inputs(
+        a, aR_s, b, ecc, period, R_s, t_0, t_p, t_ref#, M_s, a_s, M_p, a_p
     )
 
-    return KeplerianOrbit(a, aR_s, b, ecc, period, rho_s, R_s, n, t_0, t_p, t_ref, incl, Omega, omega, M₀,
-                          M_s, a_s, M_p, a_p)
+    return KeplerianOrbit(a, aR_s, b, ecc, period, rho_s, R_s, n, t_0, t_p, t_ref, M_0, incl, Omega, omega)
+    #M_s, a_s, M_p, a_p)
 end
 
 function KeplerianOrbit(aR_s, period, incl, t_0, ecc, Omega, omega)
@@ -121,19 +123,20 @@ function KeplerianOrbit(aR_s, period, incl, t_0, ecc, Omega, omega)
     # Compute remaining system parameters
     rho_s = compute_rho_s(aR_s, period, G)
     b = compute_b(aR_s, sincos(incl), ecc, omega)
-    M₀ = compute_M₀(ecc, omega)
+    M_0 = compute_M_0(ecc, omega)
     n = 2.0 * π / period
-    t_p = t_0 - M₀ / n
+    t_p = t_0 - M_0 / n
     t_ref = t_p - t_0
-    a = R_s = M_s = a_s = M_p = a_p = nothing
+    #a = R_s = M_s = a_s = M_p = a_p = nothing
+    a = R_s = nothing
 
     # Normalize inputs
     aR_s, b, ecc, period, t_0, t_p, t_ref = normalize_inputs(
-        a, aR_s, b, ecc, period, R_s, t_0, t_p, t_ref, M_s, a_s, M_p, a_p
+        a, aR_s, b, ecc, period, R_s, t_0, t_p, t_ref#, M_s, a_s, M_p, a_p
     )
 
-    return KeplerianOrbit(a, aR_s, b, ecc, period, rho_s, R_s, n, t_0, t_p, t_ref, incl, Omega, omega, M₀,
-                          M_s, a_s, M_p, a_p)
+    return KeplerianOrbit(a, aR_s, b, ecc, period, rho_s, R_s, n, t_0, t_p, t_ref, M_0, incl, Omega, omega)
+                          #M_s, a_s, M_p, a_p)
 end
 
 function KeplerianOrbit(nt::NamedTuple{(:rho_s, :R_s, :period, :ecc, :t_0, :incl, :Omega, :omega)})
@@ -205,19 +208,19 @@ compute_incl(rho_s, period, G, b, ecc, sincosomega) = compute_incl(compute_aR_s(
 ###########
 compute_M_tot(a, period, G) = 4.0 * π^2.0 * a^3.0 / (G * period^2.0)
 
-function compute_RV_params(rho_s, R_s, a, period, G; M_p = zero(typeof(rho_s * R_s^3.0)))
-    M_tot = compute_M_tot(a, period, G)
-    M_s = M_tot - M_p
-    a_p = -(M_s / M_tot) * a
-    a_s = a + a_p
-    return M_s, a_s, M_p, a_p
-end
+#function compute_RV_params(rho_s, R_s, a, period, G; M_p = zero(typeof(rho_s * R_s^3.0)))
+#    M_tot = compute_M_tot(a, period, G)
+#    M_s = M_tot - M_p
+#    a_p = -(M_s / M_tot) * a
+#    a_s = a + a_p
+#    return M_s, a_s, M_p, a_p
+#end
 
-function compute_M₀(ecc, omega)
+function compute_M_0(ecc, omega)
     sin_omega, cos_omega = sincos(omega)
     E₀ = 2.0 * atan(√(1.0 - ecc) * cos_omega, √(1.0 + ecc) * (1.0 + sin_omega))
-    M₀ = E₀ - ecc * sin(E₀)
-    return M₀
+    M_0 = E₀ - ecc * sin(E₀)
+    return M_0
 end
 
 # Finds the position `r` of the planet along its orbit after rotating
@@ -252,17 +255,17 @@ function compute_true_anomaly(orbit::KeplerianOrbit, t)
     end
 end
 
-flip(orbit::KeplerianOrbit, Rₚ) = KeplerianOrbit(
-    M_s = orbit.M_p,
-    M_p = orbit.M_s,
-    R_s = Rₚ,
-    period = orbit.period,
-    t_p = orbit.t_p,
-    incl = orbit.incl,
-    ecc = orbit.ecc,
-    omega = orbit.omega - π,
-    Omega = orbit.Omega
-)
+#flip(orbit::KeplerianOrbit, Rₚ) = KeplerianOrbit(
+#    M_s = orbit.M_p,
+#    M_p = orbit.M_s,
+#    R_s = Rₚ,
+#    period = orbit.period,
+#    t_p = orbit.t_p,
+#    incl = orbit.incl,
+#    ecc = orbit.ecc,
+#    omega = orbit.omega - π,
+#    Omega = orbit.Omega
+#)
 
 stringify_units(value::Unitful.AbstractQuantity, unit) = value
 stringify_units(value, unit) = "$value $unit"
@@ -284,10 +287,10 @@ function Base.show(io::IO, ::MIME"text/plain", orbit::KeplerianOrbit)
           incl: $(stringify_units(orbit.incl, "rad"))
           Ω: $(stringify_units(orbit.Omega, "rad"))
           ω: $(stringify_units(orbit.omega, "rad"))
-          Mₛ: $(stringify_units(orbit.M_s, "M⊙"))
-          aₛ: $(stringify_units(orbit.a_s, "R⊙"))
-          Mₚ: $(stringify_units(orbit.M_p, "M⊙"))
-          aₚ: $(stringify_units(orbit.a_p, "R⊙"))
       """
+          #Mₛ: $(stringify_units(orbit.M_s, "M⊙"))
+          #aₛ: $(stringify_units(orbit.a_s, "R⊙"))
+          #Mₚ: $(stringify_units(orbit.M_p, "M⊙"))
+          #aₚ: $(stringify_units(orbit.a_p, "R⊙"))
     )
 end
