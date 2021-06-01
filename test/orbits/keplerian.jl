@@ -126,9 +126,13 @@ end
 @testset "KeplerianOrbit: helper functions" begin
     a, R_s, aR_s = 2.0, 4.0, 0.5
     P, G_nom = √π, 1.0
+    b = 0.0
+    ecc = 0.0
+    sincosomega = (1.0, 0.0)
     @test compute_a(aR_s, R_s) ≈ a
     @test compute_aR_s(a, R_s) ≈ aR_s
     @test compute_rho_s(aR_s, P, G_nom) ≈ 3.0 * aR_s^3
+    @test compute_incl(aR_s, b, ecc, sincosomega) == π/2.0
 end
 
 @testset "KeplerianOrbit: valid inputs" begin
