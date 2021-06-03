@@ -306,8 +306,6 @@ end
 end
 
 @testset "KeplerianOrbit: flip" begin
-    t = range(0, 100; length=1_000)
-
     orbit = KeplerianOrbit(
         rho_s = 0.34,
         R_s = 1.1,
@@ -319,7 +317,10 @@ end
         Omega = 1.0,
         M_p = 0.1,
     )
+
     orbit_flipped = flip(orbit, 0.7)
+
+    t = range(0, 100; length=1_000)
 
     u_star = as_matrix(_star_position.(orbit, orbit.R_s, t))
     u_planet_flipped = as_matrix(_planet_position.(orbit_flipped, orbit.R_s, t))

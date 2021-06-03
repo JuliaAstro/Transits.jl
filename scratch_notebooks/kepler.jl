@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.14.5
+# v0.14.7
 
 using Markdown
 using InteractiveUtils
@@ -54,14 +54,15 @@ as_matrix(pos) = reinterpret(reshape, Float64, pos) |> permutedims
 # ╔═╡ 81d987d3-b0e8-48cb-9a9c-d924cd8f7297
 let
     t = range(0, 100; length=1_000)
-
+    m_star = 1.3
+	r_star = 1.1
     orbit = KeplerianOrbit(
-        rho_s = 0.34,
-        R_s = 1.1,
+        rho_s = m_star / ((4.0/3.0) * π * r_star^3),
+        R_s = r_star,
         period = 100.0,
         ecc = 0.3,
         t_0 = 0.5,
-        incl = π / 4.0,
+        incl = 0.25*π,
         omega = 0.5,
         Omega = 1.0,
 		M_p = 0.1,
@@ -81,7 +82,21 @@ let
 #         #@test allclose(u_planet[:, i], u_star_flipped[:, i], atol=1e-5)
 #     end
 	
-	u_star, u_planet_flipped
+	#u_star, u_planet_flipped
+	
+	fig = Figure(resolution=(1_000, 400))
+	ax1 = Axis(fig[1, 1])
+	ax2 = Axis(fig[1, 2])
+	linkyaxes!(ax1, ax2)
+	
+	for (star1, star2, pos) in zip(eachcol(u_star), eachcol(u_planet_flipped), ["x", "y", "z"])
+		lines!(ax1, t, star1, label=pos)
+		lines!(ax2, t, star2, label=pos)
+	end
+	
+	axislegend(ax2)
+	
+	fig
 end
 
 # ╔═╡ ca156253-c53d-4b5c-a8b8-7fe694b8f095
