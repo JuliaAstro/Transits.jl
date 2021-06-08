@@ -61,6 +61,7 @@ function normalize_inputs(
     n,
     M_p, M_s,
     )
+
     # Normalize unitless types
     aR_s, b, ecc = promote(aR_s, b, ecc)
 
@@ -68,8 +69,8 @@ function normalize_inputs(
     if !(period isa Real)
         period, t_0, t_p, t_ref = uconvert.(u"d", (period, t_0, t_p, t_ref))
         a, a_p, a_s, R_p, R_s = uconvert.(u"Rsun", (a, a_p, a_s, R_p, R_s))
-        rho_p, rho_s = uconvert.(u"Msun/Rsun^3", rho_p, rho_s)
-        incl, omega, Omega = uconvert.(u"rad", incl, omega, Omega)
+        rho_p, rho_s = uconvert.(u"Msun/Rsun^3", (rho_p, rho_s))
+        incl, omega, Omega = uconvert.(u"rad", (incl, omega, Omega))
         M_p, M_s = uconvert.(u"Msun", (M_p, M_s))
     else
         period, t_0, t_p, t_ref = promote(period, t_0, t_p, t_ref)
@@ -144,7 +145,7 @@ function KeplerianOrbit(nt::NamedTuple{(
     elseif isnothing(nt.rho_s) & !isnothing(nt.aR_s)
         aR_s, ecc = nt.aR_s, nt.ecc
         rho_s = compute_rho_s(aR_s, period, G)
-        R_s = isnothing(nt.R_s) ? 1.0 : nt.R_s
+        R_s = isnothing(nt.R_s) ? (nt.period isa Real ? 1.0 : 1.0u"Rsun") : nt.R_s
         R_p = isnothing(nt.R_p) ? zero(R_s) : nt.R_p
         a = compute_a(rho_s, period, R_s, G)
         M_s, a_s, M_p, a_p = compute_RV_params(rho_s, R_s, a, period, G; M_p=nt.M_p)
@@ -197,6 +198,7 @@ function KeplerianOrbit(nt::NamedTuple{(
         M_p, M_s,
     )
 end
+
 @kwcall KeplerianOrbit(
     period, t_0,
     R_p=nothing, R_s=nothing,

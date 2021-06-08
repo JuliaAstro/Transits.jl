@@ -19,6 +19,30 @@ end
 # ╔═╡ 2a67f029-8472-47f4-8fdc-054214861355
 using KeywordCalls
 
+# ╔═╡ afb5a050-b80d-4205-8583-6515779c18e3
+KeplerianOrbit(
+	ρₛ = 2.0u"g/cm^3",
+	Rₛ = 1.0u"Rsun",
+	P = 2.0u"d",
+	ecc = 0.001,
+	t₀ = 0.0u"d",
+	incl = 0.0u"°",
+	Ω = 0.0u"°",
+	ω = 0.0u"°",
+)
+
+# ╔═╡ 0895d026-491f-4168-8ad0-509a3227ca89
+KeplerianOrbit(
+	aRₛ = 7.5,
+	P = 2.0u"d",
+	incl = 90.0u"°",
+	t₀ = 0.0u"d",
+	ecc = 0.0,	
+	Ω = 0.0u"°",
+	ω = 0.0u"°",
+	#R_s = 2.0u"Rsun",
+)
+
 # ╔═╡ da4c42b9-a22b-435d-8c1d-c4b93a9cd411
 function make_orbit_ρₛ(P, δ, T, τ)
 	return KeplerianOrbit(
@@ -147,6 +171,9 @@ KeplerianOrbit(
 
 # ╔═╡ f01eeef5-24f7-4a31-ab19-a785b78b55e5
 orbit = make_orbit_ρₛ(3.0, 0.15^2, 0.3, 0.1)
+
+# ╔═╡ 0e95ef22-b4ba-41d8-8dfc-79f9553b9fb8
+sprint(show, "text/plain", orbit) == repr( "text/plain", orbit)
 
 # ╔═╡ f119776f-9b8c-40bd-a411-a29df4c81a8c
 KO(nt::NamedTuple{(:rho_s, :aR_s, :R_s, :period, :ecc, :t_0, :incl, :b, :Omega, :omega, :M_p)}) = 2
@@ -311,6 +338,9 @@ let
 end
 
 # ╔═╡ Cell order:
+# ╠═afb5a050-b80d-4205-8583-6515779c18e3
+# ╠═0895d026-491f-4168-8ad0-509a3227ca89
+# ╠═0e95ef22-b4ba-41d8-8dfc-79f9553b9fb8
 # ╠═da4c42b9-a22b-435d-8c1d-c4b93a9cd411
 # ╠═09d609e7-54c4-468c-8f8f-39aa808d20be
 # ╠═3de4e3b5-3d64-4e50-b951-de03a8d77ad1

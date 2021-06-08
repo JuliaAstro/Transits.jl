@@ -201,7 +201,7 @@ orbit = KeplerianOrbit(
 orbit_repr = """
   Keplerian Orbit
     a: 3.753076012191651 R⊙
-    aRₛ: 13.567421667478143
+    aRₛ: 7.506152024383302
     b: 4.596192525287218e-16
     ecc: 0.0
     P: 2.0 d
