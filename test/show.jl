@@ -64,3 +64,36 @@ end
      t0: 0.0
      b: 0.0"""
 end
+
+@testset "KeplerianOrbit" begin
+    orbit = KeplerianOrbit(
+        ρₛ = 2.0,
+        Rₛ = 0.5,
+        period = 2.0,
+        ecc = 0.0,
+        t₀ = 0.0,
+        incl = π / 2.0,
+        Ω = 0.0,
+        ω = 0.0,
+    )
+
+    @test sprint(show, "text/plain", orbit) === """
+    Keplerian Orbit
+     a: 3.753076012191651 R⊙
+     aRₛ: 7.506152024383302
+     b: 4.596192525287218e-16
+     ecc: 0.0
+     P: 2.0 d
+     ρₛ: 0.3386804244486997 M⊙/R⊙³
+     Rₛ: 0.5 R⊙
+     t₀: 0.0 d
+     tₚ: -0.5 d
+     t_ref: -0.5 d
+     incl: 1.5707963267948966 rad
+     Ω: 0.0 rad
+     ω: 0.0 rad
+     Mₛ: 0.17733265556045136 M⊙
+     aₛ: 0.0 R⊙
+     Mₚ: 0.0 M⊙
+     aₚ: -3.753076012191651 R⊙"""
+end
