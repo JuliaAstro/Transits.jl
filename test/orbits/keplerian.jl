@@ -1,7 +1,7 @@
 using BenchmarkTools
 using Unitful, UnitfulAstro
 using Transits.Orbits: KeplerianOrbit, flip,
-                       compute_rho_s, compute_aR_s, compute_a, compute_incl,
+                       compute_rho_star, compute_aR_star, compute_a, compute_incl,
                        relative_position,
                        _star_position, _planet_position
 
@@ -130,17 +130,17 @@ end
 end
 
 @testset "KeplerianOrbit: helper functions" begin
-    a, R_s, aR_s = 2.0, 4.0, 0.5
+    a, R_star, aR_star = 2.0, 4.0, 0.5
     period, G_nom = √π, 1.0
-    rho_s = 3.0 * 0.5^3
+    rho_star = 3.0 * 0.5^3
     b = 0.0
     ecc = 0.0
     sincosomega = (1.0, 0.0)
-    @test compute_a(aR_s, R_s) ≈ a
-    @test compute_aR_s(a, R_s) ≈ aR_s
-    @test compute_rho_s(aR_s, period, G_nom) ≈ 3.0 * aR_s^3
-    @test compute_rho_s(a, period, R_s, G_nom) ≈ 3.0 * (a/R_s)^3
-    @test compute_incl(rho_s, period, G_nom, b, ecc, sincosomega) ≈ compute_incl(aR_s, b, ecc, sincosomega) ≈ π/2.0
+    @test compute_a(aR_star, R_star) ≈ a
+    @test compute_aR_star(a, R_star) ≈ aR_star
+    @test compute_rho_star(aR_star, period, G_nom) ≈ 3.0 * aR_star^3
+    @test compute_rho_star(a, period, R_star, G_nom) ≈ 3.0 * (a/R_star)^3
+    @test compute_incl(rho_star, period, G_nom, b, ecc, sincosomega) ≈ compute_incl(aR_star, b, ecc, sincosomega) ≈ π/2.0
 end
 
 #=
@@ -269,30 +269,30 @@ end
 
 @testset "KeplerianOrbit: flip" begin
     orbit = KeplerianOrbit(
-        rho_s = 0.34,
-        R_s = 1.1,
+        rho_star = 0.34,
+        R_star = 1.1,
         period = 100.0,
         ecc = 0.3,
         t_0 = 0.5,
         incl = π / 4.0,
         omega = 0.5,
         Omega = 1.0,
-        M_p = 0.1,
+        M_planet = 0.1,
     )
 
     orbit_flipped = flip(orbit, 0.7)
 
     t = range(0, 100; length=1_000)
 
-    u_star = as_matrix(_star_position.(orbit, orbit.R_s, t))
-    u_planet_flipped = as_matrix(_planet_position.(orbit_flipped, orbit.R_s, t))
+    u_star = as_matrix(_star_position.(orbit, orbit.R_star, t))
+    u_planet_flipped = as_matrix(_planet_position.(orbit_flipped, orbit.R_star, t))
     for i in 1:3
         @show u_star[1:10, i] u_planet_flipped[1:10, i]
         @test allclose(u_star[:, i], u_planet_flipped[:, i], atol=1e-5)
     end
 
-    u_planet = as_matrix(_planet_position.(orbit, orbit.R_s, t))
-    u_star_flipped = as_matrix(_star_position.(orbit_flipped, orbit.R_s, t))
+    u_planet = as_matrix(_planet_position.(orbit, orbit.R_star, t))
+    u_star_flipped = as_matrix(_star_position.(orbit_flipped, orbit.R_star, t))
     for i in 1:3
         @test allclose(u_planet[:, i], u_star_flipped[:, i], atol=1e-5)
     end

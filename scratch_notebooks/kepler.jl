@@ -19,6 +19,9 @@ end
 # ╔═╡ 2a67f029-8472-47f4-8fdc-054214861355
 using KeywordCalls
 
+# ╔═╡ 363f8556-5aa3-4254-a4ad-34bf467f1ca0
+
+
 # ╔═╡ afb5a050-b80d-4205-8583-6515779c18e3
 KeplerianOrbit(
 	ρₛ = 2.0u"g/cm^3",
@@ -75,12 +78,14 @@ const _planet_position = Orbits._planet_position
 # ╔═╡ df13cf06-bb11-452f-978e-98d27e226bb2
 as_matrix(pos) = reinterpret(reshape, Float64, pos) |> permutedims
 
-# ╔═╡ 81d987d3-b0e8-48cb-9a9c-d924cd8f7297
-let
-    t = range(0, 100; length=1_000)
+# ╔═╡ e714ab58-0530-43b0-83ca-0244b709d957
+0.31035213902919595u"Msun/Rsun^3" |> u"g/cm^3"
+
+# ╔═╡ 2ce44554-5c01-4beb-a696-6c27b0bfca2d
+Pl.with_terminal() do
     m_star = 1.3
-	r_star = 1.1
-    orbit = KeplerianOrbit(
+	r_star = 1.0
+	orbit = KeplerianOrbit(
         rho_s = m_star / ((4.0/3.0) * π * r_star^3),
         R_s = r_star,
         period = 100.0,
@@ -91,36 +96,54 @@ let
         Omega = 1.0,
 		M_p = 0.1,
     )
+end
+
+# ╔═╡ 81d987d3-b0e8-48cb-9a9c-d924cd8f7297
+let
+    t = range(0, 100; length=1_000)
+    m_star = 1.3
+	r_star = 1.0
+	orbit = KeplerianOrbit(
+		rho_s = m_star / ((4.0/3.0) * π * r_star^3),
+		R_s = r_star,
+		period = 100.0,
+		ecc = 0.3,
+		t_0 = 0.5,
+		incl = 0.25*π,
+		omega = 0.5,	
+		Omega = 1.0,
+		M_p = 0.1,
+    )
     
 	orbit_flipped = flip(orbit, 0.7)
+	
+	orbit, orbit_flipped
+	
+#     u_star = _star_position.(orbit, orbit.R_s, t) |> as_matrix
+#     u_planet_flipped = _planet_position.(orbit_flipped, orbit.R_s, t) |> as_matrix
+# # # #     for i in 1:3
+# # # #         #@test allclose(u_star[:, i], u_planet_flipped[:, i], atol=1e-5)
+# # # #     end
 
-    u_star = as_matrix(_star_position.(orbit, orbit.R_s, t))
-    u_planet_flipped = as_matrix(_planet_position.(orbit_flipped, orbit.R_s, t))
-#     for i in 1:3
-#         #@test allclose(u_star[:, i], u_planet_flipped[:, i], atol=1e-5)
-#     end
-
-#     u_planet = stack(_planet_position.(orbit, orbit.R_s, t))
-#     u_star_flipped = stack(_star_position.(orbit_flipped, orbit.R_s, t))
-#     for i in 1:3
-#         #@test allclose(u_planet[:, i], u_star_flipped[:, i], atol=1e-5)
-#     end
+# # # #     u_planet = stack(_planet_position.(orbit, orbit.R_s, t))
+# # # #     u_star_flipped = stack(_star_position.(orbit_flipped, orbit.R_s, t))
+# # # #     for i in 1:3
+# # # #         #@test allclose(u_planet[:, i], u_star_flipped[:, i], atol=1e-5)
+# # # #     end
+		
+# 	fig = Figure(resolution=(1_000, 400))
+# 	ax1 = Axis(fig[1, 1])
+# 	ax2 = Axis(fig[1, 2])
+# # 	#linkyaxes!(ax1, ax2)
 	
-	#u_star, u_planet_flipped
+# 	for (star1, star2, pos) in zip(eachcol(u_star), eachcol(u_planet_flipped), ["x", "y", "z"])
+# 		lines!(ax1, t, star1, label=pos)
+# 		lines!(ax2, t, star2, label=pos)
+# 	end
 	
-	fig = Figure(resolution=(1_000, 400))
-	ax1 = Axis(fig[1, 1])
-	ax2 = Axis(fig[1, 2])
-	linkyaxes!(ax1, ax2)
+# 	axislegend(ax2)
 	
-	for (star1, star2, pos) in zip(eachcol(u_star), eachcol(u_planet_flipped), ["x", "y", "z"])
-		lines!(ax1, t, star1, label=pos)
-		lines!(ax2, t, star2, label=pos)
-	end
-	
-	axislegend(ax2)
-	
-	fig
+# 	fig
 end
 
 # ╔═╡ ca156253-c53d-4b5c-a8b8-7fe694b8f095
@@ -335,6 +358,7 @@ let
 end
 
 # ╔═╡ Cell order:
+# ╠═363f8556-5aa3-4254-a4ad-34bf467f1ca0
 # ╠═afb5a050-b80d-4205-8583-6515779c18e3
 # ╠═0895d026-491f-4168-8ad0-509a3227ca89
 # ╠═da4c42b9-a22b-435d-8c1d-c4b93a9cd411
@@ -343,6 +367,8 @@ end
 # ╠═72174e0c-0116-4d1e-8365-c1aa63b648ca
 # ╠═6de491a0-525d-4283-999f-dff478185214
 # ╠═df13cf06-bb11-452f-978e-98d27e226bb2
+# ╠═e714ab58-0530-43b0-83ca-0244b709d957
+# ╠═2ce44554-5c01-4beb-a696-6c27b0bfca2d
 # ╠═81d987d3-b0e8-48cb-9a9c-d924cd8f7297
 # ╠═ca156253-c53d-4b5c-a8b8-7fe694b8f095
 # ╠═9d2d78b1-2319-43d2-8a51-c383ba17b585
