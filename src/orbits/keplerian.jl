@@ -7,6 +7,7 @@ using Rotations
 # Domain specific unit conversions / Constants
 const G_nom = 2942.2062175044193 # Rsun^3/Msun/d^2
 const G_unit = PhysicalConstants.CODATA2018.G
+const MsunRsun_to_gcc = (1.0u"Msun/Rsun^3" |> u"g/cm^3").val
 
 """
     KeplerianOrbit(; kwargs...)
@@ -15,7 +16,6 @@ Keplerian orbit parameterized by the basic observables of a transiting 2-body sy
 
 # Parameters
 * `a` - The semi-major axis, nominally in AU
-* `aR_star`/`aRₛ` - The ratio of the semi-major axis to the star radius.
 * `b` - The impact parameter, bounded between 0 ≤ b ≤ 1
 * `ecc` - The eccentricity of the closed orbit, bounded between 0 ≤ ecc < 1
 * `period`/`P` - The orbital period of the planet, nominally in days.
@@ -42,11 +42,10 @@ struct KeplerianOrbit{T,L,D,R,A,I,M} <: AbstractOrbit
     aR_star::R
     b::R
     ecc::R
-    M_0::R
+    n::I
     incl::A
     omega::A
     Omega::A
-    n::I
     M_planet::M
     M_star::M
 end
@@ -55,34 +54,33 @@ function normalize_inputs(
     period, t_0, t_p, t_ref,
     a, a_planet, a_star, R_planet, R_star,
     rho_planet, rho_star,
-    aR_star, b, ecc, M_0,
+    aR_star, b, ecc,
     incl, omega, Omega,
-    n,
     M_planet, M_star,
+    no_units,
     )
 
     # Normalize unitless types
     aR_star, b, ecc = promote(aR_star, b, ecc)
 
     # Normalize quantities
-    if !(period isa Real)
+    if no_units
+        period, t_0, t_p, t_ref = promote(period, t_0, t_p, t_ref)
+        a, a_planet, a_star, R_planet, R_star = promote(a, a_planet, a_star, R_planet, R_star)
+    else
         period, t_0, t_p, t_ref = uconvert.(u"d", (period, t_0, t_p, t_ref))
         a, a_planet, a_star, R_planet, R_star = uconvert.(u"Rsun", (a, a_planet, a_star, R_planet, R_star))
         rho_planet, rho_star = uconvert.(u"Msun/Rsun^3", (rho_planet, rho_star))
         incl, omega, Omega = uconvert.(u"rad", (incl, omega, Omega))
         M_planet, M_star = uconvert.(u"Msun", (M_planet, M_star))
-    else
-        period, t_0, t_p, t_ref = promote(period, t_0, t_p, t_ref)
-        a, a_planet, a_star, R_planet, R_star = promote(a, a_planet, a_star, R_planet, R_star)
     end
 
     return (
         period, t_0, t_p, t_ref,
         a, a_planet, a_star, R_planet, R_star,
         rho_planet, rho_star,
-        aR_star, b, ecc, M_0,
+        aR_star, b, ecc,
         incl, omega, Omega,
-        n,
         M_planet, M_star,
     )
 end
@@ -95,19 +93,31 @@ function KeplerianOrbit(nt::NamedTuple{(
         :incl, :omega, :Omega,
         :M_planet, :M_star,
     )})
-    G = nt.period isa Real ? G_nom : G_unit
-    a, period, rho_star, R_star, M_star, M_planet, G = compute_consistent_inputs(
-        nt.a, nt.period, nt.rho_star, nt.R_star, nt.M_star, nt.M_planet, G
+    if nt.period isa Real || nt.a isa Real
+        G = G_nom
+        no_units = true
+    else
+        G = G_unit
+        no_units = false
+    end
+    a, aR_star, period, rho_star, R_star, M_star, M_planet = compute_consistent_inputs(
+        nt.a, nt.aR_star, nt.period, nt.rho_star, nt.R_star, nt.M_star, nt.M_planet, G,
     )
     M_tot = M_star + M_planet
+    if isnothing(nt.R_planet)
+        R_planet = oneunit(R_star)
+    else
+        R_planet = nt.R_planet
+    end
+    rho_planet = compute_rho(M_planet, R_planet)
 
     n = 2.0 * π / period
     a_star = a * M_planet / M_tot
     a_planet = -a * M_star / M_tot
 
     # Eccentricity
-    if any(isnothing.((ecc, nt.omega)))
-        throw(ArgumentError(both `e` and `ω` must be provided))
+    if any( isnothing.((nt.ecc, nt.omega)) )
+        throw(ArgumentError("both `e` and `ω` must be provided"))
     else
         omega = nt.omega
         sin_omega, cos_omega = sincos(omega)
@@ -115,114 +125,53 @@ function KeplerianOrbit(nt::NamedTuple{(
 
     if isnothing(nt.ecc) || iszero(nt.ecc)
         ecc = 0.0
-        M_0 = 0.5*π
         incl_factor_inv = 1.0
     else
         ecc = nt.ecc
-        E_0 = 2.0 * atan(√(1.0 - ecc) * cos_omega, √(1.0 + ecc) * (1.0 + sin_omega))
-        M_0 = E_0 - ecc * sin(E_0)
         incl_factor_inv  = (1.0 - ecc^2) / (1.0 + ecc * sin_omega)
     end
+    E_0 = 2.0 * atan(√(1.0 - ecc) * cos_omega, √(1.0 + ecc) * (1.0 + sin_omega))
+    M_0 = E_0 - ecc * sin(E_0)
 
     if !isnothing(nt.incl) & isnothing(nt.b)
-        b = compute_b(nt.aR_star, sincos(nt.incl), nt.ecc, nt.omega)
         incl = nt.incl
+        b = compute_b(a, R_star, sincos(incl), ecc, omega, incl_factor_inv)
     elseif isnothing(nt.incl) & !isnothing(nt.b)
         b = nt.b
-        incl = compute_incl(rho_star, nt.period, G, b, nt.ecc, sincos(nt.ω))
+        incl = compute_incl(a, R_star, b, ecc, sincos(ω))
     else
         throw(ArgumentError("Either incl or b must be specified"))
     end
 
+    # Compute remaining system parameters
+    t_0 = isnothing(nt.t_0) ? (no_units ? 0.0 : 0.0u"d") : nt.t_0
+    t_p = t_0 - M_0 / n
+    t_ref = t_p - t_0
+    Omega = isnothing(nt.Omega) ? (no_units ? 0.5*π : 0.5*π*u"rad") : nt.Omega
 
-
-
-    if !isnothing(nt.rho_star) & isnothing(nt.aR_star)
-        rho_star = nt.rho_star
-        R_star = nt.R_star
-        R_planet = isnothing(nt.R_planet) ? 0.01*oneunit(R_star) : nt.R_planet
-        aR_star, ecc = compute_aR_star(rho_star, period, G), nt.ecc
-        a = compute_a(rho_star, period, R_star, G)
-        M_star = rho_star * (4.0/3.0)*π*R_star^3
-        a_star, M_planet, a_planet = compute_RV_params(a, M_star; M_planet=nt.M_planet)
-        rho_planet = isnothing(nt.M_planet) ? zero(rho_star) : compute_rho(M_planet, R_planet)
-        if !isnothing(nt.incl) & isnothing(nt.b)
-            b = compute_b(rho_star, nt.period, G, sincos(nt.incl), nt.ecc, nt.omega)
-            incl = nt.incl
-        elseif isnothing(nt.incl) & !isnothing(nt.b)
-            b = nt.b
-            incl = compute_incl(nt.rho_star, nt.period, G, b, nt.ecc, sincos(nt.omega))
-        else
-            throw(ArgumentError("Either incl or b must be specified"))
-        end
-
-        # Compute remaining system parameters
-        t_p = nt.t_0 - M_0 / n
-        t_ref = t_p - nt.t_0
-
-        # Normalize inputs
-        (
-            period, t_0, t_p, t_ref,
-            a, a_planet, a_star, R_planet, R_star,
-            rho_planet, rho_star,
-            aR_star, b, ecc, M_0,
-            incl, omega, Omega,
-            n,
-            M_planet, M_star,
-        ) = normalize_inputs(
-            period, t_0, t_p, t_ref,
-            a, a_planet, a_star, R_planet, R_star,
-            rho_planet, rho_star,
-            aR_star, b, ecc, M_0,
-            incl, omega, Omega,
-            n,
-            M_planet, M_star,
-        )
-    elseif isnothing(nt.rho_star) & !isnothing(nt.aR_star)
-        aR_star, ecc = nt.aR_star, nt.ecc
-        rho_star = compute_rho_star(aR_star, period, G)
-        R_star = isnothing(nt.R_star) ? (nt.period isa Real ? 1.0 : 1.0u"Rsun") : nt.R_star
-        R_planet = isnothing(nt.R_planet) ? zero(R_star) : nt.R_planet
-        a = compute_a(rho_star, period, R_star, G)
-        M_star = rho_star * (4.0/3.0) * π * R_star^3
-        a_star, M_planet, a_planet = compute_RV_params(a, M_star; M_planet=nt.M_planet)
-        rho_planet = isnothing(nt.M_planet) ? zero(rho_star) : compute_rho(M_planet, R_planet)
-
-        # Compute remaining system parameters
-        n = 2.0 * π / nt.period
-        M_0 = compute_M_0(nt.ecc, nt.omega)
-        t_p = nt.t_0 - M_0 / n
-        t_ref = t_p - nt.t_0
-
-        # Normalize inputs
-        (
-            period, t_0, t_p, t_ref,
-            a, a_planet, a_star, R_planet, R_star,
-            rho_planet, rho_star,
-            aR_star, b, ecc, M_0,
-            incl, omega, Omega,
-            n,
-            M_planet, M_star,
-        ) = normalize_inputs(
-            period, t_0, t_p, t_ref,
-            a, a_planet, a_star, R_planet, R_star,
-            rho_planet, rho_star,
-            aR_star, b, ecc, M_0,
-            incl, omega, Omega,
-            n,
-            M_planet, M_star,
-        )
-    else
-        throw(ArgumentError("Either rho_star or aR_star must be specified"))
-    end
-
+    # Normalize inputs
+    (
+        period, t_0, t_p, t_ref,
+        a, a_planet, a_star, R_planet, R_star,
+        rho_planet, rho_star,
+        aR_star, b, ecc,
+        incl, omega, Omega,
+        M_planet, M_star,
+    ) = normalize_inputs(
+        period, t_0, t_p, t_ref,
+        a, a_planet, a_star, R_planet, R_star,
+        rho_planet, rho_star,
+        aR_star, b, ecc,
+        incl, omega, Omega,
+        M_planet, M_star,
+        no_units,
+    )
     return KeplerianOrbit(
         period, t_0, t_p, t_ref,
         a, a_planet, a_star, R_planet, R_star,
         rho_planet, rho_star,
-        aR_star, b, ecc, M_0,
+        aR_star, b, ecc, n,
         incl, omega, Omega,
-        n,
         M_planet, M_star,
     )
 end
@@ -237,8 +186,8 @@ end
 )
 
 @kwalias KeplerianOrbit [
-    ρₛ => rho_star,
     aRₛ => aR_star,
+    ρₛ => rho_star,
     Rₛ => R_star,
     P => period,
     t₀ => t_0,
@@ -250,53 +199,40 @@ end
 # Orbit logic
 #############
 # Star density
-compute_rho_star(aR_star, period, G_nom) = (3.0 * π / (G_nom * period^2)) * aR_star^3
-compute_rho_star(aR_star, period, G::typeof(G_unit)) = (3.0 * π / (G * period^2)) * aR_star^3
-compute_rho_star(a, period, R_star, G) = compute_rho_star(compute_aR_star(a, R_star), period, G)
+#compute_rho_star(aR_star, period, G_nom) = (3.0 * π / (G_nom * period^2)) * aR_star^3
+#compute_rho_star(aR_star, period, G::typeof(G_unit)) = (3.0 * π / (G * period^2)) * aR_star^3
+#compute_rho_star(a, period, R_star, G) = compute_rho_star(compute_aR_star(a, R_star), period, G)
 
-# General density
+# Spherical density
 compute_rho(M, R) = 0.75 * M / (π*R^3)
 
 # Semi-major axis / star radius ratio
-compute_aR_star(a, R_star) = a / R_star
-compute_aR_star(rho_star, period, G_nom) = cbrt(G_nom * period^2 * rho_star / (3.0 * π))
-compute_aR_star(rho_star, period, G::typeof(G_unit)) = cbrt(G * period^2 * rho_star / (3.0 * π))
+#compute_aR_star(a, R_star) = a / R_star
+#compute_aR_star(rho_star, period, G_nom) = cbrt(G_nom * period^2 * rho_star / (3.0 * π))
+#compute_aR_star(rho_star, period, G::typeof(G_unit)) = cbrt(G * period^2 * rho_star / (3.0 * π))
 
 # Semi-major axis
-compute_a(aR_star, R_star) = aR_star * R_star
+# compute_a(aR_star, R_star) = aR_star * R_star
 compute_a(M_tot, period, G) = cbrt(G * M_tot * period^2 / (4.0 * π^2))
-compute_a(rho_star, period, R_star, G) = compute_a(compute_aR_star(rho_star, period, G), R_star)
 
 # Impact parameter
-function compute_b(aR_star, sincos_incl, ecc, omega)
+function compute_b(aR_star, sincos_incl, ecc, omega, incl_factor_inv)
     sin_omega, cos_omega = sincos(omega)
     cos_incl = sincos_incl[2]
-    incl_factor_inv  = (1.0 - ecc^2) / (1.0 + ecc * sin_omega)
-    return aR_star * cos_incl * incl_factor_inv
+    return (aR_star) * cos_incl * incl_factor_inv
 end
-compute_b(rho_star, period, G, sincos_incl, ecc, omega) = compute_b(compute_aR_star(rho_star, period, G), sincos_incl, ecc, omega)
+compute_b(a, R_star, sincos_incl, ecc, omega, incl_factor_inv) = compute_b(a/R_star, sincos_incl, ecc, omega, incl_factor_inv)
 
 # Inclination
 function compute_incl(aR_star, b, ecc, sincosomega)
     return acos((b/aR_star) * (1.0 + ecc*sincosomega[1])/(1.0 - ecc^2))
 end
-compute_incl(rho_star, period, G, b, ecc, sincosomega) = compute_incl(compute_aR_star(rho_star, period, G), b, ecc, sincosomega)
-
-###########
-# RV params
-###########
-function compute_RV_params(a, M_star; M_planet=nothing)
-    isnothing(M_planet) && (M_planet = zero(M_star))
-    M_tot = M_star + M_planet
-    a_planet = -(M_star / M_tot) * a
-    a_star = a + a_planet
-    return a_star, M_planet, a_planet
-end
+compute_incl(a, R_star, b, ecc, sincosomega) = compute_incl(a/R_star, b, ecc, sincosomega)
 
 # Finds the position `r` of the planet along its orbit after rotating
 # through the true anomaly `ν`, then transforms this from the
 # orbital plan to the equatorial plane
-# separation: aR_star, a_star / R_star, or a_planet / R_star
+# separation: aR_star, a/R_star, a_star / R_star, or a_planet / R_star
 # TODO: consider moving this to a separate orbital calculations package in the future
 function _position(orbit, separation, t)
     sin_ν, cos_ν = compute_true_anomaly(orbit, t)
@@ -323,11 +259,6 @@ function compute_true_anomaly(orbit::KeplerianOrbit, t)
         E = kepler_solver(M, orbit.ecc)
         return sincos(trueanom(E, orbit.ecc))
     end
-end
-
-function compute_M_0(ecc, omega)
-    end
-    return M_0
 end
 
 function flip(orbit::KeplerianOrbit, ror)
@@ -361,46 +292,18 @@ function flip(orbit::KeplerianOrbit, ror)
     end
 end
 
-stringify_units(value::Unitful.AbstractQuantity, unit) = value
-stringify_units(value, unit) = "$value $unit"
-function Base.show(io::IO, ::MIME"text/plain", orbit::KeplerianOrbit)
-    print(
-        io,
-        """
-        Keplerian Orbit
-         a: $(stringify_units(orbit.a, "R⊙"))
-         aRₛ: $(orbit.aR_star)
-         b: $(orbit.b)
-         ecc: $(orbit.ecc)
-         P: $(stringify_units(orbit.period, "d"))
-         ρₚ: $(stringify_units(orbit.rho_planet, "M⊙/R⊙³"))
-         ρₛ: $(stringify_units(orbit.rho_star, "M⊙/R⊙³"))
-         Rₚ: $(stringify_units(orbit.R_planet, "R⊙"))
-         Rₛ: $(stringify_units(orbit.R_star, "R⊙"))
-         t₀: $(stringify_units(orbit.t_0, "d"))
-         tₚ: $(stringify_units(orbit.t_p, "d"))
-         t_ref: $(stringify_units(orbit.t_ref, "d"))
-         incl: $(stringify_units(orbit.incl, "rad"))
-         Ω: $(stringify_units(orbit.Omega, "rad"))
-         ω: $(stringify_units(orbit.omega, "rad"))
-         Mₛ: $(stringify_units(orbit.M_star, "M⊙"))
-         aₛ: $(stringify_units(orbit.a_star, "R⊙"))
-         Mₚ: $(stringify_units(orbit.M_planet, "M⊙"))
-         aₚ: $(stringify_units(orbit.a_planet, "R⊙"))"""
-    )
-end
-
 function compute_consistent_inputs(a, aR_star, period, rho_star, R_star, M_star, M_planet, G)
-    all(isnothing.((a, period))) && throw(
+    all( isnothing.((a, period)) ) && throw(
         ArgumentError("at least `a` or `P` must be specified")
     )
 
-    isnothing(M_planet) && (M_planet = G isa Real ? 0.0 : 0.0u"Msun")
+    no_units = G isa Real
+    isnothing(M_planet) && (M_planet = no_units ? 0.0 : 0.0u"Msun")
 
     # Compute implied stellar density
     implied_rho_star = false
-    if all((!isnothing).((a, period)))
-        if any((!isnothing).((rho_star, M_star)))
+    if all( (!isnothing).((a, period)) )
+        if any( (!isnothing).((rho_star, M_star)) )
             throw(ArgumentError(
                 "if both `a` and `P` are given,
                 `ρₛ` or `Mₛ` cannot be defined"
@@ -420,8 +323,8 @@ function compute_consistent_inputs(a, aR_star, period, rho_star, R_star, M_star,
     end
 
     # Check combination of stellar params are valid
-    if all(isnothing.((R_star, M_star)))
-        R_star = G isa Real ? 1.0 : 1.0u"Rsun"
+    if all( isnothing.((R_star, M_star)) )
+        R_star = no_units ? 1.0 : 1.0u"Rsun"
         isnothing(rho_star) && (M_star = oneunit(M_planet))
     end
 
@@ -443,10 +346,52 @@ function compute_consistent_inputs(a, aR_star, period, rho_star, R_star, M_star,
     # Compute planet params
     M_tot = M_star + M_planet
     if isnothing(a)
-        a = isnothing(aR_star) ? ( G * M_tot * period^2 / (4.0 * π^2) )^(1/3) : aR_star * R_star
+        if isnothing(aR_star)
+            a = ( G * M_tot * period^2 / (4.0 * π^2) )^(1/3)
+            aR_star = a / R_star
+        else
+            a = aR_star * R_star
+        end
     else
         period = 2.0 * π * a^(3/2) / (√(G * M_tot))
+        aR_star = a / R_star
     end
 
-    return a, period, rho_star, R_star, M_star, M_planet
+    return a, aR_star, period, rho_star, R_star, M_star, M_planet
+end
+
+stringify_units(value::Unitful.AbstractQuantity, unit) = value
+stringify_units(value, unit) = "$value $unit"
+function Base.show(io::IO, ::MIME"text/plain", orbit::KeplerianOrbit)
+    if orbit.period isa Real
+        rho_planet = orbit.rho_planet * MsunRsun_to_gcc
+        rho_star = orbit.rho_star * MsunRsun_to_gcc
+    else
+        rho_planet = orbit.rho_planet |> u"g/cm^3"
+        rho_star = orbit.rho_star |> u"g/cm^3"
+    end
+    print(
+        io,
+        """
+        Keplerian Orbit
+         a: $(stringify_units(orbit.a, "R⊙"))
+         aRₛ: $(orbit.aR_star)
+         b: $(orbit.b)
+         ecc: $(orbit.ecc)
+         P: $(stringify_units(orbit.period, "d"))
+         ρₚ: $(stringify_units(rho_planet, "M⊙/R⊙³"))
+         ρₛ: $(stringify_units(rho_star, "g/cm³"))
+         Rₚ: $(stringify_units(orbit.R_planet, "R⊙"))
+         Rₛ: $(stringify_units(orbit.R_star, "R⊙"))
+         t₀: $(stringify_units(orbit.t_0, "d"))
+         tₚ: $(stringify_units(orbit.t_p, "d"))
+         t_ref: $(stringify_units(orbit.t_ref, "d"))
+         incl: $(stringify_units(orbit.incl, "rad"))
+         Ω: $(stringify_units(orbit.Omega, "rad"))
+         ω: $(stringify_units(orbit.omega, "rad"))
+         Mₛ: $(stringify_units(orbit.M_star, "M⊙"))
+         aₛ: $(stringify_units(orbit.a_star, "R⊙"))
+         Mₚ: $(stringify_units(orbit.M_planet, "M⊙"))
+         aₚ: $(stringify_units(orbit.a_planet, "R⊙"))"""
+    )
 end

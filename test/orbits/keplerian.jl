@@ -1,11 +1,11 @@
 using BenchmarkTools
 using Unitful, UnitfulAstro
 using Transits.Orbits: KeplerianOrbit, flip,
-                       compute_rho_star, compute_aR_star, compute_a, compute_incl,
+                       compute_a, compute_incl,
                        relative_position,
                        _star_position, _planet_position
 
-# https://as_matrixoverflow.com/a/27100515
+# https://stackoverflow.com/questions/27098844/allclose-how-to-check-if-two-arrays-are-close-in-julia/27100515#27100515
 function allclose(a, b; rtol=1e-5, atol=1e-8)
     return all(abs.(a - b) .<= (atol .+ rtol * abs.(b)))
 end
@@ -130,17 +130,13 @@ end
 end
 
 @testset "KeplerianOrbit: helper functions" begin
-    a, R_star, aR_star = 2.0, 4.0, 0.5
+    a, R_star = 2.0, 4.0
     period, G_nom = √π, 1.0
     rho_star = 3.0 * 0.5^3
     b = 0.0
     ecc = 0.0
     sincosomega = (1.0, 0.0)
-    @test compute_a(aR_star, R_star) ≈ a
-    @test compute_aR_star(a, R_star) ≈ aR_star
-    @test compute_rho_star(aR_star, period, G_nom) ≈ 3.0 * aR_star^3
-    @test compute_rho_star(a, period, R_star, G_nom) ≈ 3.0 * (a/R_star)^3
-    @test compute_incl(rho_star, period, G_nom, b, ecc, sincosomega) ≈ compute_incl(aR_star, b, ecc, sincosomega) ≈ π/2.0
+    @test compute_incl(a, R_star, b, ecc, sincosomega) ≈ π/2.0
 end
 
 #=

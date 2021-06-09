@@ -16,92 +16,56 @@ begin
 	using UnitfulAstro
 end
 
+# ╔═╡ 838c7e85-8bd9-4f77-bf95-1f9bf125aced
+using JLD2
+
+# ╔═╡ 59419b02-c4b4-4e8c-8870-d5c4924f9245
+using Transits.Orbits: relative_position
+
 # ╔═╡ 2a67f029-8472-47f4-8fdc-054214861355
 using KeywordCalls
 
-# ╔═╡ 363f8556-5aa3-4254-a4ad-34bf467f1ca0
-function compute_consistent_inputs(a, period, rho_star, R_star, M_star, M_planet, G)
-	all(isnothing.((a, period))) && throw(
-		ArgumentError("at least `a` or `P` must be specified")
-	)
-	
-	isnothing(M_planet) && (M_planet = G isa Real ? 0.0 : 0.0u"Msun")
-		
-	# Compute implied stellar density
-	implied_rho_star = false
-	if all((!isnothing).((a, period)))
-		if any((!isnothing).((rho_star, M_star)))
-			throw(ArgumentError(
-				"if both `a` and `P` are given,
-				`ρₛ` or `Mₛ` cannot be defined"
-			))
-		end
-				
-		# Default to Rₛ = 1 R⊙ if not provided
-		isnothing(R_star) && (R_star = oneunit(a))
+# ╔═╡ 6904dad7-ad26-4e29-a913-7cf2ab88c34f
+16.016514927977216u"Msun/Rsun^3" |> u"g/cm^3"
 
-		# Compute implied mass
-		M_tot = 4.0 * π^2 * a^3 / (G * period^2)
-			
-		# Compute implied density
-		M_star = M_tot - M_planet
-		rho_star = M_star / ((4.0/3.0) * π * R_star^3)
-		implied_rho_star = true
-	end
-	
-	# Check combination of stellar params are valid
-	if all(isnothing.((R_star, M_star)))
-		R_star = G isa Real ? 1.0 : 1.0u"Rsun"
-		isnothing(rho_star) && (M_star = oneunit(M_planet))
-	end
-	
-	if !implied_rho_star && sum(isnothing.((rho_star, R_star, M_star))) ≠ 1
-		throw(ArgumentError(
-			"values mut be provided for exactly two of: `ρₛ`, `Rₛ`, `Mₛ`"
-		))
-	end
-	
-	# Compute stellar params
-	if isnothing(rho_star)
-		rho_star = 3.0 * M_star / (4.0 * π * R_star^3)
-	elseif isnothing(R_star)
-		R_star = ( 3.0 * M_star / (4.0 * π * rho_star) )^(1/3)
-	else
-		M_star = 4.0 * π * R_star^3 * rho_star / 3.0
-	end
-	
-	# Compute planet params
-	M_tot = M_star + M_planet
-	if isnothing(a)
-		a = ( G * M_tot * period^2 / (4.0 * π^2) )^(1/3)
-	else
-		period = 2.0 * π * a^(3/2) / (√(G * M_tot))
-	end
-
-	return a, period, rho_star, R_star, M_star, M_planet
+# ╔═╡ 32b63834-f7c1-4e1c-b6bd-3be0a720dc2a
+begin
+	stringify_units(value::Unitful.AbstractQuantity, unit) = value
+	stringify_units(value, unit) = "$value $unit"
 end
 
-# ╔═╡ f9bbe4d2-a39d-4c19-8238-157fe7dfb008
-Pl.with_terminal() do
-	a = 7.0
-	period = 2.0
-	rho_star = nothing
-	R_star = nothing
-	M_star = nothing
-	M_planet = nothing
-	G = 2924
-		
-	compute_consistent_inputs(a, period, rho_star, R_star, M_star, M_planet, G)
-end
+# ╔═╡ ce23236f-75a1-4720-8420-f53333227e02
+stringify_units(3.0u"Msun/Rsun", "yee")
+
+# ╔═╡ a7dab461-6de1-4cda-8470-2018b3da29e9
+0.238732414637843 * (1.0u"Msun/Rsun^3" |> u"g/cm^3").val
+
+# ╔═╡ 87881f39-40c4-49e4-9f4a-6ff56e346742
+0.238732414637843u"Msun/Rsun^3" |> u"g/cm^3"
+
+# ╔═╡ a1d0da34-8599-46e8-87e8-47c9512b6140
+(1.0u"Msun/Rsun^3" |> u"g/cm^3").val
+
+# ╔═╡ 9acde0d7-cd2e-4e48-b8a0-eea217b09b85
+KeplerianOrbit(
+	ρₛ = 2.0,
+	Rₛ = 0.5,
+	period = 2.0,
+	ecc = 0.0,
+	t₀ = 0.0,
+	incl = π / 2.0,
+	Ω = 0.0,
+	ω = 0.0,
+)
 
 # ╔═╡ afb5a050-b80d-4205-8583-6515779c18e3
 KeplerianOrbit(
 	ρₛ = 2.0u"g/cm^3",
 	Rₛ = 1.0u"Rsun",
 	P = 2.0u"d",
-	ecc = 0.001,
+	ecc = 0.0,
 	t₀ = 0.0u"d",
-	incl = 0.0u"°",
+	incl = 90.0u"°",
 	Ω = 0.0u"°",
 	ω = 0.0u"°",
 )
@@ -150,23 +114,117 @@ const _planet_position = Orbits._planet_position
 # ╔═╡ df13cf06-bb11-452f-978e-98d27e226bb2
 as_matrix(pos) = reinterpret(reshape, Float64, pos) |> permutedims
 
+# ╔═╡ 127b92f4-52b0-465f-8679-b93e542a16c0
+begin
+	sky_coords = load("../test/python_code/test_data/KeplerianOrbit_sky_coords.jld2")
+		
+	orbits = [
+		KeplerianOrbit(
+			aRₛ = sky_coords["a"][i],
+			P = sky_coords["period"][i],
+			incl = sky_coords["incl"][i],
+			t₀ = sky_coords["t0"][i],
+			ecc = sky_coords["e"][i],
+			Ω = 0.0,
+			ω = sky_coords["omega"][i],
+		)
+		for i in 1:length(sky_coords["t0"])
+    ]
+
+
+	# Compute coords
+    t = sky_coords["t"]
+    x = Matrix{Float64}(undef, length(sky_coords["t"]), length(sky_coords["t0"]))
+    y = similar(x)
+    z = similar(x)
+    for (orbit, x_i, y_i, z_i) in zip(orbits, eachcol(x), eachcol(y), eachcol(z))
+        pos = relative_position.(orbit, t) |> as_matrix
+        a, b, c = eachcol(pos)
+        x_i .= a
+        y_i .= b
+        z_i .= c
+    end
+	
+	# Compare
+    m = sky_coords["m"]
+    r = @. √(x^2 + y^2)
+    r_Transits = r[m]
+    r_batman = sky_coords["r_batman"][m]	
+	
+# 	fig = Figure(resolution=(1_000, 400))
+# 	ax1 = Axis(fig[1, 1])
+# 	ax2 = Axis(fig[1, 2])
+# # 	#linkyaxes!(ax1, ax2)
+	
+# 	for (star1, star2, pos) in zip(eachcol(r), eachcol(sky_coords["r_batman"]), ["x", "y"])
+# 		lines!(ax1, t, star1, label=pos)
+# 		lines!(ax2, t, star2, label=pos)
+# 	end
+	
+# 	axislegend(ax2)
+	
+# 	fig
+end
+
+# ╔═╡ 11452086-26e0-4b4d-96b6-ef7730d027ad
+let
+i = 1
+KeplerianOrbit(
+			aRₛ = sky_coords["a"][i],
+			P = sky_coords["period"][i],
+			incl = sky_coords["incl"][i],
+			t₀ = sky_coords["t0"][i],
+			ecc = sky_coords["e"][i],
+			Ω = 0.0,
+			ω = sky_coords["omega"][i],
+		)
+end
+
+# ╔═╡ 3a6d0079-a02c-4951-a7e5-8b94614a42b9
+Pl.with_terminal() do
+	i = 1
+	KeplerianOrbit(
+			aRₛ = sky_coords["a"][i],
+			P = sky_coords["period"][i],
+			incl = sky_coords["incl"][i],
+			t₀ = sky_coords["t0"][i],
+			ecc = sky_coords["e"][i],
+			Ω = 0.0,
+			ω = sky_coords["omega"][i],
+		)
+end
+
 # ╔═╡ e714ab58-0530-43b0-83ca-0244b709d957
-0.31035213902919595u"Msun/Rsun^3" |> u"g/cm^3"
+let
+	m_star = 1.3
+	r_star = 1.0
+	m_planet = 0.1
+KeplerianOrbit(
+        M_star=m_star,
+        R_star=1.1,
+        t_0=0.5,
+        period=100.0,
+        ecc=0.3,
+        omega=0.5,
+        Omega=1.0,
+        incl=0.25 * π,
+        M_planet=m_planet,
+    )
+end
 
 # ╔═╡ 2ce44554-5c01-4beb-a696-6c27b0bfca2d
 Pl.with_terminal() do
     m_star = 1.3
 	r_star = 1.0
 	orbit = KeplerianOrbit(
-        rho_s = m_star / ((4.0/3.0) * π * r_star^3),
-        R_s = r_star,
+        rho_star = m_star / ((4.0/3.0) * π * r_star^3),
+        R_star = r_star,
         period = 100.0,
         ecc = 0.3,
         t_0 = 0.5,
         incl = 0.25*π,
         omega = 0.5,
         Omega = 1.0,
-		M_p = 0.1,
     )
 end
 
@@ -176,23 +234,23 @@ let
     m_star = 1.3
 	r_star = 1.0
 	orbit = KeplerianOrbit(
-		rho_s = m_star / ((4.0/3.0) * π * r_star^3),
-		R_s = r_star,
+		rho_star = m_star / ((4.0/3.0) * π * r_star^3),
+		R_star = r_star,
 		period = 100.0,
 		ecc = 0.3,
 		t_0 = 0.5,
 		incl = 0.25*π,
 		omega = 0.5,	
 		Omega = 1.0,
-		M_p = 0.1,
+		M_planet = 0.1,
     )
     
 	orbit_flipped = flip(orbit, 0.7)
 	
 	orbit, orbit_flipped
 	
-#     u_star = _star_position.(orbit, orbit.R_s, t) |> as_matrix
-#     u_planet_flipped = _planet_position.(orbit_flipped, orbit.R_s, t) |> as_matrix
+    u_star = _star_position.(orbit, orbit.R_star, t) |> as_matrix
+    u_planet_flipped = _planet_position.(orbit_flipped, orbit.R_star, t) |> as_matrix
 # # # #     for i in 1:3
 # # # #         #@test allclose(u_star[:, i], u_planet_flipped[:, i], atol=1e-5)
 # # # #     end
@@ -203,19 +261,19 @@ let
 # # # #         #@test allclose(u_planet[:, i], u_star_flipped[:, i], atol=1e-5)
 # # # #     end
 		
-# 	fig = Figure(resolution=(1_000, 400))
-# 	ax1 = Axis(fig[1, 1])
-# 	ax2 = Axis(fig[1, 2])
-# # 	#linkyaxes!(ax1, ax2)
+	fig = Figure(resolution=(1_000, 400))
+	ax1 = Axis(fig[1, 1])
+	ax2 = Axis(fig[1, 2])
+# 	#linkyaxes!(ax1, ax2)
 	
-# 	for (star1, star2, pos) in zip(eachcol(u_star), eachcol(u_planet_flipped), ["x", "y", "z"])
-# 		lines!(ax1, t, star1, label=pos)
-# 		lines!(ax2, t, star2, label=pos)
-# 	end
+	for (star1, star2, pos) in zip(eachcol(u_star), eachcol(u_planet_flipped), ["x", "y", "z"])
+		lines!(ax1, t, star1, label=pos)
+		lines!(ax2, t, star2, label=pos)
+	end
 	
-# 	axislegend(ax2)
+	axislegend(ax2)
 	
-# 	fig
+	fig
 end
 
 # ╔═╡ ca156253-c53d-4b5c-a8b8-7fe694b8f095
@@ -430,8 +488,18 @@ let
 end
 
 # ╔═╡ Cell order:
-# ╠═363f8556-5aa3-4254-a4ad-34bf467f1ca0
-# ╠═f9bbe4d2-a39d-4c19-8238-157fe7dfb008
+# ╠═838c7e85-8bd9-4f77-bf95-1f9bf125aced
+# ╠═59419b02-c4b4-4e8c-8870-d5c4924f9245
+# ╠═6904dad7-ad26-4e29-a913-7cf2ab88c34f
+# ╠═11452086-26e0-4b4d-96b6-ef7730d027ad
+# ╠═32b63834-f7c1-4e1c-b6bd-3be0a720dc2a
+# ╠═ce23236f-75a1-4720-8420-f53333227e02
+# ╠═a7dab461-6de1-4cda-8470-2018b3da29e9
+# ╠═87881f39-40c4-49e4-9f4a-6ff56e346742
+# ╠═a1d0da34-8599-46e8-87e8-47c9512b6140
+# ╠═3a6d0079-a02c-4951-a7e5-8b94614a42b9
+# ╠═127b92f4-52b0-465f-8679-b93e542a16c0
+# ╠═9acde0d7-cd2e-4e48-b8a0-eea217b09b85
 # ╠═afb5a050-b80d-4205-8583-6515779c18e3
 # ╠═0895d026-491f-4168-8ad0-509a3227ca89
 # ╠═da4c42b9-a22b-435d-8c1d-c4b93a9cd411
