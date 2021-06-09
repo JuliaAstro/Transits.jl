@@ -20,7 +20,79 @@ end
 using KeywordCalls
 
 # ╔═╡ 363f8556-5aa3-4254-a4ad-34bf467f1ca0
+function compute_consistent_inputs(a, period, rho_star, R_star, M_star, M_planet, G)
+	all(isnothing.((a, period))) && throw(
+		ArgumentError("at least `a` or `P` must be specified")
+	)
+	
+	isnothing(M_planet) && (M_planet = G isa Real ? 0.0 : 0.0u"Msun")
+		
+	# Compute implied stellar density
+	implied_rho_star = false
+	if all((!isnothing).((a, period)))
+		if any((!isnothing).((rho_star, M_star)))
+			throw(ArgumentError(
+				"if both `a` and `P` are given,
+				`ρₛ` or `Mₛ` cannot be defined"
+			))
+		end
+				
+		# Default to Rₛ = 1 R⊙ if not provided
+		isnothing(R_star) && (R_star = oneunit(a))
 
+		# Compute implied mass
+		M_tot = 4.0 * π^2 * a^3 / (G * period^2)
+			
+		# Compute implied density
+		M_star = M_tot - M_planet
+		rho_star = M_star / ((4.0/3.0) * π * R_star^3)
+		implied_rho_star = true
+	end
+	
+	# Check combination of stellar params are valid
+	if all(isnothing.((R_star, M_star)))
+		R_star = G isa Real ? 1.0 : 1.0u"Rsun"
+		isnothing(rho_star) && (M_star = oneunit(M_planet))
+	end
+	
+	if !implied_rho_star && sum(isnothing.((rho_star, R_star, M_star))) ≠ 1
+		throw(ArgumentError(
+			"values mut be provided for exactly two of: `ρₛ`, `Rₛ`, `Mₛ`"
+		))
+	end
+	
+	# Compute stellar params
+	if isnothing(rho_star)
+		rho_star = 3.0 * M_star / (4.0 * π * R_star^3)
+	elseif isnothing(R_star)
+		R_star = ( 3.0 * M_star / (4.0 * π * rho_star) )^(1/3)
+	else
+		M_star = 4.0 * π * R_star^3 * rho_star / 3.0
+	end
+	
+	# Compute planet params
+	M_tot = M_star + M_planet
+	if isnothing(a)
+		a = ( G * M_tot * period^2 / (4.0 * π^2) )^(1/3)
+	else
+		period = 2.0 * π * a^(3/2) / (√(G * M_tot))
+	end
+
+	return a, period, rho_star, R_star, M_star, M_planet
+end
+
+# ╔═╡ f9bbe4d2-a39d-4c19-8238-157fe7dfb008
+Pl.with_terminal() do
+	a = 7.0
+	period = 2.0
+	rho_star = nothing
+	R_star = nothing
+	M_star = nothing
+	M_planet = nothing
+	G = 2924
+		
+	compute_consistent_inputs(a, period, rho_star, R_star, M_star, M_planet, G)
+end
 
 # ╔═╡ afb5a050-b80d-4205-8583-6515779c18e3
 KeplerianOrbit(
@@ -359,6 +431,7 @@ end
 
 # ╔═╡ Cell order:
 # ╠═363f8556-5aa3-4254-a4ad-34bf467f1ca0
+# ╠═f9bbe4d2-a39d-4c19-8238-157fe7dfb008
 # ╠═afb5a050-b80d-4205-8583-6515779c18e3
 # ╠═0895d026-491f-4168-8ad0-509a3227ca89
 # ╠═da4c42b9-a22b-435d-8c1d-c4b93a9cd411

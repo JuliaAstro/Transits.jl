@@ -89,15 +89,53 @@ end
 
 function KeplerianOrbit(nt::NamedTuple{(
         :period, :t_0,
-        :R_planet, :R_star,
+        :a, :R_planet, :R_star,
         :rho_star,
         :aR_star, :b, :ecc,
         :incl, :omega, :Omega,
         :M_planet, :M_star,
     )})
     G = nt.period isa Real ? G_nom : G_unit
-    period, t_0 = nt.period, nt.t_0
-    omega, Omega = nt.omega, nt.Omega
+    a, period, rho_star, R_star, M_star, M_planet, G = compute_consistent_inputs(
+        nt.a, nt.period, nt.rho_star, nt.R_star, nt.M_star, nt.M_planet, G
+    )
+    M_tot = M_star + M_planet
+
+    n = 2.0 * π / period
+    a_star = a * M_planet / M_tot
+    a_planet = -a * M_star / M_tot
+
+    # Eccentricity
+    if any(isnothing.((ecc, nt.omega)))
+        throw(ArgumentError(both `e` and `ω` must be provided))
+    else
+        omega = nt.omega
+        sin_omega, cos_omega = sincos(omega)
+    end
+
+    if isnothing(nt.ecc) || iszero(nt.ecc)
+        ecc = 0.0
+        M_0 = 0.5*π
+        incl_factor_inv = 1.0
+    else
+        ecc = nt.ecc
+        E_0 = 2.0 * atan(√(1.0 - ecc) * cos_omega, √(1.0 + ecc) * (1.0 + sin_omega))
+        M_0 = E_0 - ecc * sin(E_0)
+        incl_factor_inv  = (1.0 - ecc^2) / (1.0 + ecc * sin_omega)
+    end
+
+    if !isnothing(nt.incl) & isnothing(nt.b)
+        b = compute_b(nt.aR_star, sincos(nt.incl), nt.ecc, nt.omega)
+        incl = nt.incl
+    elseif isnothing(nt.incl) & !isnothing(nt.b)
+        b = nt.b
+        incl = compute_incl(rho_star, nt.period, G, b, nt.ecc, sincos(nt.ω))
+    else
+        throw(ArgumentError("Either incl or b must be specified"))
+    end
+
+
+
 
     if !isnothing(nt.rho_star) & isnothing(nt.aR_star)
         rho_star = nt.rho_star
@@ -119,8 +157,6 @@ function KeplerianOrbit(nt::NamedTuple{(
         end
 
         # Compute remaining system parameters
-        n = 2.0 * π / nt.period
-        M_0 = compute_M_0(ecc, omega)
         t_p = nt.t_0 - M_0 / n
         t_ref = t_p - nt.t_0
 
@@ -151,15 +187,6 @@ function KeplerianOrbit(nt::NamedTuple{(
         M_star = rho_star * (4.0/3.0) * π * R_star^3
         a_star, M_planet, a_planet = compute_RV_params(a, M_star; M_planet=nt.M_planet)
         rho_planet = isnothing(nt.M_planet) ? zero(rho_star) : compute_rho(M_planet, R_planet)
-        if !isnothing(nt.incl) & isnothing(nt.b)
-            b = compute_b(nt.aR_star, sincos(nt.incl), nt.ecc, nt.omega)
-            incl = nt.incl
-        elseif isnothing(nt.incl) & !isnothing(nt.b)
-            b = nt.b
-            incl = compute_incl(rho_star, nt.period, G, b, nt.ecc, sincos(nt.ω))
-        else
-            throw(ArgumentError("Either incl or b must be specified"))
-        end
 
         # Compute remaining system parameters
         n = 2.0 * π / nt.period
@@ -201,11 +228,11 @@ function KeplerianOrbit(nt::NamedTuple{(
 end
 
 @kwcall KeplerianOrbit(
-    period, t_0,
-    R_planet=nothing, R_star=nothing,
+    period=nothing, t_0=nothing,
+    a=nothing, R_planet=nothing, R_star=nothing,
     rho_star=nothing,
-    aR_star=nothing, b=nothing, ecc,
-    incl=nothing, omega, Omega,
+    aR_star=nothing, b=nothing, ecc=nothing,
+    incl=nothing, omega=nothing, Omega=nothing,
     M_planet=nothing, M_star=nothing,
 )
 
@@ -299,9 +326,7 @@ function compute_true_anomaly(orbit::KeplerianOrbit, t)
 end
 
 function compute_M_0(ecc, omega)
-    sin_omega, cos_omega = sincos(omega)
-    E₀ = 2.0 * atan(√(1.0 - ecc) * cos_omega, √(1.0 + ecc) * (1.0 + sin_omega))
-    M_0 = E₀ - ecc * sin(E₀)
+    end
     return M_0
 end
 
@@ -363,4 +388,65 @@ function Base.show(io::IO, ::MIME"text/plain", orbit::KeplerianOrbit)
          Mₚ: $(stringify_units(orbit.M_planet, "M⊙"))
          aₚ: $(stringify_units(orbit.a_planet, "R⊙"))"""
     )
+end
+
+function compute_consistent_inputs(a, aR_star, period, rho_star, R_star, M_star, M_planet, G)
+    all(isnothing.((a, period))) && throw(
+        ArgumentError("at least `a` or `P` must be specified")
+    )
+
+    isnothing(M_planet) && (M_planet = G isa Real ? 0.0 : 0.0u"Msun")
+
+    # Compute implied stellar density
+    implied_rho_star = false
+    if all((!isnothing).((a, period)))
+        if any((!isnothing).((rho_star, M_star)))
+            throw(ArgumentError(
+                "if both `a` and `P` are given,
+                `ρₛ` or `Mₛ` cannot be defined"
+            ))
+        end
+
+        # Default to Rₛ = 1 R⊙ if not provided
+        isnothing(R_star) && (R_star = oneunit(a))
+
+        # Compute implied mass
+        M_tot = 4.0 * π^2 * a^3 / (G * period^2)
+
+        # Compute implied density
+        M_star = M_tot - M_planet
+        rho_star = M_star / ((4.0/3.0) * π * R_star^3)
+        implied_rho_star = true
+    end
+
+    # Check combination of stellar params are valid
+    if all(isnothing.((R_star, M_star)))
+        R_star = G isa Real ? 1.0 : 1.0u"Rsun"
+        isnothing(rho_star) && (M_star = oneunit(M_planet))
+    end
+
+    if !implied_rho_star && sum(isnothing.((rho_star, R_star, M_star))) ≠ 1
+        throw(ArgumentError(
+            "values mut be provided for exactly two of: `ρₛ`, `Rₛ`, `Mₛ`"
+        ))
+    end
+
+    # Compute stellar params
+    if isnothing(rho_star)
+        rho_star = 3.0 * M_star / (4.0 * π * R_star^3)
+    elseif isnothing(R_star)
+        R_star = ( 3.0 * M_star / (4.0 * π * rho_star) )^(1/3)
+    else
+        M_star = 4.0 * π * R_star^3 * rho_star / 3.0
+    end
+
+    # Compute planet params
+    M_tot = M_star + M_planet
+    if isnothing(a)
+        a = isnothing(aR_star) ? ( G * M_tot * period^2 / (4.0 * π^2) )^(1/3) : aR_star * R_star
+    else
+        period = 2.0 * π * a^(3/2) / (√(G * M_tot))
+    end
+
+    return a, period, rho_star, R_star, M_star, M_planet
 end
