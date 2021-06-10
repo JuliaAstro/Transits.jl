@@ -32,6 +32,7 @@ struct KeplerianOrbit{T,L,D,R,A,I,M} <: AbstractOrbit
     t_0::T
     t_p::T
     t_ref::T
+    n::I
     a::L
     a_planet::L
     a_star::L
@@ -42,7 +43,7 @@ struct KeplerianOrbit{T,L,D,R,A,I,M} <: AbstractOrbit
     aR_star::R
     b::R
     ecc::R
-    n::I
+    M_0::R
     incl::A
     omega::A
     Omega::A
@@ -52,16 +53,17 @@ end
 
 function normalize_inputs(
     period, t_0, t_p, t_ref,
+    n,
     a, a_planet, a_star, R_planet, R_star,
     rho_planet, rho_star,
-    aR_star, b, ecc,
+    aR_star, b, ecc, M_0,
     incl, omega, Omega,
     M_planet, M_star,
     no_units,
     )
 
     # Normalize unitless types
-    aR_star, b, ecc = promote(aR_star, b, ecc)
+    aR_star, b, ecc, M_0 = promote(aR_star, b, ecc, M_0)
 
     # Normalize quantities
     if no_units
@@ -77,16 +79,17 @@ function normalize_inputs(
 
     return (
         period, t_0, t_p, t_ref,
+        n,
         a, a_planet, a_star, R_planet, R_star,
         rho_planet, rho_star,
-        aR_star, b, ecc,
+        aR_star, b, ecc, M_0,
         incl, omega, Omega,
         M_planet, M_star,
     )
 end
 
 function KeplerianOrbit(nt::NamedTuple{(
-        :period, :t_0,
+        :period, :t_0, :t_p,
         :a, :R_planet, :R_star,
         :rho_star,
         :aR_star, :b, :ecc,
@@ -105,7 +108,7 @@ function KeplerianOrbit(nt::NamedTuple{(
     )
     M_tot = M_star + M_planet
     if isnothing(nt.R_planet)
-        R_planet = oneunit(R_star)
+        R_planet = 0.001*oneunit(R_star)
     else
         R_planet = nt.R_planet
     end
@@ -125,6 +128,7 @@ function KeplerianOrbit(nt::NamedTuple{(
 
     if isnothing(nt.ecc) || iszero(nt.ecc)
         ecc = 0.0
+        #M_0 = 0.5 * π # TODO: find out why this fails
         incl_factor_inv = 1.0
     else
         ecc = nt.ecc
@@ -138,46 +142,59 @@ function KeplerianOrbit(nt::NamedTuple{(
         b = compute_b(a, R_star, sincos(incl), ecc, omega, incl_factor_inv)
     elseif isnothing(nt.incl) & !isnothing(nt.b)
         b = nt.b
-        incl = compute_incl(a, R_star, b, ecc, sincos(ω))
+        incl = compute_incl(a, R_star, b, ecc, sincos(omega))
     else
         throw(ArgumentError("Either incl or b must be specified"))
     end
 
     # Compute remaining system parameters
-    t_0 = isnothing(nt.t_0) ? (no_units ? 0.0 : 0.0u"d") : nt.t_0
-    t_p = t_0 - M_0 / n
+    !(isnothing(nt.t_0) ⊻ isnothing(nt.t_p)) && throw(
+        ArgumentError("Either t₀ or tₚ must be specified")
+    )
+    if isnothing(nt.t_0)
+        t_p = nt.t_p
+        t_0 = t_p + M_0 / n
+    else
+        t_0 = nt.t_0
+        t_p = t_0 - M_0 / n
+    end
+
     t_ref = t_p - t_0
+
     Omega = isnothing(nt.Omega) ? (no_units ? 0.5*π : 0.5*π*u"rad") : nt.Omega
 
     # Normalize inputs
     (
         period, t_0, t_p, t_ref,
+        n,
         a, a_planet, a_star, R_planet, R_star,
         rho_planet, rho_star,
-        aR_star, b, ecc,
+        aR_star, b, ecc, M_0,
         incl, omega, Omega,
         M_planet, M_star,
     ) = normalize_inputs(
         period, t_0, t_p, t_ref,
+        n,
         a, a_planet, a_star, R_planet, R_star,
         rho_planet, rho_star,
-        aR_star, b, ecc,
+        aR_star, b, ecc, M_0,
         incl, omega, Omega,
         M_planet, M_star,
         no_units,
     )
     return KeplerianOrbit(
         period, t_0, t_p, t_ref,
+        n,
         a, a_planet, a_star, R_planet, R_star,
         rho_planet, rho_star,
-        aR_star, b, ecc, n,
+        aR_star, b, ecc, M_0,
         incl, omega, Omega,
         M_planet, M_star,
     )
 end
 
 @kwcall KeplerianOrbit(
-    period=nothing, t_0=nothing,
+    period=nothing, t_0=nothing, t_p=nothing,
     a=nothing, R_planet=nothing, R_star=nothing,
     rho_star=nothing,
     aR_star=nothing, b=nothing, ecc=nothing,
@@ -191,6 +208,7 @@ end
     Rₛ => R_star,
     P => period,
     t₀ => t_0,
+    tₚ => t_p,
     Ω => Omega,
     ω => omega,
 ]
@@ -236,7 +254,7 @@ compute_incl(a, R_star, b, ecc, sincosomega) = compute_incl(a/R_star, b, ecc, si
 # TODO: consider moving this to a separate orbital calculations package in the future
 function _position(orbit, separation, t)
     sin_ν, cos_ν = compute_true_anomaly(orbit, t)
-    if iszero(orbit.ecc)
+    if isnothing(orbit.ecc) || iszero(orbit.ecc)
         r = separation
     else
         r = separation * (1 - orbit.ecc^2) / (1 + orbit.ecc * cos_ν)
@@ -253,7 +271,7 @@ relative_position(orbit::KeplerianOrbit, t) = _position(orbit, -orbit.aR_star, t
 # Returns sin(ν), cos(ν)
 function compute_true_anomaly(orbit::KeplerianOrbit, t)
     M = (t - orbit.t_0 - orbit.t_ref) * orbit.n
-    if iszero(orbit.ecc)
+    if isnothing(orbit.ecc) || iszero(orbit.ecc)
         return sincos(M)
     else
         E = kepler_solver(M, orbit.ecc)
@@ -261,33 +279,33 @@ function compute_true_anomaly(orbit::KeplerianOrbit, t)
     end
 end
 
-function flip(orbit::KeplerianOrbit, ror)
-    R_planet = ror * orbit.R_star
+function flip(orbit::KeplerianOrbit, R_planet)
     M_planet = orbit.M_planet
-    if iszero(orbit.ecc)
+    if isnothing(orbit.ecc) || iszero(orbit.ecc)
         return KeplerianOrbit(
-            rho_star = compute_rho(M_planet, R_planet),
-            R_star = R_planet,
             period = orbit.period,
-            ecc = orbit.ecc,
-            t_0 = orbit.t_0,
+            t_p = orbit.t_p + 0.5*orbit.period,
             incl = orbit.incl,
             Omega = orbit.Omega,
             omega = orbit.omega,
+            M_star = orbit.M_planet,
             M_planet = orbit.M_star,
+            R_star = R_planet,
+            R_planet = orbit.R_star,
+            ecc = orbit.ecc,
         )
     else
         return KeplerianOrbit(
-            rho_star = compute_rho(M_planet, R_planet),
-            R_star = R_planet,
             period = orbit.period,
-            ecc = orbit.ecc,
-            t_0 = orbit.t_0,
+            t_p = orbit.t_p,
             incl = orbit.incl,
             Omega = orbit.Omega,
             omega = orbit.omega - π,
+            M_star = orbit.M_planet,
             M_planet = orbit.M_star,
+            R_star = R_planet,
             R_planet = orbit.R_star,
+            ecc = orbit.ecc,
         )
     end
 end

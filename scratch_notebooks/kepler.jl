@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.14.7
+# v0.14.8
 
 using Markdown
 using InteractiveUtils
@@ -9,7 +9,7 @@ begin
 	using Revise
 	using Transits
 	using BenchmarkTools
-	import PlutoUI as Pl
+	using PlutoUI
 	using CairoMakie
 	using Measurements
 	using Unitful
@@ -22,11 +22,8 @@ using JLD2
 # ╔═╡ 59419b02-c4b4-4e8c-8870-d5c4924f9245
 using Transits.Orbits: relative_position
 
-# ╔═╡ 2a67f029-8472-47f4-8fdc-054214861355
-using KeywordCalls
-
-# ╔═╡ 6904dad7-ad26-4e29-a913-7cf2ab88c34f
-16.016514927977216u"Msun/Rsun^3" |> u"g/cm^3"
+# ╔═╡ b3e30bfb-695f-44a1-9993-99a0e086f07c
+using Test
 
 # ╔═╡ 32b63834-f7c1-4e1c-b6bd-3be0a720dc2a
 begin
@@ -181,7 +178,7 @@ KeplerianOrbit(
 end
 
 # ╔═╡ 3a6d0079-a02c-4951-a7e5-8b94614a42b9
-Pl.with_terminal() do
+with_terminal() do
 	i = 1
 	KeplerianOrbit(
 			aRₛ = sky_coords["a"][i],
@@ -194,26 +191,8 @@ Pl.with_terminal() do
 		)
 end
 
-# ╔═╡ e714ab58-0530-43b0-83ca-0244b709d957
-let
-	m_star = 1.3
-	r_star = 1.0
-	m_planet = 0.1
-KeplerianOrbit(
-        M_star=m_star,
-        R_star=1.1,
-        t_0=0.5,
-        period=100.0,
-        ecc=0.3,
-        omega=0.5,
-        Omega=1.0,
-        incl=0.25 * π,
-        M_planet=m_planet,
-    )
-end
-
 # ╔═╡ 2ce44554-5c01-4beb-a696-6c27b0bfca2d
-Pl.with_terminal() do
+with_terminal() do
     m_star = 1.3
 	r_star = 1.0
 	orbit = KeplerianOrbit(
@@ -228,43 +207,41 @@ Pl.with_terminal() do
     )
 end
 
+# ╔═╡ 4f4ddfec-c9f3-458a-853b-a02c5eadaa8c
+zero(0u"m")
+
 # ╔═╡ 81d987d3-b0e8-48cb-9a9c-d924cd8f7297
 let
-    t = range(0, 100; length=1_000)
-    m_star = 1.3
-	r_star = 1.0
 	orbit = KeplerianOrbit(
-		rho_star = m_star / ((4.0/3.0) * π * r_star^3),
-		R_star = r_star,
-		period = 100.0,
-		ecc = 0.3,
-		t_0 = 0.5,
-		incl = 0.25*π,
-		omega = 0.5,	
-		Omega = 1.0,
-		M_planet = 0.1,
-    )
+		M_star = 1.3,
+        R_star=1.1,
+        t_0 = 0.5,
+        period = 100.0,
+        ecc = 0.0,
+        omega = 0.5,
+        Omega = 1.0,
+        incl = 0.25 * π,
+        M_planet = 0.1,
+	)
     
 	orbit_flipped = flip(orbit, 0.7)
 	
 	orbit, orbit_flipped
-	
+		
+	t = range(0, 100; length=1_000)	
+
     u_star = _star_position.(orbit, orbit.R_star, t) |> as_matrix
     u_planet_flipped = _planet_position.(orbit_flipped, orbit.R_star, t) |> as_matrix
-# # # #     for i in 1:3
-# # # #         #@test allclose(u_star[:, i], u_planet_flipped[:, i], atol=1e-5)
-# # # #     end
+    for i in 1:3
+        @show allclose(u_star[:, i], u_planet_flipped[:, i], atol=1e-5)
+    end
+	
+	println()
 
-# # # #     u_planet = stack(_planet_position.(orbit, orbit.R_s, t))
-# # # #     u_star_flipped = stack(_star_position.(orbit_flipped, orbit.R_s, t))
-# # # #     for i in 1:3
-# # # #         #@test allclose(u_planet[:, i], u_star_flipped[:, i], atol=1e-5)
-# # # #     end
-		
 	fig = Figure(resolution=(1_000, 400))
 	ax1 = Axis(fig[1, 1])
 	ax2 = Axis(fig[1, 2])
-# 	#linkyaxes!(ax1, ax2)
+	linkyaxes!(ax1, ax2)
 	
 	for (star1, star2, pos) in zip(eachcol(u_star), eachcol(u_planet_flipped), ["x", "y", "z"])
 		lines!(ax1, t, star1, label=pos)
@@ -276,197 +253,12 @@ let
 	fig
 end
 
-# ╔═╡ ca156253-c53d-4b5c-a8b8-7fe694b8f095
-h(nt::NamedTuple{(:b, :a, :c)}) = println("Calling f(b = ", nt.b,",a = ", nt.a, ")")
-
-# ╔═╡ 9d2d78b1-2319-43d2-8a51-c383ba17b585
-@kwcall h(b,a,c=0)
-
-# ╔═╡ d8012a6f-b509-44c9-a2b3-eba0513ee037
-KeplerianOrbit(
-        ρₛ = 2.0,
-        Rₛ = 0.5,
-        period = 2.0,
-        ecc = 0.0,
-        t₀ = 0.0,
-        incl = π / 2.0,
-        Ω = 0.0,
-        ω = 0.0,
-    )
-
-# ╔═╡ 12800da5-a23e-4939-85a7-7ba09f19c501
-KeplerianOrbit(
-    ρₛ = 2.0,
-    Rₛ = 0.5,
-    period = 2.0,
-    ecc = 0.0,
-    t₀ = 0.0,
-    incl = π / 2.0,
-    Ω = 0.0,
-    ω = 0.0,
-)
-
-
-# ╔═╡ f4c8ff31-b33f-4f51-b9d8-8cf15fd8e9b1
-KeplerianOrbit(
-	rho_s = 0.34,
-	R_s = 1.1,
-	period = 100.0,
-	ecc = 0.3,
-	t_0 = 0.5,
-	omega = 0.5,
-	Omega = 1.0,
-	#M_p = 0.1,
-	#b = 0.2,
-	incl = 0.1,
-	M_p = 0.001,
-)
-
-# ╔═╡ f01eeef5-24f7-4a31-ab19-a785b78b55e5
-orbit = make_orbit_ρₛ(3.0, 0.15^2, 0.3, 0.1)
-
-# ╔═╡ f119776f-9b8c-40bd-a411-a29df4c81a8c
-KO(nt::NamedTuple{(:rho_s, :aR_s, :R_s, :period, :ecc, :t_0, :incl, :b, :Omega, :omega, :M_p)}) = 2
-
-
-# ╔═╡ 33c52bc2-70cb-42f4-87c4-dafd0d3f63fb
-@kwcall KO(rho_s=nothing, aR_s=nothing, R_s, period, ecc, t_0, incl=nothing, b=nothing, Omega, omega, M_p=nothing)
-
-# ╔═╡ 91dbdfae-f232-4e95-ab82-9cd9d5bc05f5
-KO(
-	aR_s = 7.5,
-	period = 2.0,
-	incl = 90.0,
-	t_0 = 0.0,
-	ecc = 0.0,
-	Omega = 0.0,
-	omega = 0.0,
-	R_s = 2,
-)
-
-# ╔═╡ 3515a6e4-784f-4e1b-baf7-9bd1f4530132
-_star_position(orbit, orbit.R_s, 1:10)
-
-# ╔═╡ f4cb6bd7-ae0d-4357-af32-be14c1aceeca
-make_orbit_aRₛ() = KeplerianOrbit(
-	aRₛ = 7.5,
-	P = 2.0,
-	incl = 90.0,
-	t₀ = 0.0,
-	ecc = 0.0,
-	Ω = 0.0,
-	ω = 0.0,
-)
-
-# ╔═╡ 5467cc29-d5fb-4d78-9a59-b0f866df9a73
-Pl.with_terminal() do 
-	@btime make_orbit_aRₛ()
-end
-
-# ╔═╡ 07989195-4c8c-4599-ace6-84ad526db2bd
-make_orbit_aRₛ()
-
-# ╔═╡ 72506d79-5550-4e10-9830-ccf224bb60bd
-make_orbit_ρₛ_units() = KeplerianOrbit(
-	ρₛ = 2.0u"g/cm^3",
-	Rₛ = 0.5u"Rsun",
-	period = 2.0u"d",
-	ecc = 0.0,
-	t₀ = 0.0u"d",
-	incl = 90u"°",
-	Ω = 0u"°",
-	ω = 0u"°",
-	#M_p = 0.5u"Msun"
-)
-
-# ╔═╡ 7f40987b-ef60-4786-8639-2100628c4595
-make_orbit_aRₛ_units() = KeplerianOrbit(
-	aRₛ = 7.5,
-	P = 2.0u"d",
-	incl = 90.0u"°",
-	t₀ = 0.0u"d",
-	ecc = 0.0,
-	Ω = 0.0u"°",
-	ω = 0.0u"°",
-)
-
-# ╔═╡ cdda90a8-6f94-4c84-9557-27db687d80e9
-# with_terminal() do
-# 	@btime make_orbit_ρₛ()
-# 	@btime make_orbit_aRₛ()
-# end
-
-# ╔═╡ b9a8b205-3df3-4866-bfcf-8841550f9a85
-let
-	orbit = make_orbit_ρₛ(3.0, 0.15^2, 0.3, 0.1)
-	u = [0.4, 0.26] # quad limb dark
-	ld = PolynomialLimbDark(u)
-
-	t = range(-1.0, 1.0, length=1000) # days from t0
-	rs = range(0, 0.2, length=10) # radius ratio
-
-	fluxes = @. ld(orbit, t, rs')
-	
-	fig = Figure()
-	ax = Axis(fig[1, 1])
-	
-	for flux in eachcol(fluxes)
-		lines!(ax, t, flux)
-	end
-	
-	fig
-end
-
-# ╔═╡ a8d30635-7d16-49bf-bf9b-2c6c1e7f8b70
-const G_nom = Orbits.G_nom# * u"Rsun^3/Msun/d^2"
-
-# ╔═╡ 1e49a299-a7cc-438a-b186-d2c14619fbf6
-ρₛ(P, δ, T, τ) = (3.0*P / (G_nom*π^2)) * (δ^(1/4) / (√(T*τ)))^3
-
-# ╔═╡ 9fe20dfe-6029-45b2-9b48-570f00200ebe
-begin
-	P = 3.0
-	δ = 8.41e-5
-	T = 0.5
-	τ = 0.125
-	
-	ρₛ(P, δ, T, τ)
-end
-
-# ╔═╡ 39383b74-4c65-4553-afd5-b0d111a9bb03
-1.0* u"Rearth/Rsun" |> upreferred
-
-# ╔═╡ 947373bb-c9f6-422c-a200-c9d3e17b49be
-let
-	ld = IntegratedLimbDark([0.4, 0.26])
-	orbit = make_orbit_ρₛ(3.0, 0.15^2, 0.3, 0.1)
-	t = range(-1.0, 1.0, length=1000)
-	texp = [0.1 0.2 0.3]
-	# no extra calculations made
-	fluxes = @. ld(orbit, t, 0.2)
-	# use quadrature to find time-averaged flux for each t
-	fluxes_int = @. ld(orbit, t, 0.2, texp)
-	
-	fig = Figure()
-	ax = Axis(fig[1, 1])
-	
-	for flux in eachcol(fluxes)
-		lines!(ax, t, flux)
-	end
-	
-	for flux in eachcol(fluxes_int)
-		lines!(ax, t, flux)
-	end
-	
-	fig
-end
-
 # ╔═╡ 2d06d3dd-e266-4da2-a6f5-f5b196189524
 let
 	ld = SecondaryLimbDark([0.4, 0.26], brightness_ratio=0.1)
 	ld_int = IntegratedLimbDark(ld) # composition works flawlessly
 
-	orbit = make_orbit_ρₛ(4.0, 0.15^2, 0.3, 0.1)
+	orbit = KeplerianOrbit(P = 3.456, ecc=0.0, ω=0.0, incl=π/2, t₀=0.0)
 	t = range(-1.25, 5, length=1000)
 	rs = range(0.01, 0.1, length=6)
 
@@ -487,10 +279,73 @@ let
 	fig
 end
 
+# ╔═╡ 9ff128be-c834-45aa-aace-e9e771b390f2
+
+
+# ╔═╡ daad2939-52b7-455f-a9b0-f5a7a5c52b62
+let
+   t = range(0, 100; length=1_000)
+
+   orbit = KeplerianOrbit(
+       M_star = 1.3,
+       M_planet = 0.1,
+       R_star = 1.0,
+       P = 100.0,
+       t_0 = 0.5,
+       incl = 45.0,
+       ecc = 0.0,
+       omega = 0.5,
+       Omega = 1.0
+   )
+   orbit_flipped = flip(orbit, 0.7)
+
+   u_star = as_matrix(_star_position.(orbit, orbit.R_star, t))
+   u_planet_flipped = as_matrix(_planet_position.(orbit_flipped, orbit.R_star, t))
+   for i in 1:3
+       @test allclose(u_star[:, i], u_planet_flipped[:, i], atol=1e-5)
+   end
+
+   u_planet = as_matrix(_planet_position.(orbit, orbit.R_star, t))
+   u_star_flipped = as_matrix(_star_position.(orbit_flipped, orbit.R_star, t))
+   for i in 1:3
+       @test allclose(u_planet[:, i], u_star_flipped[:, i], atol=1e-5)
+   end
+end
+
+# ╔═╡ 40e24355-7451-4b08-b58f-089de5cf39c2
+let
+    orbit = KeplerianOrbit(
+        M_star = 1.3,
+        R_star = 1.1,
+		t_0 = 0.5,
+        period = 100.0,
+        ecc = 0.3,
+        incl = 0.25*π,
+        omega = 0.5,
+        Omega = 1.0,
+        M_planet = 0.1,
+    )
+
+    orbit_flipped = flip(orbit, 0.7)
+
+    t = range(0, 100; length=1_000)
+
+    u_star = as_matrix(_star_position.(orbit, orbit.R_star, t))
+    u_planet_flipped = as_matrix(_planet_position.(orbit_flipped, orbit.R_star, t))
+    for i in 1:3
+        @test allclose(u_star[:, i], u_planet_flipped[:, i], atol=1e-5)
+    end
+
+    u_planet = as_matrix(_planet_position.(orbit, orbit.R_star, t))
+    u_star_flipped = as_matrix(_star_position.(orbit_flipped, orbit.R_star, t))
+    for i in 1:3
+        @test allclose(u_planet[:, i], u_star_flipped[:, i], atol=1e-5)
+    end
+end
+
 # ╔═╡ Cell order:
 # ╠═838c7e85-8bd9-4f77-bf95-1f9bf125aced
 # ╠═59419b02-c4b4-4e8c-8870-d5c4924f9245
-# ╠═6904dad7-ad26-4e29-a913-7cf2ab88c34f
 # ╠═11452086-26e0-4b4d-96b6-ef7730d027ad
 # ╠═32b63834-f7c1-4e1c-b6bd-3be0a720dc2a
 # ╠═ce23236f-75a1-4720-8420-f53333227e02
@@ -508,31 +363,12 @@ end
 # ╠═72174e0c-0116-4d1e-8365-c1aa63b648ca
 # ╠═6de491a0-525d-4283-999f-dff478185214
 # ╠═df13cf06-bb11-452f-978e-98d27e226bb2
-# ╠═e714ab58-0530-43b0-83ca-0244b709d957
 # ╠═2ce44554-5c01-4beb-a696-6c27b0bfca2d
+# ╠═4f4ddfec-c9f3-458a-853b-a02c5eadaa8c
 # ╠═81d987d3-b0e8-48cb-9a9c-d924cd8f7297
-# ╠═ca156253-c53d-4b5c-a8b8-7fe694b8f095
-# ╠═9d2d78b1-2319-43d2-8a51-c383ba17b585
-# ╠═d8012a6f-b509-44c9-a2b3-eba0513ee037
-# ╠═12800da5-a23e-4939-85a7-7ba09f19c501
-# ╠═2a67f029-8472-47f4-8fdc-054214861355
-# ╠═f4c8ff31-b33f-4f51-b9d8-8cf15fd8e9b1
-# ╠═5467cc29-d5fb-4d78-9a59-b0f866df9a73
-# ╠═f01eeef5-24f7-4a31-ab19-a785b78b55e5
-# ╠═f119776f-9b8c-40bd-a411-a29df4c81a8c
-# ╠═33c52bc2-70cb-42f4-87c4-dafd0d3f63fb
-# ╠═91dbdfae-f232-4e95-ab82-9cd9d5bc05f5
-# ╠═3515a6e4-784f-4e1b-baf7-9bd1f4530132
-# ╠═f4cb6bd7-ae0d-4357-af32-be14c1aceeca
-# ╠═07989195-4c8c-4599-ace6-84ad526db2bd
-# ╠═72506d79-5550-4e10-9830-ccf224bb60bd
-# ╠═7f40987b-ef60-4786-8639-2100628c4595
-# ╠═cdda90a8-6f94-4c84-9557-27db687d80e9
-# ╠═b9a8b205-3df3-4866-bfcf-8841550f9a85
-# ╠═a8d30635-7d16-49bf-bf9b-2c6c1e7f8b70
-# ╠═1e49a299-a7cc-438a-b186-d2c14619fbf6
-# ╠═9fe20dfe-6029-45b2-9b48-570f00200ebe
-# ╠═39383b74-4c65-4553-afd5-b0d111a9bb03
-# ╠═947373bb-c9f6-422c-a200-c9d3e17b49be
 # ╠═2d06d3dd-e266-4da2-a6f5-f5b196189524
+# ╠═9ff128be-c834-45aa-aace-e9e771b390f2
+# ╠═daad2939-52b7-455f-a9b0-f5a7a5c52b62
+# ╠═40e24355-7451-4b08-b58f-089de5cf39c2
+# ╠═b3e30bfb-695f-44a1-9993-99a0e086f07c
 # ╠═208b00e9-4d97-4f80-81d1-1b8346b50f83

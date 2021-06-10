@@ -18,6 +18,9 @@ function compute_r(orbit, t)
     return r
 end
 
+# Convert vector of vectors -> matrix
+as_matrix(pos) = reinterpret(reshape, Float64, pos) |> permutedims
+
 # Tests from:
 # https://github.com/exoplanet-dev/exoplanet/blob/main/tests/orbits/keplerian_test.py
 
@@ -25,19 +28,16 @@ end
     # Comparison coords from `batman`
     sky_coords = load("./python_code/test_data/KeplerianOrbit_sky_coords.jld2")
 
-    # Convert vector of vectors -> matrix
-    as_matrix(pos) = reinterpret(reshape, Float64, pos) |> permutedims
-
     # Create comparison orbits from Transits.jl
     orbits = [
         KeplerianOrbit(
-            aRₛ = sky_coords["a"][i],
+            aR_star = sky_coords["a"][i],
             P = sky_coords["period"][i],
             incl = sky_coords["incl"][i],
-            t₀ = sky_coords["t0"][i],
+            t_0 = sky_coords["t0"][i],
             ecc = sky_coords["e"][i],
-            Ω = 0.0,
-            ω = sky_coords["omega"][i],
+            Omega = 0.0,
+            omega = sky_coords["omega"][i],
         )
         for i in 1:length(sky_coords["t0"])
     ]
@@ -71,61 +71,61 @@ end
 @testset "KeplerianOrbit: construction performance" begin
     b_ρₛ = @benchmark KeplerianOrbit(
         ρₛ = 2.0,
-        Rₛ = 0.5,
+        R_star = 0.5,
         period = 2.0,
         ecc = 0.0,
-        t₀ = 0.0,
+        t_0 = 0.0,
         incl = π / 2.0,
-        Ω = 0.0,
-        ω = 0.0,
+        Omega = 0.0,
+        omega = 0.0,
     )
 
     b_ρₛ_units = @benchmark KeplerianOrbit(
         ρₛ = 2.0u"g/cm^3",
-        Rₛ = 0.5u"Rsun",
+        R_star = 0.5u"Rsun",
         period = 2.0u"d",
         ecc = 0.0,
-        t₀ = 0.0u"d",
+        t_0 = 0.0u"d",
         incl = 90.0u"°",
-        Ω = 0.0u"°",
-        ω = 0.0u"°",
+        Omega = 0.0u"°",
+        omega = 0.0u"°",
     )
 
-    b_aRₛ = @benchmark KeplerianOrbit(
-        aRₛ = 7.5,
+    b_aR_star = @benchmark KeplerianOrbit(
+        aR_star = 7.5,
         P = 2.0,
         incl = π / 2.0,
-        t₀ = 0.0,
+        t_0 = 0.0,
         ecc = 0.0,
-        Ω = 0.0,
-        ω = 0.0,
+        Omega = 0.0,
+        omega = 0.0,
     )
 
-    b_aRₛ_units = @benchmark KeplerianOrbit(
-        aRₛ = 7.5,
+    b_aR_star_units = @benchmark KeplerianOrbit(
+        aR_star = 7.5,
         P = 2.0u"d",
         incl = 90.0u"°",
-        t₀ = 0.0u"d",
+        t_0 = 0.0u"d",
         ecc = 0.0,
-        Ω = 0.0u"°",
-        ω = 0.0u"°",
+        Omega = 0.0u"°",
+        omega = 0.0u"°",
     )
 
     # Units
     @test median(b_ρₛ_units.times) ≤ 100_000 # ns
     @test b_ρₛ_units.allocs ≤ 500
-    @test median(b_aRₛ_units.times) ≤ 100_000   # ns
-    @test b_aRₛ_units.allocs ≤ 500
+    @test median(b_aR_star_units.times) ≤ 100_000   # ns
+    @test b_aR_star_units.allocs ≤ 500
 
     if v"1.6" ≤ Base.VERSION < v"1.7-"
         @test b_ρₛ.allocs == b_ρₛ.memory == 0
         @test median(b_ρₛ.times) ≤ 500 # ns
-        @test b_aRₛ.allocs == b_aRₛ.memory == 0
-        @test median(b_aRₛ.times) ≤ 500 # ns
+        @test b_aR_star.allocs == b_aR_star.memory == 0
+        @test median(b_aR_star.times) ≤ 500 # ns
     else
         # TODO: investigate performance regression
         @test median(b_ρₛ.times) ≤ 10_000 # ns
-        @test median(b_aRₛ.times) ≤ 10_000 # ns
+        @test median(b_aR_star.times) ≤ 10_000 # ns
     end
 end
 
@@ -143,41 +143,41 @@ end
 @testset "KeplerianOrbit: valid inputs" begin
     @test KeplerianOrbit(
         ρₛ = 2.0,
-        Rₛ = 0.5,
+        R_star = 0.5,
         period = 2.0,
         ecc = 0.0,
-        t₀ = 0.0,
+        t_0 = 0.0,
         incl = π / 2.0,
-        Ω = 0.0,
-        ω = 0.0,
+        Omega = 0.0,
+        omega = 0.0,
     ) ===
     KeplerianOrbit(
         ρₛ = 2.0,
-        Rₛ = 0.5,
+        R_star = 0.5,
         period = 2.0,
         ecc = 0.0,
-        t₀ = 0.0,
+        t_0 = 0.0,
         b = 0.0,
-        Ω = 0.0,
-        ω = 0.0,
+        Omega = 0.0,
+        omega = 0.0,
     )
     @test KeplerianOrbit(
-        aRₛ = 7.5,
+        aR_star = 7.5,
         P = 2.0,
         incl = π / 2.0,
-        t₀ = 0.0,
+        t_0 = 0.0,
         ecc = 0.0,
-        Ω = 0.0,
-        ω = 0.0,
+        Omega = 0.0,
+        omega = 0.0,
     ) ===
     KeplerianOrbit(
-        aRₛ = 7.5,
+        aR_star = 7.5,
         P = 2.0,
         b = 0.0,
-        t₀ = 0.0,
+        t_0 = 0.0,
         ecc = 0.0,
-        Ω = 0.0,
-        ω = 0.0,
+        Omega = 0.0,
+        omega = 0.0,
     )
 end
 
@@ -189,17 +189,17 @@ end
     t0 = 0.2
     b = 0.5
     ecc = 0.1
-    ω = 0.1
+    omega = 0.1
 
     # Sample model from `Transits.jl`
     orbit = KeplerianOrbit(
-        Rₛ = r_star,
+        R_star = r_star,
         Mₛ = m_star,
         P =  period,
-        t₀ = t0,
+        t_0 = t0,
         b = b,
         ecc = ecc,
-        ω = ω,
+        omega = omega,
     )
 
     # Sample model from `batman`
@@ -210,10 +210,10 @@ end
             t,
             $t0,
             $period,
-            $(orbit.aRₛ),
+            $(orbit.aR_star),
             $(orbit.incl),
             $ecc,
-            $ω,
+            $omega,
             1,
             1
         )
@@ -246,31 +246,32 @@ end
     t0 = 0.2
     b = 0.5
     ecc = 0.8
-    ω = 0.1
+    omega = 0.1
 
     # Sample model from `Transits.jl`
     orbit = KeplerianOrbit(
-        Rₛ = r_star,
+        R_star = r_star,
         Mₛ = m_star,
         P =  period,
-        t₀ = t0,
+        t_0 = t0,
         b = b,
         ecc = ecc,
-        ω = ω,
+        omega = omega,
     )
 
-    pos = relative_position.(orbit, orbit.t₀)
+    pos = relative_position.(orbit, orbit.t_0)
     @test allclose((√(pos[1]^2 + pos[2]^2)), orbit.b)
 end
+=#
 
 @testset "KeplerianOrbit: flip" begin
     orbit = KeplerianOrbit(
-        rho_star = 0.34,
+        M_star = 1.3,
         R_star = 1.1,
+        t_0 = 0.5,
         period = 100.0,
         ecc = 0.3,
-        t_0 = 0.5,
-        incl = π / 4.0,
+        incl = 0.25*π,
         omega = 0.5,
         Omega = 1.0,
         M_planet = 0.1,
@@ -283,7 +284,6 @@ end
     u_star = as_matrix(_star_position.(orbit, orbit.R_star, t))
     u_planet_flipped = as_matrix(_planet_position.(orbit_flipped, orbit.R_star, t))
     for i in 1:3
-        @show u_star[1:10, i] u_planet_flipped[1:10, i]
         @test allclose(u_star[:, i], u_planet_flipped[:, i], atol=1e-5)
     end
 
@@ -294,32 +294,31 @@ end
     end
 end
 
-#@testset "KeplerianOrbit: flip circular" begin
-#    t = range(0, 100; length=1_000)
-#
-#    orbit = KeplerianOrbit(
-#        Mₛ = 1.3,
-#        Mₚ = 0.1,
-#        Rₛ = 1.0,
-#        P = 100.0,
-#        t₀ = 0.5,
-#        incl = 45.0,
-#        ecc = 0.0,
-#        ω = 0.5,
-#        Ω = 1.0
-#    )
-#    orbit_flipped = flip(orbit, 0.7)
-#
-#    u_star = as_matrix(_star_position.(orbit, orbit.Rₛ, t))
-#    u_planet_flipped = as_matrix(_planet_position.(orbit_flipped, orbit.Rₛ, t))
-#    for i in 1:3
-#        @test allclose(u_star[:, i], u_planet_flipped[:, i], atol=1e-5)
-#    end
-#
-#    u_planet = as_matrix(_planet_position.(orbit, orbit.Rₛ, t))
-#    u_star_flipped = as_matrix(_star_position.(orbit_flipped, orbit.Rₛ, t))
-#    for i in 1:3
-#        @test allclose(u_planet[:, i], u_star_flipped[:, i], atol=1e-5)
-#    end
-#end
-=#
+@testset "KeplerianOrbit: flip circular" begin
+    t = range(0, 100; length=1_000)
+
+    orbit = KeplerianOrbit(
+        M_star = 1.3,
+        M_planet = 0.1,
+        R_star = 1.0,
+        P = 100.0,
+        t_0 = 0.5,
+        incl = 45.0,
+        ecc = 0.0,
+        omega = 0.5,
+        Omega = 1.0
+    )
+    orbit_flipped = flip(orbit, 0.7)
+
+    u_star = as_matrix(_star_position.(orbit, orbit.R_star, t))
+    u_planet_flipped = as_matrix(_planet_position.(orbit_flipped, orbit.R_star, t))
+    for i in 1:3
+        @test allclose(u_star[:, i], u_planet_flipped[:, i], atol=1e-5)
+    end
+
+    u_planet = as_matrix(_planet_position.(orbit, orbit.R_star, t))
+    u_star_flipped = as_matrix(_star_position.(orbit_flipped, orbit.R_star, t))
+    for i in 1:3
+        @test allclose(u_planet[:, i], u_star_flipped[:, i], atol=1e-5)
+    end
+end
