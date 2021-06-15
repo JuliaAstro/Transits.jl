@@ -5,6 +5,8 @@ using Transits.Orbits: KeplerianOrbit, flip,
                        relative_position,
                        _star_position, _planet_position
 
+const G_nom = 2942.2062175044193 # Rsun^3/Msun/d^2
+
 # https://stackoverflow.com/questions/27098844/allclose-how-to-check-if-two-arrays-are-close-in-julia/27100515#27100515
 function allclose(a, b; rtol=1e-5, atol=1e-8)
     return all(abs.(a - b) .<= (atol .+ rtol * abs.(b)))
@@ -131,12 +133,73 @@ end
 
 @testset "KeplerianOrbit: helper functions" begin
     a, R_star = 2.0, 4.0
-    period, G_nom = √π, 1.0
+    period = √π
     rho_star = 3.0 * 0.5^3
     b = 0.0
     ecc = 0.0
     sincosomega = (1.0, 0.0)
+    M_tot = 1.0
     @test compute_incl(a, R_star, b, ecc, sincosomega) ≈ π/2.0
+    @test compute_a(M_tot, period, 1.0) ≈ cbrt(1/(4.0*π))
+end
+
+@testset "KeplerianOrbit: valid inputs" begin
+    # Both `e` and `ω` must be provided
+    @test_throws ArgumentError KeplerianOrbit(
+        rho_star=2.0, R_star=0.5, period=2.0, t_0=0.0, incl=π/2.0, Omega=0.0, omega=0.0,
+    )
+    @test_throws ArgumentError KeplerianOrbit(
+        rho_star=2.0, R_star=0.5, period=2.0, t_0=0.0, incl=π/2.0, Omega=0.0, ecc=0.0,
+    )
+    # Either `incl` or `b` must be provided
+    @test_throws ArgumentError KeplerianOrbit(
+        rho_star=2.0, R_star=0.5, period=2.0, t_0=0.0, Omega=0.0, ecc=0.0, omega=0.0,
+    )
+    # If both `a` and `P` are given, `ρₛ` or `Mₛ` cannot be defined
+    @test_throws ArgumentError KeplerianOrbit(
+        rho_star=2.0,
+        R_star=0.5, a=7.5, period=2.0, t_0=0.0, incl=π/2.0, Omega=0.0, omega=0.0, ecc=0.0,
+    )
+    @test_throws ArgumentError KeplerianOrbit(
+        M_star=1.0,
+        R_star=0.5, a=7.5, period=2.0, t_0=0.0, incl=π/2.0, Omega=0.0, omega=0.0, ecc=0.0,
+    )
+    # Mus provide exactly two of: `ρₛ`, `Rₛ`, or `Mₛ` if ρₛ not implied
+    @test_throws ArgumentError KeplerianOrbit(
+        R_star=0.5,
+        period=2.0, t_0=0.0, incl=π/2.0, Omega=0.0, omega=0.0, ecc=0.0,
+    )
+    @test_throws ArgumentError KeplerianOrbit(
+        M_star=0.5,
+        period=2.0, t_0=0.0, incl=π/2.0, Omega=0.0, omega=0.0, ecc=0.0,
+    )
+    @test_throws ArgumentError KeplerianOrbit(
+        M_star=0.5, R_star=0.5, rho_star=0.5,
+        period=2.0, t_0=0.0, incl=π/2.0, Omega=0.0, omega=0.0, ecc=0.0,
+    )
+end
+
+@testset "KeplerianOrbit: implied inputs" begin
+    # Rₛ ≡ 1.0 R⊙ if not specified
+    orbit_no_R_star = KeplerianOrbit(
+        rho_star=2.0, period=2.0, t_0=0.0,
+        incl=π/2.0, Omega=0.0, omega=0.0, ecc=0.0
+    )
+    @test orbit_no_R_star.R_star == one(orbit_no_R_star.a)
+
+    # Compute M_tot if `a` and `period` given
+    orbit_a_period = KeplerianOrbit(
+        a=1.0, period=1.0, t_0=0.0,
+        incl=π/2.0, Omega=0.0, omega=0.0, ecc=0.0
+    )
+    @test orbit_a_period.M_planet + orbit_a_period.M_star == 4.0 * π^2 / G_nom
+
+    # Compute `Rₛ` from `Mₛ`
+    orbit_M_star = KeplerianOrbit(
+        M_star=4.0*π, rho_star = 1.0, period = 2.0, t_0 = 0.0,
+        incl = π / 2.0, Omega = 0.0, omega = 0.0, ecc = 0.0
+    )
+    @test orbit_M_star.R_star == 3.0^(1/3)
 end
 
 #=
