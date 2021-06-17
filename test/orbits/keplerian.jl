@@ -202,130 +202,45 @@ end
     @test orbit_M_star.R_star == 3.0^(1/3)
 end
 
-#=
-@testset "KeplerianOrbit: valid inputs" begin
-    @test KeplerianOrbit(
-        ρₛ = 2.0,
-        R_star = 0.5,
-        period = 2.0,
-        ecc = 0.0,
-        t_0 = 0.0,
-        incl = π / 2.0,
-        Omega = 0.0,
-        omega = 0.0,
-    ) ===
-    KeplerianOrbit(
-        ρₛ = 2.0,
-        R_star = 0.5,
-        period = 2.0,
-        ecc = 0.0,
-        t_0 = 0.0,
-        b = 0.0,
-        Omega = 0.0,
-        omega = 0.0,
-    )
-    @test KeplerianOrbit(
-        aR_star = 7.5,
-        P = 2.0,
-        incl = π / 2.0,
-        t_0 = 0.0,
-        ecc = 0.0,
-        Omega = 0.0,
-        omega = 0.0,
-    ) ===
-    KeplerianOrbit(
-        aR_star = 7.5,
-        P = 2.0,
-        b = 0.0,
-        t_0 = 0.0,
-        ecc = 0.0,
-        Omega = 0.0,
-        omega = 0.0,
-    )
-end
-
 @testset "KeplerianOrbit: small star" begin
-    # Model inputs
-    r_star = 0.189
-    m_star = 0.151
-    period = 0.4626413
-    t0 = 0.2
-    b = 0.5
-    ecc = 0.1
-    omega = 0.1
-
     # Sample model from `Transits.jl`
     orbit = KeplerianOrbit(
-        R_star = r_star,
-        Mₛ = m_star,
-        P =  period,
-        t_0 = t0,
-        b = b,
-        ecc = ecc,
-        omega = omega,
+        R_star = 0.189,
+        M_star = 0.151,
+        period =  0.4626413,
+        t_0 = 0.2,
+        b = 0.5,
+        ecc = 0.1,
+        omega = 0.1,
     )
 
-    # Sample model from `batman`
-    py"""
-    def small_star():
-        t = np.linspace(0, $period, 500)
-        r_batman = _rsky._rsky(
-            t,
-            $t0,
-            $period,
-            $(orbit.aR_star),
-            $(orbit.incl),
-            $ecc,
-            $omega,
-            1,
-            1
-        )
-
-        m = r_batman < 100.0
-
-        return {
-            "t": t,
-            "r_batman": r_batman,
-            "m": m,
-        }
-    """
-    small_star = py"small_star"
+    # Comparison coords from `batman`
+    small_star = load("./python_code/test_data/KeplerianOrbit_small_star.jld2")
 
     # Compare
-    test_vals = small_star()
-    t = test_vals["t"]
-    r_batman = test_vals["r_batman"]
-    m = test_vals["m"]
+    t = small_star["t"]
+    r_batman = small_star["r_batman"]
+    m = small_star["m"]
     r = compute_r(orbit, t)
     @test sum(m) > 0
     @test allclose(r_batman[m], r[m], atol=2e-5)
 end
 
 @testset "KeplerianOrbit: impact" begin
-    # Model inputs
-    r_star = 0.189
-    m_star = 0.151
-    period = 0.4626413
-    t0 = 0.2
-    b = 0.5
-    ecc = 0.8
-    omega = 0.1
-
     # Sample model from `Transits.jl`
     orbit = KeplerianOrbit(
-        R_star = r_star,
-        Mₛ = m_star,
-        P =  period,
-        t_0 = t0,
-        b = b,
-        ecc = ecc,
-        omega = omega,
+        R_star = 0.189,
+        M_star = 0.151,
+        P = 0.4626413,
+        t_0 = 0.2,
+        b = 0.5,
+        ecc = 0.8,
+        omega = 0.1,
     )
 
     pos = relative_position.(orbit, orbit.t_0)
     @test allclose((√(pos[1]^2 + pos[2]^2)), orbit.b)
 end
-=#
 
 @testset "KeplerianOrbit: flip" begin
     orbit = KeplerianOrbit(

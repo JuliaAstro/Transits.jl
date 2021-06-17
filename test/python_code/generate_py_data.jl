@@ -1,11 +1,11 @@
 using PyCall
 using JLD2
+using Transits.Orbits: KeplerianOrbit
 
 py"""
 import numpy as np
 from batman import _rsky
 
-sky_coords = {}
 def sky_coords():
     t = np.linspace(-100, 100, 1_000)
 
@@ -42,5 +42,47 @@ def sky_coords():
         "omega" : omega,
         "incl" : incl,
     }
+
+
+def small_star(period, t_0, aR_star, incl, ecc, omega):
+    t = np.linspace(0, period, 500)
+    r_batman = _rsky._rsky(
+        t,
+        t_0,
+        period,
+        aR_star,
+        incl,
+        ecc,
+        omega,
+        1,
+        1
+    )
+
+    m = r_batman < 100.0
+
+    return {
+        "t": t,
+        "r_batman": r_batman,
+        "m": m,
+    }
 """
 save("test_data/KeplerianOrbit_sky_coords.jld2", py"sky_coords"())
+
+# Sample model from `Transits.jl`
+period =  0.4626413
+t_0 = 0.2
+ecc = 0.1
+omega = 0.1
+orbit = KeplerianOrbit(
+    R_star = 0.189,
+    M_star = 0.151,
+    period = period,
+    t_0 = t_0,
+    b = 0.5,
+    ecc = ecc,
+    omega = omega,
+)
+save(
+    "test_data/KeplerianOrbit_small_star.jld2",
+    py"small_star"(period, t_0, orbit.aR_star, orbit.incl, ecc, omega)
+)
