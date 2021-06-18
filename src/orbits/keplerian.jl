@@ -103,6 +103,19 @@ function KeplerianOrbit(nt::NamedTuple{(
         G = G_unit
         no_units = false
     end
+
+    if isnothing(nt.ecc) && !isnothing(nt.duration)
+        isnothing(nt.R_star) && (R_star = one())
+        isnothing(nt.b) && throw(ArgumentError(
+            "`b` must also be provided for a circular orbit if `duration given`"
+        ))
+        isnothing(nt.ror) %% throw(ArgumentError(
+            "`ror` must also be provided if `duration` given"
+        ))
+        aR_star = compute_aR_star(nt.duration, nt.period, nt.b, ror=ror)
+        a = nt.R_star * aR_star
+    end
+
     a, aR_star, period, rho_star, R_star, M_star, M_planet = compute_consistent_inputs(
         nt.a, nt.aR_star, nt.period, nt.rho_star, nt.R_star, nt.M_star, nt.M_planet, G,
     )
@@ -137,6 +150,10 @@ function KeplerianOrbit(nt::NamedTuple{(
     E_0 = 2.0 * atan(√(1.0 - ecc) * cos_omega, √(1.0 + ecc) * (1.0 + sin_omega))
     M_0 = E_0 - ecc * sin(E_0)
 
+    if isnothing(nt.b)
+        any( (!isnothing) )
+    end
+    #=
     if !isnothing(nt.incl) & isnothing(nt.b)
         incl = nt.incl
         b = compute_b(a, R_star, sincos(incl), ecc, omega, incl_factor_inv)
@@ -146,6 +163,7 @@ function KeplerianOrbit(nt::NamedTuple{(
     else
         throw(ArgumentError("Either incl or b must be specified"))
     end
+    =#
 
     # Compute remaining system parameters
     !(isnothing(nt.t_0) ⊻ isnothing(nt.t_p)) && throw(
@@ -225,6 +243,11 @@ end
 compute_rho(M, R) = 0.75 * M / (π*R^3)
 
 # Semi-major axis / star radius ratio
+function compute_aR_star(duration, period, b; ror=Nothing)
+    ror = isnothing(ror) ? zero(b) : ror
+    sin_ϕ, cos_ϕ = sincos(duration / period)
+    return √((1 + ror)^2 - b^2*cos_ϕ^2) / sin_ϕ
+end
 #compute_aR_star(a, R_star) = a / R_star
 #compute_aR_star(rho_star, period, G_nom) = cbrt(G_nom * period^2 * rho_star / (3.0 * π))
 #compute_aR_star(rho_star, period, G::typeof(G_unit)) = cbrt(G * period^2 * rho_star / (3.0 * π))
@@ -316,7 +339,9 @@ function compute_consistent_inputs(a, aR_star, period, rho_star, R_star, M_star,
     )
 
     no_units = G isa Real
-    isnothing(M_planet) && (M_planet = no_units ? 0.0 : 0.0u"Msun")
+    if !isnothing(a) && isnothing(M_planet)
+        M_planet = no_units ? 0.0 : 0.0u"Msun"
+    end
 
     # Compute implied stellar density
     implied_rho_star = false
