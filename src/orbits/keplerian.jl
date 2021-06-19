@@ -46,7 +46,11 @@ struct KeplerianOrbit{T,L,D,R,A,I,M} <: AbstractOrbit
     M_0::R
     incl::A
     omega::A
+    cos_omega::A
+    sin_omega::A
     Omega::A
+    cos_Omega::A
+    sin_Omega::A
     M_planet::M
     M_star::M
 end
@@ -93,7 +97,7 @@ function KeplerianOrbit(nt::NamedTuple{(
         :a, :R_planet, :R_star,
         :rho_star,
         :aR_star, :b, :ecc,
-        :incl, :omega, :Omega,
+        :incl, :omega, :cos_Omega, :sin_Omega, :Omega, :cos_Omega, :sin_Omega,
         :M_planet, :M_star,
     )})
     if nt.period isa Real || nt.a isa Real
@@ -116,8 +120,8 @@ function KeplerianOrbit(nt::NamedTuple{(
         a = nt.R_star * aR_star
     end
 
-    a, aR_star, period, rho_star, R_star, M_star, M_planet = compute_consistent_inputs(
-        nt.a, nt.aR_star, nt.period, nt.rho_star, nt.R_star, nt.M_star, nt.M_planet, G,
+    a, period, rho_star, R_star, M_star, M_planet = compute_consistent_inputs(
+        nt.a, nt.period, nt.rho_star, nt.R_star, nt.M_star, nt.M_planet, G,
     )
     M_tot = M_star + M_planet
     if isnothing(nt.R_planet)
@@ -131,27 +135,65 @@ function KeplerianOrbit(nt::NamedTuple{(
     a_star = a * M_planet / M_tot
     a_planet = -a * M_star / M_tot
 
-    # Eccentricity
-    if any( isnothing.((nt.ecc, nt.omega)) )
-        throw(ArgumentError("both `e` and `ω` must be provided"))
+    # Omega
+    if isnothing(nt.Omega)
+        Omega = nothing
     else
-        omega = nt.omega
-        sin_omega, cos_omega = sincos(omega)
+        Omega = nt.Omega
+        sin_Omega, cos_Omega = sincos(nt.Omega)
     end
 
-    if isnothing(nt.ecc) || iszero(nt.ecc)
-        ecc = 0.0
-        #M_0 = 0.5 * π # TODO: find out why this fails
+    # Eccentricity
+    if isnothing(nt.ecc)
+        ecc = nothing
+        M_0 = 0.5 * π # TODO: find out why this fails
         incl_factor_inv = 1.0
     else
         ecc = nt.ecc
+
+        if !isnothing(nt.omega)
+            all( (!isnothing).(nt.cos_omega, nt.sin_omega) ) && throw(ArgumentError(
+                "Only `cos_ω` or `sin_ω` can be provided"
+            ))
+            omega = nt.omega
+            sin_omega, cos_omega = sincos(nt.omega)
+        elseif all( (!isnothing).(cos_omega, sin_omega) )
+            cos_omega, sin_omega = nt.cos_omega, nt.sin_omega
+            omega = atan(sin_omega, cos_omega)
+        else
+            throw(ArgumentError("both `e` and `ω` must be provided"))
+        end
+
+        E_0 = 2.0 * atan(√(1.0 - ecc) * cos_omega, √(1.0 + ecc) * (1.0 + sin_omega))
+        M_0 = E_0 - ecc * sin(E_0)
+
         incl_factor_inv  = (1.0 - ecc^2) / (1.0 + ecc * sin_omega)
     end
-    E_0 = 2.0 * atan(√(1.0 - ecc) * cos_omega, √(1.0 + ecc) * (1.0 + sin_omega))
-    M_0 = E_0 - ecc * sin(E_0)
 
-    if isnothing(nt.b)
-        any( (!isnothing) )
+    # Jacobian for cos(i) -> b
+    dcosi_db = R_star / a * (1.0 / incl_factor_inv)
+    if !isnothing(nt.b)
+        any( (!isnothing.(nt.incl, nt.duration)) ) && throw(ArgumentError(
+            "Only `incl`, `b`, or `duration` can be given"
+        ))
+        b = nt.b
+        cos_incl = dcosi_db * b
+        incl = acos(cos_incl)
+    elseif !isnothing(nt.incl)
+        !isnothing(nt.duration) && throw(ArgumentError(
+            "Only `incl`, `b`, or `duration` can be given"
+        ))
+        incl = nt.incl
+        sin_incl, cos_incl = sincos(incl)
+        b = cos_incl / dcosi_db
+    elseif !isnothing(nt.duration)
+        !isnothing(ecc) && throw(ArgumentError(
+            "Fitting with `duration` only works for eccentric orbits"
+        ))
+        duration = nt.duration
+        c = sin(π * duration / (incl_factor_inv) / period)
+        aR_star =
+    else
     end
     #=
     if !isnothing(nt.incl) & isnothing(nt.b)
@@ -161,7 +203,6 @@ function KeplerianOrbit(nt::NamedTuple{(
         b = nt.b
         incl = compute_incl(a, R_star, b, ecc, sincos(omega))
     else
-        throw(ArgumentError("Either incl or b must be specified"))
     end
     =#
 
@@ -333,7 +374,7 @@ function flip(orbit::KeplerianOrbit, R_planet)
     end
 end
 
-function compute_consistent_inputs(a, aR_star, period, rho_star, R_star, M_star, M_planet, G)
+function compute_consistent_inputs(a, period, rho_star, R_star, M_star, M_planet, G)
     all( isnothing.((a, period)) ) && throw(
         ArgumentError("at least `a` or `P` must be specified")
     )
@@ -400,7 +441,7 @@ function compute_consistent_inputs(a, aR_star, period, rho_star, R_star, M_star,
         aR_star = a / R_star
     end
 
-    return a, aR_star, period, rho_star, R_star, M_star, M_planet
+    return a, period, rho_star, R_star, M_star, M_planet
 end
 
 stringify_units(value::Unitful.AbstractQuantity, unit) = value
