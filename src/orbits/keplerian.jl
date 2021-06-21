@@ -32,6 +32,7 @@ struct KeplerianOrbit{T,L,D,R,A,I,M} <: AbstractOrbit
     t_0::T
     t_p::T
     t_ref::T
+    duration::Union{Nothing, T}
     a::L
     a_planet::L
     a_star::L
@@ -43,6 +44,8 @@ struct KeplerianOrbit{T,L,D,R,A,I,M} <: AbstractOrbit
     b::R
     ecc::R
     M_0::R
+    cos_incl::R
+    sin_incl::R
     cos_omega::R
     sin_omega::R
     cos_Omega::R
@@ -56,25 +59,28 @@ struct KeplerianOrbit{T,L,D,R,A,I,M} <: AbstractOrbit
 end
 
 function normalize_inputs(
-    period, t_0, t_p, t_ref,
-    n,
+    period, t_0, t_p, t_ref, duration,
     a, a_planet, a_star, R_planet, R_star,
     rho_planet, rho_star,
-    aR_star, b, ecc, M_0,
+    aR_star, b, ecc, M_0, cos_incl, sin_incl, cos_omega, sin_omega, cos_Omega, sin_Omega,
     incl, omega, Omega,
     M_planet, M_star,
     no_units,
     )
 
-    # Normalize unitless types
-    aR_star, b, ecc, M_0 = promote(aR_star, b, ecc, M_0)
+    # Normalize dimensionless quantities
+    aR_star, b, ecc, M_0, cos_incl, sin_incl, cos_omega, sin_omega, cos_Omega, sin_Omega = promote(
+        aR_star, b, ecc, M_0, cos_incl, sin_incl, cos_omega, sin_omega, cos_Omega, sin_Omega
+    )
 
-    # Normalize quantities
+    # Normalize remaining quantities
     if no_units
         period, t_0, t_p, t_ref = promote(period, t_0, t_p, t_ref)
+        !isnothing(duration) && (duration = promote(period, duration))
         a, a_planet, a_star, R_planet, R_star = promote(a, a_planet, a_star, R_planet, R_star)
     else
         period, t_0, t_p, t_ref = uconvert.(u"d", (period, t_0, t_p, t_ref))
+        !isnothing(duration) && (duration = uconvert.(u"d", (period, duration)))
         a, a_planet, a_star, R_planet, R_star = uconvert.(u"Rsun", (a, a_planet, a_star, R_planet, R_star))
         rho_planet, rho_star = uconvert.(u"Msun/Rsun^3", (rho_planet, rho_star))
         incl, omega, Omega = uconvert.(u"rad", (incl, omega, Omega))
@@ -82,22 +88,21 @@ function normalize_inputs(
     end
 
     return (
-        period, t_0, t_p, t_ref,
-        n,
+        period, t_0, t_p, t_ref, duration,
         a, a_planet, a_star, R_planet, R_star,
         rho_planet, rho_star,
-        aR_star, b, ecc, M_0,
+        aR_star, b, ecc, M_0, cos_incl, sin_incl, cos_omega, sin_omega, cos_Omega, sin_Omega,
         incl, omega, Omega,
         M_planet, M_star,
     )
 end
 
 function KeplerianOrbit(nt::NamedTuple{(
-        :period, :t_0, :t_p,
+        :period, :t_0, :t_p, :duration,
         :a, :R_planet, :R_star,
         :rho_star,
-        :aR_star, :b, :ecc,
-        :incl, :omega, :cos_Omega, :sin_Omega, :Omega, :cos_Omega, :sin_Omega,
+        :aR_star, :b, :ecc, :cos_omega, :sin_omega,
+        :incl, :omega, :Omega,
         :M_planet, :M_star,
     )})
     if nt.period isa Real || nt.a isa Real
@@ -151,12 +156,12 @@ function KeplerianOrbit(nt::NamedTuple{(
     else
         ecc = nt.ecc
         if !isnothing(nt.omega)
-            all( (!isnothing).(nt.cos_omega, nt.sin_omega) ) && throw(ArgumentError(
+            all( (!isnothing).((nt.cos_omega, nt.sin_omega)) ) && throw(ArgumentError(
                 "Only `Ω`, or `cos_ω` and `sin_ω` can be provided"
             ))
             omega = nt.omega
             sin_omega, cos_omega = sincos(nt.omega)
-        elseif all( (!isnothing).(cos_omega, sin_omega) )
+        elseif all( (!isnothing).((cos_omega, sin_omega)) )
             cos_omega, sin_omega = nt.cos_omega, nt.sin_omega
             omega = atan(sin_omega, cos_omega)
         else
@@ -170,6 +175,7 @@ function KeplerianOrbit(nt::NamedTuple{(
 
     # Jacobian for cos(i) -> b
     dcosi_db = R_star / a * (1.0 / incl_factor_inv)
+    aR_star = a / R_star
     if !isnothing(nt.b)
         any( (!isnothing.(nt.incl, nt.duration)) ) && throw(ArgumentError(
             "Only `incl`, `b`, or `duration` can be given"
@@ -177,6 +183,7 @@ function KeplerianOrbit(nt::NamedTuple{(
         b = nt.b
         cos_incl = dcosi_db * b
         incl = acos(cos_incl)
+        duration = nt.duration
     elseif !isnothing(nt.incl)
         !isnothing(nt.duration) && throw(ArgumentError(
             "Only `incl`, `b`, or `duration` can be given"
@@ -184,6 +191,7 @@ function KeplerianOrbit(nt::NamedTuple{(
         incl = nt.incl
         sin_incl, cos_incl = sincos(incl)
         b = cos_incl / dcosi_db
+        duration = nt.duration
     elseif !isnothing(nt.duration)
         !isnothing(ecc) && throw(ArgumentError(
             "Fitting with `duration` only works for eccentric orbits"
@@ -191,7 +199,6 @@ function KeplerianOrbit(nt::NamedTuple{(
         duration = nt.duration
         c = sin(π * duration / (incl_factor_inv) / period)
         c_sq = c^2
-        aR_star = a / R_star
         ecc_sin_omega = ecc*sin_omega
         b = √(
             (aR_star^2 * c_sq - 1.0) /
@@ -207,6 +214,7 @@ function KeplerianOrbit(nt::NamedTuple{(
         incl = 0.5*π
         cos_incl = 0.0
         b = 0.0
+        duration = nt.duration
     end
 
     # Compute remaining system parameters
@@ -225,47 +233,40 @@ function KeplerianOrbit(nt::NamedTuple{(
 
     # Normalize inputs
     (
-        period, t_0, t_p, t_ref,
-        n,
+        period, t_0, t_p, t_ref, duration,
         a, a_planet, a_star, R_planet, R_star,
         rho_planet, rho_star,
-        aR_star, b, ecc, M_0,
+        aR_star, b, ecc, M_0, cos_incl, sin_incl, cos_omega, sin_omega, cos_Omega, sin_Omega,
         incl, omega, Omega,
         M_planet, M_star,
     ) = normalize_inputs(
-        period, t_0, t_p, t_ref,
-        n,
+        period, t_0, t_p, t_ref, duration,
         a, a_planet, a_star, R_planet, R_star,
         rho_planet, rho_star,
-        aR_star, b, ecc, M_0,
+        aR_star, b, ecc, M_0, cos_incl, sin_incl, cos_omega, sin_omega, cos_Omega, sin_Omega,
         incl, omega, Omega,
         M_planet, M_star,
         no_units,
     )
     return KeplerianOrbit(
-        period, t_0, t_p, t_ref,
-        n,
+        period, t_0, t_p, t_ref, duration,
         a, a_planet, a_star, R_planet, R_star,
         rho_planet, rho_star,
-        aR_star, b, ecc, M_0,
+        aR_star, b, ecc, M_0, cos_incl, sin_incl, cos_omega, sin_omega, cos_Omega, sin_Omega,
         incl, omega, Omega,
+        n,
         M_planet, M_star,
     )
 end
 
 @kwcall KeplerianOrbit(
-M_star=nothing, rho_star=nothing, period=nothing, t_0=nothing, incl=nothing,
-Omega=nothing, omega=nothing, ecc=nothing
+    period=nothing, t_0=nothing, t_p=nothing, duration=nothing,
+    a=nothing, R_planet=nothing, R_star=nothing,
+    rho_star=nothing,
+    aR_star=nothing, b=nothing, ecc=nothing, cos_omega=nothing, sin_omega=nothing,
+    incl=nothing, omega=nothing, Omega=nothing,
+    M_planet=nothing, M_star=nothing,
 )
-#@kwcall KeplerianOrbit(
-#    period=nothing, t_0=nothing, t_p=nothing, duration=nothing,
-#    a=nothing, R_planet=nothing, R_star=nothing,
-#    rho_star=nothing,
-#    aR_star=nothing, b=nothing, ecc=nothing, M_0=nothing,
-#    cos_omega=nothing, sin_omega=nothing, cos_Omega=nothing, sin_Omega=nothing,
-#    incl=nothing, omega=nothing, Omega=nothing,
-#    M_planet=nothing, M_star=nothing,
-#)
 
 @kwalias KeplerianOrbit [
     aRₛ => aR_star,
@@ -369,7 +370,12 @@ function compute_consistent_inputs(a, period, rho_star, R_star, M_star, M_planet
     )
 
     no_units = G isa Real
+
     if !isnothing(a) && isnothing(M_planet)
+        M_planet = no_units ? 0.0 : 0.0u"Msun"
+    end
+
+    if !isnothing(period) && isnothing(M_planet)
         M_planet = no_units ? 0.0 : 0.0u"Msun"
     end
 
@@ -419,15 +425,9 @@ function compute_consistent_inputs(a, period, rho_star, R_star, M_star, M_planet
     # Compute planet params
     M_tot = M_star + M_planet
     if isnothing(a)
-        if isnothing(aR_star)
-            a = ( G * M_tot * period^2 / (4.0 * π^2) )^(1/3)
-            aR_star = a / R_star
-        else
-            a = aR_star * R_star
-        end
+        a = ( G * M_tot * period^2 / (4.0 * π^2) )^(1/3)
     else
         period = 2.0 * π * a^(3/2) / (√(G * M_tot))
-        aR_star = a / R_star
     end
 
     return a, period, rho_star, R_star, M_star, M_planet

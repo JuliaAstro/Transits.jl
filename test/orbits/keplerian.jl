@@ -1,7 +1,6 @@
 using BenchmarkTools
 using Unitful, UnitfulAstro
 using Transits.Orbits: KeplerianOrbit, flip,
-                       compute_a, compute_incl,
                        relative_position,
                        _star_position, _planet_position
 
@@ -139,8 +138,6 @@ end
     ecc = 0.0
     sincosomega = (1.0, 0.0)
     M_tot = 1.0
-    @test compute_incl(a, R_star, b, ecc, sincosomega) ≈ π/2.0
-    @test compute_a(M_tot, period, 1.0) ≈ cbrt(1/(4.0*π))
 end
 
 @testset "KeplerianOrbit: valid inputs" begin
