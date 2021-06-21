@@ -32,7 +32,6 @@ struct KeplerianOrbit{T,L,D,R,A,I,M} <: AbstractOrbit
     t_0::T
     t_p::T
     t_ref::T
-    n::I
     a::L
     a_planet::L
     a_star::L
@@ -44,13 +43,14 @@ struct KeplerianOrbit{T,L,D,R,A,I,M} <: AbstractOrbit
     b::R
     ecc::R
     M_0::R
+    cos_omega::R
+    sin_omega::R
+    cos_Omega::R
+    sin_Omega::R
     incl::A
     omega::A
-    cos_omega::A
-    sin_omega::A
     Omega::A
-    cos_Omega::A
-    sin_Omega::A
+    n::I
     M_planet::M
     M_star::M
 end
@@ -113,7 +113,7 @@ function KeplerianOrbit(nt::NamedTuple{(
         isnothing(nt.b) && throw(ArgumentError(
             "`b` must also be provided for a circular orbit if `duration given`"
         ))
-        isnothing(nt.ror) %% throw(ArgumentError(
+        isnothing(nt.ror) && throw(ArgumentError(
             "`ror` must also be provided if `duration` given"
         ))
         aR_star = compute_aR_star(nt.duration, nt.period, nt.b, ror=ror)
@@ -150,10 +150,9 @@ function KeplerianOrbit(nt::NamedTuple{(
         incl_factor_inv = 1.0
     else
         ecc = nt.ecc
-
         if !isnothing(nt.omega)
             all( (!isnothing).(nt.cos_omega, nt.sin_omega) ) && throw(ArgumentError(
-                "Only `cos_ω` or `sin_ω` can be provided"
+                "Only `Ω`, or `cos_ω` and `sin_ω` can be provided"
             ))
             omega = nt.omega
             sin_omega, cos_omega = sincos(nt.omega)
@@ -163,7 +162,6 @@ function KeplerianOrbit(nt::NamedTuple{(
         else
             throw(ArgumentError("both `e` and `ω` must be provided"))
         end
-
         E_0 = 2.0 * atan(√(1.0 - ecc) * cos_omega, √(1.0 + ecc) * (1.0 + sin_omega))
         M_0 = E_0 - ecc * sin(E_0)
 
@@ -192,19 +190,24 @@ function KeplerianOrbit(nt::NamedTuple{(
         ))
         duration = nt.duration
         c = sin(π * duration / (incl_factor_inv) / period)
-        aR_star =
+        c_sq = c^2
+        aR_star = a / R_star
+        ecc_sin_omega = ecc*sin_omega
+        b = √(
+            (aR_star^2 * c_sq - 1.0) /
+            (
+                c_sq * ecc_sin_omega^2 +
+                2.0*c_sq*ecc_sin_omega +
+                c_sq - ecc^4 + 2.0*ecc^2 - 1.0
+            )
+        ) * (1.0 - ecc^2)
+        cos_incl = dcosi_db * b
+        incl = acos(cos_incl)
     else
+        incl = 0.5*π
+        cos_incl = 0.0
+        b = 0.0
     end
-    #=
-    if !isnothing(nt.incl) & isnothing(nt.b)
-        incl = nt.incl
-        b = compute_b(a, R_star, sincos(incl), ecc, omega, incl_factor_inv)
-    elseif isnothing(nt.incl) & !isnothing(nt.b)
-        b = nt.b
-        incl = compute_incl(a, R_star, b, ecc, sincos(omega))
-    else
-    end
-    =#
 
     # Compute remaining system parameters
     !(isnothing(nt.t_0) ⊻ isnothing(nt.t_p)) && throw(
@@ -219,8 +222,6 @@ function KeplerianOrbit(nt::NamedTuple{(
     end
 
     t_ref = t_p - t_0
-
-    Omega = isnothing(nt.Omega) ? (no_units ? 0.5*π : 0.5*π*u"rad") : nt.Omega
 
     # Normalize inputs
     (
@@ -253,13 +254,18 @@ function KeplerianOrbit(nt::NamedTuple{(
 end
 
 @kwcall KeplerianOrbit(
-    period=nothing, t_0=nothing, t_p=nothing,
-    a=nothing, R_planet=nothing, R_star=nothing,
-    rho_star=nothing,
-    aR_star=nothing, b=nothing, ecc=nothing,
-    incl=nothing, omega=nothing, Omega=nothing,
-    M_planet=nothing, M_star=nothing,
+M_star=nothing, rho_star=nothing, period=nothing, t_0=nothing, incl=nothing,
+Omega=nothing, omega=nothing, ecc=nothing
 )
+#@kwcall KeplerianOrbit(
+#    period=nothing, t_0=nothing, t_p=nothing, duration=nothing,
+#    a=nothing, R_planet=nothing, R_star=nothing,
+#    rho_star=nothing,
+#    aR_star=nothing, b=nothing, ecc=nothing, M_0=nothing,
+#    cos_omega=nothing, sin_omega=nothing, cos_Omega=nothing, sin_Omega=nothing,
+#    incl=nothing, omega=nothing, Omega=nothing,
+#    M_planet=nothing, M_star=nothing,
+#)
 
 @kwalias KeplerianOrbit [
     aRₛ => aR_star,
@@ -270,6 +276,7 @@ end
     tₚ => t_p,
     Ω => Omega,
     ω => omega,
+    τ => duration,
 ]
 
 #############
@@ -292,24 +299,6 @@ end
 #compute_aR_star(a, R_star) = a / R_star
 #compute_aR_star(rho_star, period, G_nom) = cbrt(G_nom * period^2 * rho_star / (3.0 * π))
 #compute_aR_star(rho_star, period, G::typeof(G_unit)) = cbrt(G * period^2 * rho_star / (3.0 * π))
-
-# Semi-major axis
-# compute_a(aR_star, R_star) = aR_star * R_star
-compute_a(M_tot, period, G) = cbrt(G * M_tot * period^2 / (4.0 * π^2))
-
-# Impact parameter
-function compute_b(aR_star, sincos_incl, ecc, omega, incl_factor_inv)
-    sin_omega, cos_omega = sincos(omega)
-    cos_incl = sincos_incl[2]
-    return (aR_star) * cos_incl * incl_factor_inv
-end
-compute_b(a, R_star, sincos_incl, ecc, omega, incl_factor_inv) = compute_b(a/R_star, sincos_incl, ecc, omega, incl_factor_inv)
-
-# Inclination
-function compute_incl(aR_star, b, ecc, sincosomega)
-    return acos((b/aR_star) * (1.0 + ecc*sincosomega[1])/(1.0 - ecc^2))
-end
-compute_incl(a, R_star, b, ecc, sincosomega) = compute_incl(a/R_star, b, ecc, sincosomega)
 
 # Finds the position `r` of the planet along its orbit after rotating
 # through the true anomaly `ν`, then transforms this from the
