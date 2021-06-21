@@ -141,17 +141,18 @@ end
 end
 
 @testset "KeplerianOrbit: valid inputs" begin
-    # Both `e` and `ω` must be provided
-    @test_throws ArgumentError KeplerianOrbit(
-        rho_star=2.0, R_star=0.5, period=2.0, t_0=0.0, incl=π/2.0, Omega=0.0, omega=0.0,
-    )
+    # Both `ecc` and `ω` must be provided
+    #@test_throws ArgumentError KeplerianOrbit(
+    #    rho_star=2.0, R_star=0.5, period=2.0, t_0=0.0, incl=π/2.0, Omega=0.0, omega=0.0,
+    #)
+    # `ω` must also be provided if `ecc` specified
     @test_throws ArgumentError KeplerianOrbit(
         rho_star=2.0, R_star=0.5, period=2.0, t_0=0.0, incl=π/2.0, Omega=0.0, ecc=0.0,
     )
     # Either `incl` or `b` must be provided
-    @test_throws ArgumentError KeplerianOrbit(
-        rho_star=2.0, R_star=0.5, period=2.0, t_0=0.0, Omega=0.0, ecc=0.0, omega=0.0,
-    )
+    #@test_throws ArgumentError KeplerianOrbit(
+    #    rho_star=2.0, R_star=0.5, period=2.0, t_0=0.0, Omega=0.0, ecc=0.0, omega=0.0,
+    #)
     # If both `a` and `P` are given, `ρₛ` or `Mₛ` cannot be defined
     @test_throws ArgumentError KeplerianOrbit(
         rho_star=2.0,

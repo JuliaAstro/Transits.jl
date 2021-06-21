@@ -113,7 +113,7 @@ function KeplerianOrbit(nt::NamedTuple{(
         no_units = false
     end
 
-    if isnothing(nt.ecc) && !isnothing(nt.duration)
+    if (isnothing(nt.ecc) || iszero(nt.ecc)) && !isnothing(nt.duration)
         isnothing(nt.R_star) && (R_star = one())
         isnothing(nt.b) && throw(ArgumentError(
             "`b` must also be provided for a circular orbit if `duration given`"
@@ -121,12 +121,14 @@ function KeplerianOrbit(nt::NamedTuple{(
         isnothing(nt.ror) && throw(ArgumentError(
             "`ror` must also be provided if `duration` given"
         ))
-        aR_star = compute_aR_star(nt.duration, nt.period, nt.b, ror=ror)
+        aR_star = compute_aor(nt.duration, nt.period, nt.b, ror=ror)
         a = nt.R_star * aR_star
+    else
+        aR_star = nt.aR_star
     end
 
-    a, period, rho_star, R_star, M_star, M_planet = compute_consistent_inputs(
-        nt.a, nt.period, nt.rho_star, nt.R_star, nt.M_star, nt.M_planet, G,
+    a, aR_star, period, rho_star, R_star, M_star, M_planet = compute_consistent_inputs(
+        nt.a, nt.aR_star, nt.period, nt.rho_star, nt.R_star, nt.M_star, nt.M_planet, G,
     )
     M_tot = M_star + M_planet
     if isnothing(nt.R_planet)
@@ -142,17 +144,19 @@ function KeplerianOrbit(nt::NamedTuple{(
 
     # Omega
     if isnothing(nt.Omega)
-        Omega = nothing
+        Omega = 0.5 * π
     else
         Omega = nt.Omega
-        sin_Omega, cos_Omega = sincos(nt.Omega)
     end
+    sin_Omega, cos_Omega = sincos(Omega)
 
     # Eccentricity
     if isnothing(nt.ecc)
-        ecc = nothing
+        ecc = 0.0
         M_0 = 0.5 * π # TODO: find out why this fails
         incl_factor_inv = 1.0
+        omega = zero(Omega)
+        cos_omega, sin_omega = zero(omega), one(omega)
     else
         ecc = nt.ecc
         if !isnothing(nt.omega)
@@ -161,11 +165,11 @@ function KeplerianOrbit(nt::NamedTuple{(
             ))
             omega = nt.omega
             sin_omega, cos_omega = sincos(nt.omega)
-        elseif all( (!isnothing).((cos_omega, sin_omega)) )
+        elseif all( (!isnothing).((nt.cos_omega, nt.sin_omega)) )
             cos_omega, sin_omega = nt.cos_omega, nt.sin_omega
             omega = atan(sin_omega, cos_omega)
         else
-            throw(ArgumentError("both `e` and `ω` must be provided"))
+            throw(ArgumentError("`ω` must also be provided if `ecc` specified"))
         end
         E_0 = 2.0 * atan(√(1.0 - ecc) * cos_omega, √(1.0 + ecc) * (1.0 + sin_omega))
         M_0 = E_0 - ecc * sin(E_0)
@@ -175,14 +179,15 @@ function KeplerianOrbit(nt::NamedTuple{(
 
     # Jacobian for cos(i) -> b
     dcosi_db = R_star / a * (1.0 / incl_factor_inv)
-    aR_star = a / R_star
+    aor = a_planet / R_star
     if !isnothing(nt.b)
-        any( (!isnothing.(nt.incl, nt.duration)) ) && throw(ArgumentError(
+        any( (!isnothing).((nt.incl, nt.duration)) ) && throw(ArgumentError(
             "Only `incl`, `b`, or `duration` can be given"
         ))
         b = nt.b
         cos_incl = dcosi_db * b
         incl = acos(cos_incl)
+        sin_incl = sin(incl)
         duration = nt.duration
     elseif !isnothing(nt.incl)
         !isnothing(nt.duration) && throw(ArgumentError(
@@ -201,7 +206,7 @@ function KeplerianOrbit(nt::NamedTuple{(
         c_sq = c^2
         ecc_sin_omega = ecc*sin_omega
         b = √(
-            (aR_star^2 * c_sq - 1.0) /
+            (aor^2 * c_sq - 1.0) /
             (
                 c_sq * ecc_sin_omega^2 +
                 2.0*c_sq*ecc_sin_omega +
@@ -210,9 +215,11 @@ function KeplerianOrbit(nt::NamedTuple{(
         ) * (1.0 - ecc^2)
         cos_incl = dcosi_db * b
         incl = acos(cos_incl)
+        sin_incl = sin(incl)
     else
         incl = 0.5*π
         cos_incl = 0.0
+        sin_incl = 1.0
         b = 0.0
         duration = nt.duration
     end
@@ -291,8 +298,8 @@ end
 # Spherical density
 compute_rho(M, R) = 0.75 * M / (π*R^3)
 
-# Semi-major axis / star radius ratio
-function compute_aR_star(duration, period, b; ror=Nothing)
+# Semi-major axis / star radius ratio, assuming circular orbit
+function compute_aor(duration, period, b; ror=Nothing)
     ror = isnothing(ror) ? zero(b) : ror
     sin_ϕ, cos_ϕ = sincos(duration / period)
     return √((1 + ror)^2 - b^2*cos_ϕ^2) / sin_ϕ
@@ -364,7 +371,7 @@ function flip(orbit::KeplerianOrbit, R_planet)
     end
 end
 
-function compute_consistent_inputs(a, period, rho_star, R_star, M_star, M_planet, G)
+function compute_consistent_inputs(a, aR_star, period, rho_star, R_star, M_star, M_planet, G)
     all( isnothing.((a, period)) ) && throw(
         ArgumentError("at least `a` or `P` must be specified")
     )
@@ -425,12 +432,18 @@ function compute_consistent_inputs(a, period, rho_star, R_star, M_star, M_planet
     # Compute planet params
     M_tot = M_star + M_planet
     if isnothing(a)
-        a = ( G * M_tot * period^2 / (4.0 * π^2) )^(1/3)
+        if isnothing(aR_star)
+            a = ( G * M_tot * period^2 / (4.0 * π^2) )^(1/3)
+            aR_star = a / R_star
+        else
+            a = aR_star * R_star
+        end
     else
         period = 2.0 * π * a^(3/2) / (√(G * M_tot))
+        aR_star = a / R_star
     end
 
-    return a, period, rho_star, R_star, M_star, M_planet
+    return a, aR_star, period, rho_star, R_star, M_star, M_planet
 end
 
 stringify_units(value::Unitful.AbstractQuantity, unit) = value
