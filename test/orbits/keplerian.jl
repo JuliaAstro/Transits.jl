@@ -1,15 +1,10 @@
 using BenchmarkTools
 using Unitful, UnitfulAstro
 using Transits.Orbits: KeplerianOrbit, flip,
-                       relative_position,
+                       relative_position, compute_aor,
                        _star_position, _planet_position
 
 const G_nom = 2942.2062175044193 # Rsun^3/Msun/d^2
-
-# https://stackoverflow.com/questions/27098844/allclose-how-to-check-if-two-arrays-are-close-in-julia/27100515#27100515
-function allclose(a, b; rtol=1e-5, atol=1e-8)
-    return all(abs.(a - b) .<= (atol .+ rtol * abs.(b)))
-end
 
 function compute_r(orbit, t)
     pos = relative_position.(orbit, t)
@@ -296,5 +291,32 @@ end
     u_star_flipped = as_matrix(_star_position.(orbit_flipped, orbit.R_star, t))
     for i in 1:3
         @test allclose(u_planet[:, i], u_star_flipped[:, i], atol=1e-5)
+    end
+end
+
+@testset "KeplerianOrbit: compute_aor" begin
+    duration = 0.12
+    period = 10.1235
+    b = 0.34
+    RpRs = 0.06
+    R_star = 0.7
+    aor = compute_aor(duration, period, b, RpRs=RpRs)
+
+    for orbit in [
+        KeplerianOrbit(
+            period=period, t_0=0.0, b=b, a=R_star * aor, R_star=R_star
+        ),
+        KeplerianOrbit(
+            period = period,
+            t_0 = 0.0,
+            b = b,
+            duration = duration,
+            R_star = R_star,
+            RpRs = RpRs,
+        ),
+    ]
+
+    x, y, z = _planet_position(orbit, R_star, 0.5*duration)
+    @test allclose(√(x^2 + y^2), 1.0 + RpRs)
     end
 end
