@@ -136,37 +136,51 @@ end
 end
 
 @testset "KeplerianOrbit: valid inputs" begin
-    # Both `ecc` and `ω` must be provided
-    #@test_throws ArgumentError KeplerianOrbit(
-    #    rho_star=2.0, R_star=0.5, period=2.0, t_0=0.0, incl=π/2.0, Omega=0.0, omega=0.0,
-    #)
-    # `ω` must also be provided if `ecc` specified
-    @test_throws ArgumentError KeplerianOrbit(
+    @test_throws ArgumentError("`b` must also be provided for a circular orbit if `duration given`") KeplerianOrbit(
+        duration=0.01,
+        period=2.0, t_0=0.0, R_star=1.0
+    )
+    @test_throws ArgumentError("`RₚRₛ` must also be provided if `duration` given") KeplerianOrbit(
+        duration=0.01, b=0.0,
+        period=2.0, t_0=0.0, R_star=1.0
+    )
+    @test_throws ArgumentError("Only `ω`, or `cos_ω` and `sin_ω` can be provided") KeplerianOrbit(
+        omega=0.0, cos_omega=1.0, sin_omega=0.0,
+        period=2.0, t_0=0.0, b=0.0, M_star=1.0, R_star=1.0, ecc=0.0,
+    )
+    @test_throws ArgumentError("`ω` must also be provided if `ecc` specified") KeplerianOrbit(
         rho_star=2.0, R_star=0.5, period=2.0, t_0=0.0, incl=π/2.0, Omega=0.0, ecc=0.0,
     )
-    # Either `incl` or `b` must be provided
-    #@test_throws ArgumentError KeplerianOrbit(
-    #    rho_star=2.0, R_star=0.5, period=2.0, t_0=0.0, Omega=0.0, ecc=0.0, omega=0.0,
-    #)
-    # If both `a` and `P` are given, `ρₛ` or `Mₛ` cannot be defined
-    @test_throws ArgumentError KeplerianOrbit(
+    @test_throws ArgumentError("Only `incl`, `b`, or `duration` can be given") KeplerianOrbit(
+        incl=π/2.0, b=0.0, duration=1.0,
+        period=2.0, t_0=0.0, R_star=1.0, RpRs=0.01,
+    )
+
+    @test_throws ArgumentError("Fitting with `duration` only works for eccentric orbits") KeplerianOrbit(
+        duration=1.0, ecc=0.01, omega=0.0,
+        period=2.0, t_0=0.0, M_star=1.0, R_star=1.0, RpRs=0.01,
+    )
+
+    # throw "Either t₀ or tₚ must be specified"
+    # throw "at least `a` or `P` must be specified"
+
+    @test_throws ArgumentError("If both `a` and `P` are given, `ρₛ` or `Mₛ` cannot be defined") KeplerianOrbit(
         rho_star=2.0,
         R_star=0.5, a=7.5, period=2.0, t_0=0.0, incl=π/2.0, Omega=0.0, omega=0.0, ecc=0.0,
     )
-    @test_throws ArgumentError KeplerianOrbit(
+    @test_throws ArgumentError("If both `a` and `P` are given, `ρₛ` or `Mₛ` cannot be defined") KeplerianOrbit(
         M_star=1.0,
         R_star=0.5, a=7.5, period=2.0, t_0=0.0, incl=π/2.0, Omega=0.0, omega=0.0, ecc=0.0,
     )
-    # Mus provide exactly two of: `ρₛ`, `Rₛ`, or `Mₛ` if ρₛ not implied
-    @test_throws ArgumentError KeplerianOrbit(
+    @test_throws ArgumentError("Must provide exactly two of: `ρₛ`, `Rₛ`, or `Mₛ` if ρₛ not implied") KeplerianOrbit(
         R_star=0.5,
         period=2.0, t_0=0.0, incl=π/2.0, Omega=0.0, omega=0.0, ecc=0.0,
     )
-    @test_throws ArgumentError KeplerianOrbit(
+    @test_throws ArgumentError("Must provide exactly two of: `ρₛ`, `Rₛ`, or `Mₛ` if ρₛ not implied") KeplerianOrbit(
         M_star=0.5,
         period=2.0, t_0=0.0, incl=π/2.0, Omega=0.0, omega=0.0, ecc=0.0,
     )
-    @test_throws ArgumentError KeplerianOrbit(
+    @test_throws ArgumentError("Must provide exactly two of: `ρₛ`, `Rₛ`, or `Mₛ` if ρₛ not implied") KeplerianOrbit(
         M_star=0.5, R_star=0.5, rho_star=0.5,
         period=2.0, t_0=0.0, incl=π/2.0, Omega=0.0, omega=0.0, ecc=0.0,
     )
@@ -317,6 +331,10 @@ end
     ]
 
     x, y, z = _planet_position(orbit, R_star, 0.5*duration)
+    @test allclose(√(x^2 + y^2), 1.0 + RpRs)
+    x, y, z = _planet_position(orbit, R_star, -0.5*duration)
+    @test allclose(√(x^2 + y^2), 1.0 + RpRs)
+    x, y, z = _planet_position(orbit, R_star, period + 0.5*duration)
     @test allclose(√(x^2 + y^2), 1.0 + RpRs)
     end
 end

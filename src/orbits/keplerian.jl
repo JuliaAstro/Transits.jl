@@ -165,7 +165,7 @@ function KeplerianOrbit(nt::NamedTuple{(
         ecc = nt.ecc
         if !isnothing(nt.omega)
             all( (!isnothing).((nt.cos_omega, nt.sin_omega)) ) && throw(ArgumentError(
-                "Only `Ω`, or `cos_ω` and `sin_ω` can be provided"
+                "Only `ω`, or `cos_ω` and `sin_ω` can be provided"
             ))
             omega = nt.omega
             sin_omega, cos_omega = sincos(nt.omega)
@@ -406,8 +406,7 @@ function compute_consistent_inputs(
     if all( (!isnothing).((a, period)) )
         if any( (!isnothing).((rho_star, M_star)) )
             throw(ArgumentError(
-                "if both `a` and `P` are given,
-                `ρₛ` or `Mₛ` cannot be defined"
+                "If both `a` and `P` are given, `ρₛ` or `Mₛ` cannot be defined"
             ))
         end
 
@@ -431,7 +430,7 @@ function compute_consistent_inputs(
 
     if !implied_rho_star && sum(isnothing.((rho_star, R_star, M_star))) ≠ 1
         throw(ArgumentError(
-            "values mut be provided for exactly two of: `ρₛ`, `Rₛ`, `Mₛ`"
+            "Must provide exactly two of: `ρₛ`, `Rₛ`, or `Mₛ` if ρₛ not implied"
         ))
     end
 
