@@ -202,9 +202,6 @@ function KeplerianOrbit(nt::NamedTuple{(
         b = cos_incl / dcosi_db
         duration = nt.duration
     elseif !isnothing(nt.duration)
-        !isnothing(ecc) && throw(ArgumentError(
-            "Fitting with `duration` only works for eccentric orbits"
-        ))
         duration = nt.duration
         c = sin(π * duration / (incl_factor_inv) / period)
         c_sq = c^2
@@ -381,7 +378,7 @@ function compute_consistent_inputs(
     G, ecc, duration, b, RpRs
     )
     all( isnothing.((a, period)) ) && throw(
-        ArgumentError("at least `a` or `P` must be specified")
+        ArgumentError("At least `a` or `P` must be specified")
     )
 
     no_units = G isa Real
