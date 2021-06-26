@@ -125,14 +125,45 @@ end
     end
 end
 
-@testset "KeplerianOrbit: helper functions" begin
-    a, R_star = 2.0, 4.0
-    period = √π
-    rho_star = 3.0 * 0.5^3
-    b = 0.0
-    ecc = 0.0
-    sincosomega = (1.0, 0.0)
-    M_tot = 1.0
+@testset "KeplerianOrbit: orbital elements" begin
+    orbit = KeplerianOrbit(
+        cos_omega=√(2)/2, sin_omega=√(2)/2,
+        period=2.0, t_0=0.0, b=0.01, M_star=1.0, R_star=1.0, ecc=0.0,
+    )
+    @test orbit.omega == atan(orbit.sin_omega/orbit.cos_omega)
+
+    orbit = KeplerianOrbit(
+        period = 0.9,
+        t_0 = 0.0,
+        duration = 0.02,
+        R_star = 1.0,
+        M_star = 1.0,
+        RpRs = 0.0001,
+        ecc = 0.01,
+        omega = 0.0,
+    );
+    ecc = orbit.ecc
+    sin_omega = orbit.sin_omega
+    incl_factor_inv  = (1.0 - ecc^2) / (1.0 + ecc * sin_omega)
+    c = sin(π * orbit.duration / (incl_factor_inv) / orbit.period)
+    c_sq = c^2
+    ecc_sin_omega = ecc*sin_omega
+    aor = orbit.a_planet / orbit.R_star
+    @test orbit.b == √(
+        (aor^2 * c_sq - 1.0) /
+        (
+            c_sq * ecc_sin_omega^2 +
+            2.0*c_sq*ecc_sin_omega +
+            c_sq - ecc^4 + 2.0*ecc^2 - 1.0
+        )
+    ) * (1.0 - ecc^2)
+    @test orbit.sin_incl == sin(orbit.incl)
+
+    orbit = KeplerianOrbit(
+        period=2.0, t_0=0.0, M_star=1.0, R_star=1.0,
+        ecc=0.01, omega=0.1, RpRs=0.01,
+    )
+    @test isnothing(orbit.duration)
 end
 
 @testset "KeplerianOrbit: valid inputs" begin
@@ -325,13 +356,13 @@ end
             R_star = R_star,
             RpRs = RpRs,
         ),
-    ]
+        ]
 
-    x, y, z = _planet_position(orbit, R_star, 0.5*duration)
-    @test allclose(√(x^2 + y^2), 1.0 + RpRs)
-    x, y, z = _planet_position(orbit, R_star, -0.5*duration)
-    @test allclose(√(x^2 + y^2), 1.0 + RpRs)
-    x, y, z = _planet_position(orbit, R_star, period + 0.5*duration)
-    @test allclose(√(x^2 + y^2), 1.0 + RpRs)
+        x, y, z = _planet_position(orbit, R_star, 0.5*duration)
+        @test allclose(√(x^2 + y^2), 1.0 + RpRs)
+        x, y, z = _planet_position(orbit, R_star, -0.5*duration)
+        @test allclose(√(x^2 + y^2), 1.0 + RpRs)
+        x, y, z = _planet_position(orbit, R_star, period + 0.5*duration)
+        @test allclose(√(x^2 + y^2), 1.0 + RpRs)
     end
 end
