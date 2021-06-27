@@ -1,4 +1,3 @@
-
 u = [0.4, 0.26]
 
 @testset "PolynomialLimbDark" begin
@@ -63,4 +62,47 @@ end
      duration: 1.0
      t0: 0.0
      b: 0.0"""
+end
+
+@testset "KeplerianOrbit" begin
+    orbit = KeplerianOrbit(
+        ρₛ = 2.0,
+        Rₛ = 0.5,
+        period = 2.0,
+        ecc = 0.0,
+        t₀ = 0.0,
+        incl = π / 2.0,
+        Ω = 0.0,
+        ω = 0.0,
+    )
+
+    @test sprint(show, "text/plain", orbit) === """
+    Keplerian Orbit
+     P: 2.0 d
+     t₀: 0.0 d
+     tₚ: -0.5 d
+     t_ref: -0.5 d
+     τ: nothing d
+     a: 6.783710833739071 R⊙
+     aₚ: -6.783710833739071 R⊙
+     aₛ: 0.0 R⊙
+     Rₚ: nothing R⊙
+     Rₛ: 0.5 R⊙
+     ρₚ: nothing g/cm³
+     ρₛ: 11.810543837929684 g/cm³
+     RpRs: 0.0
+     aRₛ: 13.567421667478142
+     b: 8.307649758879776e-16
+     ecc: 0.0
+     cos(incl): 6.123233995736766e-17
+     sin(incl): 1.0
+     cos(omega): 1.0
+     sin(omega): 0.0
+     cos(Omega): 1.0
+     sin(Omega): 0.0
+     incl: 1.5707963267948966 rad
+     ω: 0.0 rad
+     Ω: 0.0 rad
+     Mₚ: 0.0 M⊙
+     Mₛ: 1.0471975511965976 M⊙"""
 end

@@ -9,12 +9,17 @@ jobs:
   test:
     name: Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
     runs-on: ${{ matrix.os }}
+
+    defaults:
+      run:
+        shell: bash -l {0}
+
     strategy:
       fail-fast: false
       matrix:
         version:
           - '1.5'
-          - '1'
+          - '1.6'
           - 'nightly'
         os:
           - ubuntu-latest
@@ -38,6 +43,8 @@ jobs:
             ${{ runner.os }}-test-${{ env.cache-name }}-
             ${{ runner.os }}-test-
             ${{ runner.os }}-
+      #- name: "Install KeywordCalls branch"
+      #  run: julia --project=. -e 'using Pkg; Pkg.add(PackageSpec(name="KeywordCalls", rev="master"))'
       - uses: julia-actions/julia-buildpkg@v1
       - uses: julia-actions/julia-runtest@v1
       - uses: julia-actions/julia-processcoverage@v1
