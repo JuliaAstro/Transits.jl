@@ -2,9 +2,11 @@ using BenchmarkTools
 using Unitful, UnitfulAstro
 using Transits.Orbits: KeplerianOrbit, flip,
                        relative_position, compute_aor,
-                       _star_position, _planet_position
+                       _star_position, _planet_position,
+                       stringify_units
 
 const G_nom = 2942.2062175044193 # Rsun^3/Msun/d^2
+const MsunRsun_to_gcc = (1.0u"Msun/Rsun^3" |> u"g/cm^3").val
 
 function compute_r(orbit, t)
     pos = relative_position.(orbit, t)
@@ -365,4 +367,25 @@ end
         x, y, z = _planet_position(orbit, R_star, period + 0.5*duration)
         @test allclose(√(x^2 + y^2), 1.0 + RpRs)
     end
+end
+
+@testset "KeplerianOrbit: stringify_units" begin
+    @test stringify_units(1u"Rsun", "Rsun") == 1u"Rsun"
+    @test stringify_units(1, "R⊙") == "1 R⊙"
+end
+
+@testset "KeplerianOrbit: unit conversions" begin
+    orbit = KeplerianOrbit(a=12.0, t_0=0.0, b=0.0, R_star=1.0, M_star=1.0, M_planet=0.01, RpRs=0.01)
+    rho_planet_1 = orbit.rho_planet*u"Msun/Rsun^3" |> u"g/cm^3"
+    rho_planet_2 = orbit.rho_planet * MsunRsun_to_gcc
+    @test rho_planet_1.val == rho_planet_2
+
+    orbit = KeplerianOrbit(a=12.0u"Rsun", t_0=0.0u"d", b=0.0, R_star=1.0u"Rsun", M_star=1.0u"Msun")
+    @test isnothing(orbit.rho_planet)
+
+    orbit = KeplerianOrbit(a=12.0u"Rsun", t_0=0.0u"d", b=0.0, R_star=1.0u"Rsun", M_planet=0.01u"Msun", M_star=1.0u"Msun", RpRs=0.01)
+    rho_planet = orbit.rho_planet |> u"g/cm^3"
+    rho_star = orbit.rho_star |> u"g/cm^3"
+    @test rho_planet.val == orbit.rho_planet.val*MsunRsun_to_gcc
+    @test rho_star.val == orbit.rho_star.val*MsunRsun_to_gcc
 end

@@ -1,4 +1,3 @@
-
 u = [0.4, 0.26]
 
 @testset "PolynomialLimbDark" begin
@@ -89,7 +88,7 @@ end
      aₛ: 0.0 R⊙
      Rₚ: nothing R⊙
      Rₛ: 0.5 R⊙
-     ρₚ: nothing M⊙/R⊙³
+     ρₚ: nothing g/cm³
      ρₛ: 11.810543837929684 g/cm³
      RpRs: 0.0
      aRₛ: 13.567421667478142

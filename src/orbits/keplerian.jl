@@ -45,7 +45,7 @@ struct KeplerianOrbit{T,L,D,R,A,I,M} <: AbstractOrbit
     a::L
     a_planet::L
     a_star::L
-    R_planet::Union{Nothing, T}
+    R_planet::Union{Nothing, L}
     R_star::L
     rho_planet::Union{Nothing, D}
     rho_star::D
@@ -484,6 +484,7 @@ function Base.show(io::IO, ::MIME"text/plain", orbit::KeplerianOrbit)
         if isnothing(orbit.rho_planet)
             rho_planet = nothing
         else
+            println("we here")
             rho_planet = orbit.rho_planet |> u"g/cm^3"
         end
         rho_star = orbit.rho_star |> u"g/cm^3"
@@ -502,7 +503,7 @@ function Base.show(io::IO, ::MIME"text/plain", orbit::KeplerianOrbit)
          aₛ: $(stringify_units(orbit.a_star, "R⊙"))
          Rₚ: $(stringify_units(orbit.R_planet, "R⊙"))
          Rₛ: $(stringify_units(orbit.R_star, "R⊙"))
-         ρₚ: $(stringify_units(rho_planet, "M⊙/R⊙³"))
+         ρₚ: $(stringify_units(rho_planet, "g/cm³"))
          ρₛ: $(stringify_units(rho_star, "g/cm³"))
          RpRs: $(orbit.RpRs)
          aRₛ: $(orbit.aR_star)
