@@ -378,9 +378,11 @@ function rrule(::Type{<:PolynomialLimbDark}, u::AbstractVector{S}; maxiter=100) 
     Ω = PolynomialLimbDark(n_max, u_n, g_n, Mn_coeff, Nn_coeff, norm, Mn, Nn)
     ∂g_n = @view ∇g_n[begin + 1:end, :]
 
+    proj = ProjectTo(u)
+
     function PolynomialLimbDark_pullback(Δld)
         ∂u = ∂g_n * Δld.g_n
-        return NoTangent(), ∂u
+        return NoTangent(), proj(∂u)
     end
     return Ω, PolynomialLimbDark_pullback
 end

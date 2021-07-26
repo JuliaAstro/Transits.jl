@@ -165,9 +165,10 @@ function rrule(::Type{<:QuadLimbDark}, u_n::AbstractVector{T}; maxiter=100) wher
     ∇g_n = SA[-one(T)  one(T) zero(T)
                  -1.5     2.0  -0.25]
     N = length(u_n)
+    proj = ProjectTo(u_n)
     function QuadLimbDark_pullback(Δld)
         ∂u = @view(∇g_n[begin:begin+N-1, :]) * Δld.g_n
-        return NoTangent(), ∂u
+        return NoTangent(), proj(∂u)
     end
     return Ω, QuadLimbDark_pullback
 end
