@@ -131,10 +131,10 @@ end
 function rrule(::typeof(compute), ld::LD, b, r) where {LD <: QuadLimbDark}
     f, dfdg, dfdb, dfdr = compute_grad(ld, b, r)
     function compute_pullback(Δf)
-        ∂ld = Composite{LD}(g_n=dfdg * Δf)
+        ∂ld = Tangent{LD}(g_n=dfdg * Δf)
         ∂b = dfdb * Δf
         ∂r = dfdr * Δf
-        return NO_FIELDS, ∂ld, ∂b, ∂r
+        return NoTangent(), ∂ld, ∂b, ∂r
     end
     return f, compute_pullback
 end
@@ -155,7 +155,7 @@ function frule((_, Δu_n), ::Type{<:QuadLimbDark}, u_n::AbstractVector{T}) where
         Δu_n_full = SA[Δu_n[begin], Δu_n[begin + 1]]
         ∂g_n = ∇g_n * Δu_n_full
     end
-    ∂Ω = Composite{typeof(Ω)}(g_n=∂g_n)
+    ∂Ω = Tangent{typeof(Ω)}(g_n=∂g_n)
     return Ω, ∂Ω
 end
 
@@ -167,7 +167,7 @@ function rrule(::Type{<:QuadLimbDark}, u_n::AbstractVector{T}; maxiter=100) wher
     N = length(u_n)
     function QuadLimbDark_pullback(Δld)
         ∂u = @view(∇g_n[begin:begin+N-1, :]) * Δld.g_n
-        return NO_FIELDS, ∂u
+        return NoTangent(), ∂u
     end
     return Ω, QuadLimbDark_pullback
 end

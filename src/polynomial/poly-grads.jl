@@ -316,10 +316,10 @@ end
 function rrule(::typeof(compute), ld::LD, b, r) where {LD <: PolynomialLimbDark}
     f, dfdg, dfdb, dfdr = compute_grad(ld, b, r)
     function compute_pullback(Δf)
-        ∂ld = Composite{LD}(g_n=dfdg * Δf)
+        ∂ld = Tangent{LD}(g_n=dfdg * Δf)
         ∂b = dfdb * Δf
         ∂r = dfdr * Δf
-        return NO_FIELDS, ∂ld, ∂b, ∂r
+        return NoTangent(), ∂ld, ∂b, ∂r
     end
     return f, compute_pullback
 end
@@ -348,7 +348,7 @@ function frule((_, Δu_n), ::Type{<:PolynomialLimbDark}, u::AbstractVector{S}; m
 
     Ω = PolynomialLimbDark(n_max, u_n, g_n, Mn_coeff, Nn_coeff, norm, Mn, Nn)
     ∂g_n = @views ∇g_n[begin + 1:end, :]' * Δu_n
-    ∂Ω = Composite{typeof(Ω)}(g_n=∂g_n)
+    ∂Ω = Tangent{typeof(Ω)}(g_n=∂g_n)
     return Ω, ∂Ω
 end
 
@@ -380,7 +380,7 @@ function rrule(::Type{<:PolynomialLimbDark}, u::AbstractVector{S}; maxiter=100) 
 
     function PolynomialLimbDark_pullback(Δld)
         ∂u = ∂g_n * Δld.g_n
-        return NO_FIELDS, ∂u
+        return NoTangent(), ∂u
     end
     return Ω, PolynomialLimbDark_pullback
 end
