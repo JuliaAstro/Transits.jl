@@ -1,7 +1,7 @@
 name = "Transits"
 uuid = "2e59a628-7bac-4d38-8059-3a73ba0928ab"
 authors = ["Miles Lucas <mdlucas@hawaii.edu> and contributors"]
-version = "0.3.5"
+version = "0.3.6"
 
 [deps]
 AstroLib = "c7932e45-9af1-51e7-9da9-f004cd3a462b"
@@ -25,7 +25,7 @@ UnitfulAstro = "6112ee07-acf9-5e0f-b108-d242c714bf9f"
 [compat]
 AstroLib = "0.4"
 Bijectors = "0.8, 0.9"
-ChainRulesCore = "0.9"
+ChainRulesCore = "1"
 Distributions = "0.22, 0.23, 0.24, 0.25"
 FastGaussQuadrature = "0.4"
 Reexport = "0.2, 1"
