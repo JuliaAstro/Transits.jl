@@ -35,6 +35,14 @@ Keplerian orbit parameterized by the basic observables of a transiting 2-body sy
 * `Omega`/`Ω` -- The longitude of the ascending node [rad].
 * `M_planet`/`Mₚ` -- The mass of the planet [M⊙].
 * `M_star`/`Mₛ` -- The mass of the star [M⊙].
+
+# Valid combinations
+The following flowchart can be used to determine which parameters can define a `KeplerianOrbit`:
+1. The `period` or `a` must be given. If both given, then neither `M_star` or `rho_star` can be defined because the stellar density is now implied.
+1. Only `incl` or `b` can be given.
+1. If `ecc` is given, then `omega` must also be given.
+1. If no stellar parameters are given, the central body is assumed to be the Sun. If only `rho_star` is given, then `R_star` is defined to be 1 solar radius. Otherwise, at most two of `M_star`, `R_star`, and `rho_star` can be given.
+1. Either `t_0` or `t_p` must be given, but not both.
 """
 struct KeplerianOrbit{T,L,D,R,A,I,M} <: AbstractOrbit
     period::T
