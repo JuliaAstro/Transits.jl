@@ -190,7 +190,7 @@ function KeplerianOrbit(nt::NamedTuple{(
         E_0 = 2.0 * atan(√(1.0 - ecc) * cos_omega, √(1.0 + ecc) * (1.0 + sin_omega))
         M_0 = E_0 - ecc * sin(E_0)
 
-        incl_factor_inv  = (1.0 - ecc^2) / (1.0 + ecc * sin_omega)
+        incl_factor_inv  = (1.0 - ecc)*(1.0 + ecc) / (1.0 + ecc * sin_omega) # More precise than (1-e)^2 for small e
     end
 
     # Jacobian for cos(i) -> b
