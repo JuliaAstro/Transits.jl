@@ -476,7 +476,7 @@ function compute_consistent_inputs(
     return a, aR_star, period, rho_star, R_star, M_star, M_planet, duration
 end
 
-stringify_units(value::Unitful.AbstractQuantity, unit) = value
+stringify_units(value::Unitful.AbstractQuantity, unit) = string(value)
 stringify_units(value, unit) = "$value $unit"
 function Base.show(io::IO, ::MIME"text/plain", orbit::KeplerianOrbit)
     if orbit.period isa Real

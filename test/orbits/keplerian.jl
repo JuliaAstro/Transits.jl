@@ -370,7 +370,7 @@ end
 end
 
 @testset "KeplerianOrbit: stringify_units" begin
-    @test stringify_units(1u"Rsun", "Rsun") == 1u"Rsun"
+    @test stringify_units(1u"Rsun", "Rsun") == "1 R⊙"
     @test stringify_units(1, "R⊙") == "1 R⊙"
 end
 
