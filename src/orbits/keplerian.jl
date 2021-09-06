@@ -1,13 +1,12 @@
 using AstroLib: trueanom, kepler_solver
-using PhysicalConstants
 using Unitful, UnitfulAstro
 using KeywordCalls
 using Rotations
 
 # Domain specific unit conversions / Constants
 const G_nom = 2942.2062175044193 # Rsun^3/Msun/d^2
-const G_unit = PhysicalConstants.CODATA2018.G
-const MsunRsun_to_gcc = (1.0u"Msun/Rsun^3" |> u"g/cm^3").val
+const G_unit = Unitful.G
+const MsunRsun_to_gcc = ustrip(u"g/cm^3", 1.0u"Msun/Rsun^3")
 
 """
     KeplerianOrbit(; kwargs...)
