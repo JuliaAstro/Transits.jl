@@ -4,8 +4,8 @@ using KeywordCalls
 using Rotations
 
 # Domain specific unit conversions / Constants
-const G_nom = 2942.2062175044193 # Rsun^3/Msun/d^2
 const G_unit = Unitful.G
+const G_nom = ustrip(u"Rsun^3/Msun/d^2", G_unit)
 const MsunRsun_to_gcc = ustrip(u"g/cm^3", 1.0u"Msun/Rsun^3")
 
 """
