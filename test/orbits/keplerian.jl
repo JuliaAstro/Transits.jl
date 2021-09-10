@@ -67,8 +67,8 @@ as_matrix(pos) = reinterpret(reshape, Float64, pos) |> permutedims
 end
 
 @testset "KeplerianOrbit: construction performance" begin
-    b_ρₛ = @benchmark KeplerianOrbit(
-        ρₛ = 2.0,
+    b_rho_star = @benchmark KeplerianOrbit(
+        rho_star = 2.0,
         R_star = 0.5,
         period = 2.0,
         ecc = 0.0,
@@ -78,8 +78,8 @@ end
         omega = 0.0,
     )
 
-    b_ρₛ_units = @benchmark KeplerianOrbit(
-        ρₛ = 2.0u"g/cm^3",
+    b_rho_star_units = @benchmark KeplerianOrbit(
+        rho_star = 2.0u"g/cm^3",
         R_star = 0.5u"Rsun",
         period = 2.0u"d",
         ecc = 0.0,
@@ -110,19 +110,19 @@ end
     )
 
     # Units
-    @test median(b_ρₛ_units.times) ≤ 100_000 # ns
-    @test b_ρₛ_units.allocs ≤ 500
+    @test median(b_rho_star_units.times) ≤ 100_000 # ns
+    @test b_rho_star_units.allocs ≤ 500
     @test median(b_aR_star_units.times) ≤ 100_000   # ns
     @test b_aR_star_units.allocs ≤ 500
 
     if v"1.6" ≤ Base.VERSION < v"1.7-"
-        @test b_ρₛ.allocs == b_ρₛ.memory == 0
-        @test median(b_ρₛ.times) ≤ 500 # ns
+        @test b_rho_star.allocs == b_rho_star.memory == 0
+        @test median(b_rho_star.times) ≤ 500 # ns
         @test b_aR_star.allocs == b_aR_star.memory == 0
         @test median(b_aR_star.times) ≤ 500 # ns
     else
         # TODO: investigate performance regression
-        @test median(b_ρₛ.times) ≤ 10_000 # ns
+        @test median(b_rho_star.times) ≤ 10_000 # ns
         @test median(b_aR_star.times) ≤ 10_000 # ns
     end
 end
@@ -140,7 +140,7 @@ end
         duration = 0.02,
         R_star = 1.0,
         M_star = 1.0,
-        RpRs = 0.0001,
+        r = 0.0001,
         ecc = 0.01,
         omega = 0.0,
     );
@@ -163,7 +163,7 @@ end
 
     orbit = KeplerianOrbit(
         period=2.0, t_0=0.0, M_star=1.0, R_star=1.0,
-        ecc=0.01, omega=0.1, RpRs=0.01,
+        ecc=0.01, omega=0.1, r=0.01,
     )
     @test isnothing(orbit.duration)
 end
@@ -173,7 +173,7 @@ end
         duration=0.01,
         period=2.0, t_0=0.0, R_star=1.0
     )
-    @test_throws ArgumentError("`RₚRₛ` must also be provided if `duration` given") KeplerianOrbit(
+    @test_throws ArgumentError("`r` must also be provided if `duration` given") KeplerianOrbit(
         duration=0.01, b=0.0,
         period=2.0, t_0=0.0, R_star=1.0
     )
@@ -186,38 +186,38 @@ end
     )
     @test_throws ArgumentError("Only `incl`, `b`, or `duration` can be given") KeplerianOrbit(
         incl=π/2.0, b=0.0, duration=1.0,
-        period=2.0, t_0=0.0, R_star=1.0, RpRs=0.01,
+        period=2.0, t_0=0.0, R_star=1.0, r=0.01,
     )
-    @test_throws ArgumentError("Either t₀ or tₚ must be specified") KeplerianOrbit(
+    @test_throws ArgumentError("Either t_0 or t_p must be specified") KeplerianOrbit(
         b=0.0, period=2.0, R_star=1.0, M_star=1.0,
     )
     @test_throws ArgumentError("At least `a` or `P` must be specified") KeplerianOrbit(
         b=0.0, R_star=1.0, M_star=1.0,
     )
-    @test_throws ArgumentError("If both `a` and `P` are given, `ρₛ` or `Mₛ` cannot be defined") KeplerianOrbit(
+    @test_throws ArgumentError("If both `a` and `P` are given, `rho_star` or `M_star` cannot be defined") KeplerianOrbit(
         rho_star=2.0,
         R_star=0.5, a=7.5, period=2.0, t_0=0.0, incl=π/2.0, Omega=0.0, omega=0.0, ecc=0.0,
     )
-    @test_throws ArgumentError("If both `a` and `P` are given, `ρₛ` or `Mₛ` cannot be defined") KeplerianOrbit(
+    @test_throws ArgumentError("If both `a` and `P` are given, `rho_star` or `M_star` cannot be defined") KeplerianOrbit(
         M_star=1.0,
         R_star=0.5, a=7.5, period=2.0, t_0=0.0, incl=π/2.0, Omega=0.0, omega=0.0, ecc=0.0,
     )
-    @test_throws ArgumentError("Must provide exactly two of: `ρₛ`, `Rₛ`, or `Mₛ` if ρₛ not implied") KeplerianOrbit(
+    @test_throws ArgumentError("Must provide exactly two of: `rho_star`, `R_star`, or `M_star` if rho_star not implied") KeplerianOrbit(
         R_star=0.5,
         period=2.0, t_0=0.0, incl=π/2.0, Omega=0.0, omega=0.0, ecc=0.0,
     )
-    @test_throws ArgumentError("Must provide exactly two of: `ρₛ`, `Rₛ`, or `Mₛ` if ρₛ not implied") KeplerianOrbit(
+    @test_throws ArgumentError("Must provide exactly two of: `rho_star`, `R_star`, or `M_star` if rho_star not implied") KeplerianOrbit(
         M_star=0.5,
         period=2.0, t_0=0.0, incl=π/2.0, Omega=0.0, omega=0.0, ecc=0.0,
     )
-    @test_throws ArgumentError("Must provide exactly two of: `ρₛ`, `Rₛ`, or `Mₛ` if ρₛ not implied") KeplerianOrbit(
+    @test_throws ArgumentError("Must provide exactly two of: `rho_star`, `R_star`, or `M_star` if rho_star not implied") KeplerianOrbit(
         M_star=0.5, R_star=0.5, rho_star=0.5,
         period=2.0, t_0=0.0, incl=π/2.0, Omega=0.0, omega=0.0, ecc=0.0,
     )
 end
 
 @testset "KeplerianOrbit: implied inputs" begin
-    # Rₛ ≡ 1.0 R⊙ if not specified
+    # R_star ≡ 1.0 R⊙ if not specified
     orbit_no_R_star = KeplerianOrbit(
         rho_star=2.0, period=2.0, t_0=0.0,
         incl=π/2.0, Omega=0.0, omega=0.0, ecc=0.0
@@ -231,7 +231,7 @@ end
     )
     @test orbit_a_period.M_planet + orbit_a_period.M_star == 4.0 * π^2 / G_nom
 
-    # Compute `Rₛ` from `Mₛ`
+    # Compute `R_star` from `M_star`
     orbit_M_star = KeplerianOrbit(
         M_star=4.0*π, rho_star = 1.0, period = 2.0, t_0 = 0.0,
         incl = π / 2.0, Omega = 0.0, omega = 0.0, ecc = 0.0
@@ -342,9 +342,9 @@ end
     duration = 0.12
     period = 10.1235
     b = 0.34
-    RpRs = 0.06
+    r = 0.06
     R_star = 0.7
-    aor = compute_aor(duration, period, b, RpRs=RpRs)
+    aor = compute_aor(duration, period, b, r=r)
 
     for orbit in [
         KeplerianOrbit(
@@ -356,16 +356,16 @@ end
             b = b,
             duration = duration,
             R_star = R_star,
-            RpRs = RpRs,
+            r = r,
         ),
         ]
 
         x, y, z = _planet_position(orbit, R_star, 0.5*duration)
-        @test allclose(√(x^2 + y^2), 1.0 + RpRs)
+        @test allclose(√(x^2 + y^2), 1.0 + r)
         x, y, z = _planet_position(orbit, R_star, -0.5*duration)
-        @test allclose(√(x^2 + y^2), 1.0 + RpRs)
+        @test allclose(√(x^2 + y^2), 1.0 + r)
         x, y, z = _planet_position(orbit, R_star, period + 0.5*duration)
-        @test allclose(√(x^2 + y^2), 1.0 + RpRs)
+        @test allclose(√(x^2 + y^2), 1.0 + r)
     end
 end
 
@@ -375,7 +375,7 @@ end
 end
 
 @testset "KeplerianOrbit: unit conversions" begin
-    orbit = KeplerianOrbit(a=12.0, t_0=0.0, b=0.0, R_star=1.0, M_star=1.0, M_planet=0.01, RpRs=0.01)
+    orbit = KeplerianOrbit(a=12.0, t_0=0.0, b=0.0, R_star=1.0, M_star=1.0, M_planet=0.01, r=0.01)
     rho_planet_1 = orbit.rho_planet*u"Msun/Rsun^3" |> u"g/cm^3"
     rho_planet_2 = orbit.rho_planet * MsunRsun_to_gcc
     @test rho_planet_1.val == rho_planet_2
@@ -383,9 +383,25 @@ end
     orbit = KeplerianOrbit(a=12.0u"Rsun", t_0=0.0u"d", b=0.0, R_star=1.0u"Rsun", M_star=1.0u"Msun")
     @test isnothing(orbit.rho_planet)
 
-    orbit = KeplerianOrbit(a=12.0u"Rsun", t_0=0.0u"d", b=0.0, R_star=1.0u"Rsun", M_planet=0.01u"Msun", M_star=1.0u"Msun", RpRs=0.01)
+    orbit = KeplerianOrbit(a=12.0u"Rsun", t_0=0.0u"d", b=0.0, R_star=1.0u"Rsun", M_planet=0.01u"Msun", M_star=1.0u"Msun", r=0.01)
     rho_planet = orbit.rho_planet |> u"g/cm^3"
     rho_star = orbit.rho_star |> u"g/cm^3"
     @test rho_planet.val == orbit.rho_planet.val*MsunRsun_to_gcc
     @test rho_star.val == orbit.rho_star.val*MsunRsun_to_gcc
+end
+
+@testset "KeplerianOrbit: aliased kwargs" begin
+    orbit_standard_1 = KeplerianOrbit(a=12.0, t_0=0.0, b=0.0, R_star=1.0, M_star=1.0, M_planet=0.01, r=0.01)
+    orbit_kwarg_alias_1 = KeplerianOrbit(a=12.0, t0=0.0, b=0.0, Rs=1.0, Ms=1.0, Mp=0.01, RpRs=0.01)
+    @test orbit_standard_1 === orbit_kwarg_alias_1
+
+    orbit_standard_2 = KeplerianOrbit(
+        rho_star = 2.0, R_star = 0.5, period = 2.0, ecc = 0.0, t_0 = 0.0,
+        incl = π / 2.0, Omega = 0.0, omega = 0.0,
+    )
+    orbit_kwarg_alias_2 = KeplerianOrbit(
+        ρ_star = 2.0, Rs = 0.5, P = 2.0, e = 0.0, t0 = 0.0,
+        incl = π / 2.0, Ω = 0.0, ω = 0.0,
+    )
+    @test orbit_standard_2 === orbit_kwarg_alias_2
 end

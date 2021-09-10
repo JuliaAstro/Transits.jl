@@ -66,11 +66,11 @@ end
 
 @testset "KeplerianOrbit" begin
     orbit = KeplerianOrbit(
-        ρₛ = 2.0,
-        Rₛ = 0.5,
+        ρ_star = 2.0,
+        R_star = 0.5,
         period = 2.0,
         ecc = 0.0,
-        t₀ = 0.0,
+        t_0 = 0.0,
         incl = π / 2.0,
         Ω = 0.0,
         ω = 0.0,
@@ -90,17 +90,17 @@ end
      Rₛ: 0.5 R⊙
      ρₚ: nothing g/cm³
      ρₛ: 11.810543837929684 g/cm³
-     RpRs: 0.0
+     r: 0.0
      aRₛ: 13.567421667478142
      b: 8.307649758879776e-16
      ecc: 0.0
-     cos(incl): 6.123233995736766e-17
-     sin(incl): 1.0
-     cos(omega): 1.0
-     sin(omega): 0.0
-     cos(Omega): 1.0
-     sin(Omega): 0.0
-     incl: 1.5707963267948966 rad
+     cos(i): 6.123233995736766e-17
+     sin(i): 1.0
+     cos(ω): 1.0
+     sin(ω): 0.0
+     cos(Ω): 1.0
+     sin(Ω): 0.0
+     i: 1.5707963267948966 rad
      ω: 0.0 rad
      Ω: 0.0 rad
      Mₚ: 0.0 M⊙
