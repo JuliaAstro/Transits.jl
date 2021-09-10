@@ -160,11 +160,7 @@ function KeplerianOrbit(nt::NamedTuple{(
     a_planet = -a * M_star / M_tot
 
     # Omega
-    if isnothing(nt.Omega)
-        Omega = 0.0
-    else
-        Omega = nt.Omega
-    end
+    Omega = nt.Omega
     sin_Omega, cos_Omega = sincos(Omega)
 
     # Eccentricity
@@ -286,7 +282,7 @@ end
     a=nothing, R_planet=nothing, R_star=nothing,
     rho_star=nothing,
     r=nothing, aR_star=nothing, b=nothing, ecc=nothing, cos_omega=nothing, sin_omega=nothing,
-    incl=nothing, omega=nothing, Omega=nothing,
+    incl=nothing, omega=nothing, Omega=0.0,
     M_planet=nothing, M_star=nothing,
 )
 
