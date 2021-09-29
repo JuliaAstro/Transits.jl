@@ -188,7 +188,7 @@ end
         incl=π/2.0, b=0.0, duration=1.0,
         period=2.0, t_0=0.0, R_star=1.0, r=0.01,
     )
-    @test_throws ArgumentError("Either t_0 or t_p must be specified") KeplerianOrbit(
+    @test_throws ArgumentError("Either t0 or tp must be specified") KeplerianOrbit(
         b=0.0, period=2.0, R_star=1.0, M_star=1.0,
     )
     @test_throws ArgumentError("At least `a` or `P` must be specified") KeplerianOrbit(
@@ -275,7 +275,7 @@ end
         omega = 0.1,
     )
 
-    pos = relative_position.(orbit, orbit.t_0)
+    pos = relative_position.(orbit, orbit.t0)
     @test allclose((√(pos[1]^2 + pos[2]^2)), orbit.b)
 end
 
