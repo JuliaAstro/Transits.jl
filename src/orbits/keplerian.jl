@@ -236,17 +236,7 @@ function KeplerianOrbit(nt::NamedTuple{(
     end
 
     # Compute remaining system parameters
-    !(isnothing(nt.t0) ⊻ isnothing(nt.tp)) && throw(
-        ArgumentError("Either t0 or tp must be specified")
-    )
-    if isnothing(nt.t0)
-        tp = nt.tp
-        t0 = tp + M0 / n
-    else
-        t0 = nt.t0
-        tp = t0 - M0 / n
-    end
-
+    t0, tp = compute_t0_tp(nt.t0, nt.tp; M0=M0, n=n)
     t_ref = tp - t0
 
     # Normalize inputs
@@ -328,6 +318,12 @@ end
 # Planet radius
 compute_R_planet(R_star, r, R_planet) = R_planet
 compute_R_planet(R_star, r, R_planet::Nothing) = iszero(r) ? nothing : R_star * r
+
+# Transit times
+compute_t0_tp(t0::Nothing, tp; M0, n) = (tp + M0/n, tp)
+compute_t0_tp(t0, tp::Nothing; M0, n) = (t0, t0 - M0/n)
+compute_t0_tp(t0::Nothing, tp::Nothing; kwargs...) = throw(ArgumentError("Please specify either `t0` or `tp`"))
+compute_t0_tp(t0, tp; kwargs...) = throw(ArgumentError("Please only specify one of `t0` or `tp`"))
 
 # Finds the position `r` of the planet along its orbit after rotating
 # through the true anomaly `ν`, then transforms this from the
