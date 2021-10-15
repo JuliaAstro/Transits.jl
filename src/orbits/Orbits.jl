@@ -1,5 +1,6 @@
 module Orbits
 
+using ConcreteStructs
 using StaticArrays
 
 export SimpleOrbit, KeplerianOrbit
