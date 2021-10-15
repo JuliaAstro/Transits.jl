@@ -4,7 +4,6 @@ authors = ["Miles Lucas <mdlucas@hawaii.edu> and contributors"]
 version = "0.3.7"
 
 [deps]
-AstroLib = "c7932e45-9af1-51e7-9da9-f004cd3a462b"
 Bijectors = "76274a88-744f-5084-9051-94815aaf08c4"
 ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
 ConcreteStructs = "2569d6c7-a4a2-43d3-a901-331e8e4be471"
@@ -18,7 +17,6 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 StatsFuns = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
 
 [compat]
-AstroLib = "0.4"
 Bijectors = "0.8, 0.9"
 ChainRulesCore = "1"
 ConcreteStructs = "0.2"
