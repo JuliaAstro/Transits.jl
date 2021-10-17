@@ -3,7 +3,7 @@ module Orbits
 using ConcreteStructs
 using StaticArrays
 
-export SimpleOrbit
+export SimpleOrbit, KeplerianOrbit
 
 abstract type AbstractOrbit end
 

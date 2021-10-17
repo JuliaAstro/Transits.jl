@@ -43,81 +43,36 @@ The following flowchart can be used to determine which parameters can define a `
 4. If no stellar parameters are given, the central body is assumed to be the Sun. If only `rho_star` is given, then `R_star` is defined to be 1 solar radius. Otherwise, at most two of `M_star`, `R_star`, and `rho_star` can be given.
 5. Either `t0` or `tp` must be given, but not both.
 """
-struct KeplerianOrbit{T,L,D,R,A,I,M} <: AbstractOrbit
-    period::T
-    t0::T
-    tp::T
-    t_ref::T
-    duration::Union{Nothing, T}
-    a::L
-    a_planet::L
-    a_star::L
-    R_planet::Union{Nothing, L}
-    R_star::L
-    rho_planet::Union{Nothing, D}
-    rho_star::D
-    r::R
-    aR_star::R
-    b::R
-    ecc::R
-    M0::R
-    cos_incl::R
-    sin_incl::R
-    cos_omega::R
-    sin_omega::R
-    cos_Omega::R
-    sin_Omega::R
-    incl::A
-    omega::A
-    Omega::A
-    n::I
-    M_planet::M
-    M_star::M
-end
-
-function normalize_inputs(
-    period, t0, tp, t_ref, duration,
-    a, a_planet, a_star, R_planet, R_star,
-    rho_planet, rho_star,
-    r, aR_star, b, ecc, M0, cos_incl, sin_incl, cos_omega, sin_omega, cos_Omega, sin_Omega,
-    incl, omega, Omega,
-    M_planet, M_star,
-    no_units,
-    )
-
-    # Normalize dimensionless quantities
-    r, aR_star, b, ecc, M0, cos_incl, sin_incl, cos_omega, sin_omega, cos_Omega, sin_Omega = promote(
-        r, aR_star, b, ecc, M0, cos_incl, sin_incl, cos_omega, sin_omega, cos_Omega, sin_Omega
-    )
-
-    # Normalize remaining quantities
-    if no_units
-        period, t0, tp, t_ref = promote(period, t0, tp, t_ref)
-        !isnothing(duration) && (duration = convert(typeof(period), duration))
-        a, a_planet, a_star, R_star = promote(a, a_planet, a_star, R_star)
-        !isnothing(R_planet) && (R_planet = convert(typeof(a), R_planet))
-        !isnothing(rho_planet) && (rho_planet = convert(typeof(rho_star), rho_planet))
-        incl, omega, Omega = promote(incl, omega, Omega)
-        M_planet, M_star = promote(M_planet, M_star)
-    else
-        period, t0, tp, t_ref = uconvert.(u"d", (period, t0, tp, t_ref))
-        !isnothing(duration) && (duration = uconvert(u"d", duration))
-        a, a_planet, a_star, R_star = uconvert.(u"Rsun", (a, a_planet, a_star, R_star))
-        !isnothing(R_planet) && (R_planet = uconvert(u"Rsun", R_planet))
-        rho_star = uconvert(u"Msun/Rsun^3", rho_star)
-        !isnothing(rho_planet) && (rho_planet = uconvert(u"Msun/Rsun^3", rho_planet))
-        incl, omega, Omega = uconvert.(u"rad", (incl, omega, Omega))
-        M_planet, M_star = uconvert.(u"Msun", (M_planet, M_star))
-    end
-
-    return (
-        period, t0, tp, t_ref, duration,
-        a, a_planet, a_star, R_planet, R_star,
-        rho_planet, rho_star,
-        r, aR_star, b, ecc, M0, cos_incl, sin_incl, cos_omega, sin_omega, cos_Omega, sin_Omega,
-        incl, omega, Omega,
-        M_planet, M_star,
-    )
+@concrete struct KeplerianOrbit <: AbstractOrbit
+    period
+    t0
+    tp
+    t_ref
+    duration
+    a
+    a_planet
+    a_star
+    R_planet
+    R_star
+    rho_planet
+    rho_star
+    r
+    aR_star
+    b
+    ecc
+    M0
+    cos_incl
+    sin_incl
+    cos_omega
+    sin_omega
+    cos_Omega
+    sin_Omega
+    incl
+    omega
+    Omega
+    n
+    M_planet
+    M_star
 end
 
 function KeplerianOrbit(nt::NamedTuple{(
@@ -239,23 +194,6 @@ function KeplerianOrbit(nt::NamedTuple{(
     t0, tp = compute_t0_tp(nt.t0, nt.tp; M0=M0, n=n)
     t_ref = tp - t0
 
-    # Normalize inputs
-    (
-        period, t0, tp, t_ref, duration,
-        a, a_planet, a_star, R_planet, R_star,
-        rho_planet, rho_star,
-        r, aR_star, b, ecc, M0, cos_incl, sin_incl, cos_omega, sin_omega, cos_Omega, sin_Omega,
-        incl, omega, Omega,
-        M_planet, M_star,
-    ) = normalize_inputs(
-        period, t0, tp, t_ref, duration,
-        a, a_planet, a_star, R_planet, R_star,
-        rho_planet, rho_star,
-        r, aR_star, b, ecc, M0, cos_incl, sin_incl, cos_omega, sin_omega, cos_Omega, sin_Omega,
-        incl, omega, Omega,
-        M_planet, M_star,
-        no_units,
-    )
     return KeplerianOrbit(
         period, t0, tp, t_ref, duration,
         a, a_planet, a_star, R_planet, R_star,
