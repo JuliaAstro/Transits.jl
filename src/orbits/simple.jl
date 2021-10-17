@@ -1,11 +1,11 @@
-struct SimpleOrbit{T,V,S} <: AbstractOrbit
-    period::T
-    t0::T
-    b::V
-    duration::T
-    speed::S
-    half_period::T
-    ref_time::T
+@concrete struct SimpleOrbit <: AbstractOrbit
+    period
+    t0
+    b
+    duration
+    speed
+    half_period
+    ref_time
 end
 
 """
@@ -19,13 +19,11 @@ Circular orbit parameterized by the basic observables of a transiting system.
 * `t0` - The midpoint time of the reference transit, similar units as `period`
 * `b` - The impact parameter of the orbit, unitless
 """
-function SimpleOrbit(;period, duration, t0=zero(period), b=0.0)
+function SimpleOrbit(;period, duration, t0=zero(period), b=0)
     half_period = 0.5 * period
     duration > half_period && error("duration cannot be longer than half the period")
     speed = 2.0 * sqrt(1.0 - b^2) / duration
     ref_time =  t0 - half_period
-    # normalize time types
-    period, t0, duration, half_period, ref_time = promote(period, t0, duration, half_period, ref_time)
     SimpleOrbit(period, t0, b, duration, speed, half_period, ref_time)
 end
 
