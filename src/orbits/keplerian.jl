@@ -127,12 +127,12 @@ function KeplerianOrbit(nt::NamedTuple{(
         cos_omega, sin_omega = 1.0, 0.0
     else
         if !isnothing(nt.omega)
-            all( (!isnothing).((nt.cos_omega, nt.sin_omega)) ) && throw(ArgumentError(
+            all(!isnothing, (nt.cos_omega, nt.sin_omega)) && throw(ArgumentError(
                 "Only `ω`, or `cos_ω` and `sin_ω` can be provided"
             ))
             omega = nt.omega
             sin_omega, cos_omega = sincos(nt.omega)
-        elseif all( (!isnothing).((nt.cos_omega, nt.sin_omega)) )
+        elseif all(!isnothing, (nt.cos_omega, nt.sin_omega))
             cos_omega, sin_omega = nt.cos_omega, nt.sin_omega
             omega = atan(sin_omega, cos_omega)
         else
@@ -148,7 +148,7 @@ function KeplerianOrbit(nt::NamedTuple{(
     dcosi_db = R_star / a * (1.0 / incl_factor_inv)
 
     if !isnothing(nt.b)
-        any( (!isnothing).((nt.incl, duration)) ) && throw(ArgumentError(
+        any(!isnothing, (nt.incl, duration)) && throw(ArgumentError(
             "Only `incl`, `b`, or `duration` can be given"
         ))
         b = nt.b
@@ -329,7 +329,7 @@ function compute_consistent_inputs(
     a, aR_star, period, rho_star, R_star, M_star, M_planet,
     G, ecc, duration, b, r
     )
-    all( isnothing.((a, period)) ) && throw(
+    all(isnothing.((a, period))) && throw(
         ArgumentError("At least `a` or `P` must be specified")
     )
 
@@ -352,8 +352,8 @@ function compute_consistent_inputs(
 
     # Compute implied stellar density
     implied_rho_star = false
-    if all( (!isnothing).((a, period)) )
-        if any( (!isnothing).((rho_star, M_star)) )
+    if all(!isnothing, (a, period))
+        if any(!isnothing, (rho_star, M_star))
             throw(ArgumentError(
                 "If both `a` and `P` are given, `rho_star` or `M_star` cannot be defined"
             ))
@@ -372,7 +372,7 @@ function compute_consistent_inputs(
     end
 
     # Check combination of stellar params are valid
-    if all( isnothing.((R_star, M_star)) )
+    if all(isnothing, (R_star, M_star))
         R_star = no_units ? 1.0 : 1.0u"Rsun"
         isnothing(rho_star) && (M_star = oneunit(M_planet))
     end
