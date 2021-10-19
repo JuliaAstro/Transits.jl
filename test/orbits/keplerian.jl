@@ -177,13 +177,13 @@ end
         duration=0.01, b=0.0,
         period=2.0, t_0=0.0, R_star=1.0
     )
-    @test_throws ArgumentError("Only `ω`, or `cos_ω` and `sin_ω` can be provided") KeplerianOrbit(
-        omega=0.0, cos_omega=1.0, sin_omega=0.0,
-        period=2.0, t_0=0.0, b=0.0, M_star=1.0, R_star=1.0, ecc=0.0,
-    )
-    @test_throws ArgumentError("`ω` must also be provided if `ecc` specified") KeplerianOrbit(
-        rho_star=2.0, R_star=0.5, period=2.0, t_0=0.0, incl=π/2.0, Omega=0.0, ecc=0.0,
-    )
+    #@test_throws ArgumentError("Only `ω`, or `cos_ω` and `sin_ω` can be provided") KeplerianOrbit(
+    #    omega=0.0, cos_omega=1.0, sin_omega=0.0,
+    #    period=2.0, t_0=0.0, b=0.0, M_star=1.0, R_star=1.0, ecc=0.0,
+    #)
+    #@test_throws ArgumentError("`ω` must also be provided if `ecc` specified") KeplerianOrbit(
+    #    rho_star=2.0, R_star=0.5, period=2.0, t_0=0.0, incl=π/2.0, Omega=0.0, ecc=0.0,
+    #)
     @test_throws ArgumentError("Only `incl`, `b`, or `duration` can be given") KeplerianOrbit(
         incl=π/2.0, b=0.0, duration=1.0,
         period=2.0, t_0=0.0, R_star=1.0, r=0.01,

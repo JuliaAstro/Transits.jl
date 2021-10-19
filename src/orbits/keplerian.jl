@@ -119,14 +119,13 @@ function KeplerianOrbit(nt::NamedTuple{(
     sin_Omega, cos_Omega = sincos(Omega)
 
     # Eccentricity
-    if isnothing(nt.ecc)
-        ecc = 0.0
-        M0 = 0.5 * π # TODO: find out why this fails
+    ecc = nt.ecc
+    if iszero(ecc)
+        M0 = 0.5 * π
         incl_factor_inv = 1.0
         omega = zero(Omega)
-        cos_omega, sin_omega = zero(omega), oneunit(omega)
+        cos_omega, sin_omega = 1.0, 0.0
     else
-        ecc = nt.ecc
         if !isnothing(nt.omega)
             all( (!isnothing).((nt.cos_omega, nt.sin_omega)) ) && throw(ArgumentError(
                 "Only `ω`, or `cos_ω` and `sin_ω` can be provided"
@@ -209,7 +208,7 @@ end
     period=nothing, t0=nothing, tp=nothing, duration=nothing,
     a=nothing, R_planet=nothing, R_star=nothing,
     rho_star=nothing,
-    r=nothing, aR_star=nothing, b=nothing, ecc=nothing, cos_omega=nothing, sin_omega=nothing,
+    r=nothing, aR_star=nothing, b=nothing, ecc=0.0, cos_omega=nothing, sin_omega=nothing,
     incl=nothing, omega=nothing, Omega=0.0,
     M_planet=nothing, M_star=nothing,
 )
