@@ -325,13 +325,10 @@ function flip(orbit::KeplerianOrbit, R_planet)
     end
 end
 
-function compute_consistent_inputs(
-    a, aR_star, period, rho_star, R_star, M_star, M_planet,
-    G, ecc, duration, b, r
-    )
-    all(isnothing.((a, period))) && throw(
-        ArgumentError("At least `a` or `P` must be specified")
-    )
+function compute_consistent_inputs(a, aR_star, period, rho_star, R_star, M_star, M_planet, G, ecc, duration, b, r)
+    if isnothing(a) && isnothing(period)
+        throw(ArgumentError("At least `a` or `P` must be specified"))
+    end
 
     no_units = G isa Real
 
