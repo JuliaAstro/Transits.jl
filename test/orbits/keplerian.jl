@@ -384,7 +384,7 @@ end
     @test rho_planet_1.val == rho_planet_2
 
     orbit = KeplerianOrbit(a=12.0u"Rsun", t_0=0.0u"d", b=0.0, R_star=1.0u"Rsun", M_star=1.0u"Msun")
-    @test isnothing(orbit.rho_planet)
+    @test isnan(orbit.rho_planet)
 
     orbit = KeplerianOrbit(a=12.0u"Rsun", t_0=0.0u"d", b=0.0, R_star=1.0u"Rsun", M_planet=0.01u"Msun", M_star=1.0u"Msun", r=0.01)
     rho_planet = orbit.rho_planet |> u"g/cm^3"

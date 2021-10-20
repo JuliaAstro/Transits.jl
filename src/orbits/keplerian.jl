@@ -254,7 +254,7 @@ end
 
 # Planet radius
 compute_R_planet(R_star, r, R_planet) = R_planet
-compute_R_planet(R_star, r, R_planet::Nothing) = iszero(r) ? nothing : R_star * r
+compute_R_planet(R_star, r, R_planet::Nothing) = iszero(r) ? zero(R_star) : R_star * r
 
 # Transit times
 compute_t0_tp(t0::Nothing, tp; M0, n) = (tp + M0/n, tp)
