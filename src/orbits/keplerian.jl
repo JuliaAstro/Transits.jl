@@ -85,14 +85,11 @@ function KeplerianOrbit(nt::NamedTuple{(
     )})
     if nt.period isa Real || nt.a isa Real
         G = G_nom
-        no_units = true
     else
         G = G_unit
-        no_units = false
     end
 
     if (isnothing(nt.ecc) || iszero(nt.ecc)) && !isnothing(nt.duration)
-        #isnothing(nt.R_star) && (R_star = no_units ? 1.0 : 1.0u"Rsun")
         isnothing(nt.b) && throw(ArgumentError(
             "`b` must also be provided for a circular orbit if `duration given`"
         ))
@@ -325,26 +322,28 @@ function flip(orbit::KeplerianOrbit, R_planet)
     end
 end
 
+compute_R_star_nom(G::Real) = 1.0
+compute_R_star_nom(G) = 1.0u"Rsun"
+compute_M_planet_nom(G::Real) = 0.0
+compute_M_planet_nom(G) = 0.0u"Msun"
 function compute_consistent_inputs(a, aR_star, period, rho_star, R_star, M_star, M_planet, G, ecc, duration, b, r)
     if isnothing(a) && isnothing(period)
         throw(ArgumentError("At least `a` or `P` must be specified"))
     end
 
-    no_units = G isa Real
-
     if (isnothing(ecc) || iszero(ecc)) && !isnothing(duration)
-        isnothing(R_star) && (R_star = no_units ? 1.0 : 1.0u"Rsun")
+        isnothing(R_star) && (R_star = compute_R_star_nom(G))
         aR_star = compute_aor(duration, period, b, r=r)
         a = R_star * aR_star
         duration = nothing
     end
 
     if !isnothing(a) && isnothing(M_planet)
-        M_planet = no_units ? 0.0 : 0.0u"Msun"
+        M_planet = compute_M_planet_nom(G)
     end
 
     if !isnothing(period) && isnothing(M_planet)
-        M_planet = no_units ? 0.0 : 0.0u"Msun"
+        M_planet = compute_M_planet_nom(G)
     end
 
     # Compute implied stellar density
@@ -370,11 +369,11 @@ function compute_consistent_inputs(a, aR_star, period, rho_star, R_star, M_star,
 
     # Check combination of stellar params are valid
     if all(isnothing, (R_star, M_star))
-        R_star = no_units ? 1.0 : 1.0u"Rsun"
+        R_star = compute_R_star_nom(G)
         isnothing(rho_star) && (M_star = oneunit(M_planet))
     end
 
-    if !implied_rho_star && sum(isnothing.((rho_star, R_star, M_star))) ≠ 1
+    if !implied_rho_star && sum(isnothing, (rho_star, R_star, M_star)) ≠ 1
         throw(ArgumentError(
             "Must provide exactly two of: `rho_star`, `R_star`, or `M_star` if rho_star not implied"
         ))
