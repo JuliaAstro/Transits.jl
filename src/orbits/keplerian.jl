@@ -3,10 +3,10 @@ using Unitful, UnitfulAstro
 using KeywordCalls
 using Rotations
 
-# Domain specific unit conversions / Constants
+# Domain specific unit conversions / constants/ fallbacks
+Unitful.preferunits(u"Msun,Rsun,d"...)
 const G_unit = Unitful.G
 const G_nom = ustrip(u"Rsun^3/Msun/d^2", G_unit)
-const MsunRsun_to_gcc = ustrip(u"g/cm^3", 1.0u"Msun/Rsun^3")
 
 """
     KeplerianOrbit(; kwargs...)
@@ -405,55 +405,44 @@ function compute_consistent_inputs(a, aR_star, period, rho_star, R_star, M_star,
     return a, aR_star, period, rho_star, R_star, M_star, M_planet, duration
 end
 
-stringify_units(value::Unitful.AbstractQuantity, unit) = string(value)
-stringify_units(value, unit) = "$value $unit"
+stringify_units(value, unit_str) = @sprintf("%.4f %s", value, unit_str)
+function stringify_units(value::Unitful.AbstractQuantity, unit_str)
+    u = upreferred(value)
+    return stringify_units(ustrip(u), string(unit(u)))
+end
+stringify_units(value::Nothing, unit) = "$(value)"
+stringify_units(value) = @sprintf("%.4f", value)
 function Base.show(io::IO, ::MIME"text/plain", orbit::KeplerianOrbit)
-    if orbit.period isa Real
-        if isnothing(orbit.rho_planet)
-            rho_planet = nothing
-        else
-            rho_planet = orbit.rho_planet * MsunRsun_to_gcc
-        end
-        rho_star = orbit.rho_star * MsunRsun_to_gcc
-    else
-        if isnothing(orbit.rho_planet)
-            rho_planet = nothing
-        else
-            println("we here")
-            rho_planet = orbit.rho_planet |> u"g/cm^3"
-        end
-        rho_star = orbit.rho_star |> u"g/cm^3"
-    end
     print(
         io,
         """
         Keplerian Orbit
-         P: $(stringify_units(orbit.period, "d"))
-         t₀: $(stringify_units(orbit.t0, "d"))
-         tₚ: $(stringify_units(orbit.tp, "d"))
-         t_ref: $(stringify_units(orbit.t_ref, "d"))
-         τ: $(stringify_units(orbit.duration, "d"))
-         a: $(stringify_units(orbit.a, "R⊙"))
-         aₚ: $(stringify_units(orbit.a_planet, "R⊙"))
-         aₛ: $(stringify_units(orbit.a_star, "R⊙"))
-         Rₚ: $(stringify_units(orbit.R_planet, "R⊙"))
-         Rₛ: $(stringify_units(orbit.R_star, "R⊙"))
-         ρₚ: $(stringify_units(rho_planet, "g/cm³"))
-         ρₛ: $(stringify_units(rho_star, "g/cm³"))
-         r: $(orbit.r)
-         aRₛ: $(orbit.aR_star)
-         b: $(orbit.b)
-         ecc: $(orbit.ecc)
-         cos(i): $(orbit.cos_incl)
-         sin(i): $(orbit.sin_incl)
-         cos(ω): $(orbit.cos_omega)
-         sin(ω): $(orbit.sin_omega)
-         cos(Ω): $(orbit.cos_Omega)
-         sin(Ω): $(orbit.sin_Omega)
-         i: $(stringify_units(orbit.incl, "rad"))
-         ω: $(stringify_units(orbit.omega, "rad"))
-         Ω: $(stringify_units(orbit.Omega, "rad"))
-         Mₚ: $(stringify_units(orbit.M_planet, "M⊙"))
-         Mₛ: $(stringify_units(orbit.M_star, "M⊙"))"""
+         P:      $(stringify_units(orbit.period, "d"))
+         t₀:     $(stringify_units(orbit.t0, "d"))
+         tₚ:     $(stringify_units(orbit.tp, "d"))
+         t_ref:  $(stringify_units(orbit.t_ref, "d"))
+         τ:      $(stringify_units(orbit.duration, "d"))
+         a:      $(stringify_units(orbit.a, "R⊙"))
+         aₚ:     $(stringify_units(orbit.a_planet, "R⊙"))
+         aₛ:     $(stringify_units(orbit.a_star, "R⊙"))
+         Rₚ:     $(stringify_units(orbit.R_planet, "R⊙"))
+         Rₛ:     $(stringify_units(orbit.R_star, "R⊙"))
+         ρₚ:     $(stringify_units(orbit.rho_planet, "M⊙/R⊙³"))
+         ρₛ:     $(stringify_units(orbit.rho_star, "M⊙/R⊙³"))
+         r:      $(stringify_units(orbit.r))
+         aRₛ:    $(stringify_units(orbit.aR_star))
+         b:      $(stringify_units(orbit.b))
+         ecc:    $(stringify_units(orbit.ecc))
+         cos(i): $(stringify_units(orbit.cos_incl))
+         sin(i): $(stringify_units(orbit.sin_incl))
+         cos(ω): $(stringify_units(orbit.cos_omega))
+         sin(ω): $(stringify_units(orbit.sin_omega))
+         cos(Ω): $(stringify_units(orbit.cos_Omega))
+         sin(Ω): $(stringify_units(orbit.sin_Omega))
+         i:      $(stringify_units(orbit.incl, "rad"))
+         ω:      $(stringify_units(orbit.omega, "rad"))
+         Ω:      $(stringify_units(orbit.Omega, "rad"))
+         Mₚ:     $(stringify_units(orbit.M_planet, "M⊙"))
+         Mₛ:     $(stringify_units(orbit.M_star, "M⊙"))"""
     )
 end
