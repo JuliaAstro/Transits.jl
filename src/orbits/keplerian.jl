@@ -129,11 +129,9 @@ function KeplerianOrbit(nt::NamedTuple{(
             ))
             omega = nt.omega
             sin_omega, cos_omega = sincos(nt.omega)
-        elseif all(!isnothing, (nt.cos_omega, nt.sin_omega))
+        else
             cos_omega, sin_omega = nt.cos_omega, nt.sin_omega
             omega = atan(sin_omega, cos_omega)
-        else
-            throw(ArgumentError("`ω` must also be provided if `ecc` specified"))
         end
         E_0 = 2.0 * atan(√(1.0 - ecc) * cos_omega, √(1.0 + ecc) * (1.0 + sin_omega))
         M0 = E_0 - ecc * sin(E_0)
@@ -206,7 +204,7 @@ end
     a=nothing, R_planet=nothing, R_star=nothing,
     rho_star=nothing,
     r=nothing, aR_star=nothing, b=nothing, ecc=0.0, cos_omega=nothing, sin_omega=nothing,
-    incl=nothing, omega=nothing, Omega=0.0,
+    incl=nothing, omega=0.0, Omega=0.0,
     M_planet=nothing, M_star=nothing,
 )
 
