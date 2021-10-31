@@ -161,18 +161,21 @@ function KeplerianOrbit(nt::NamedTuple{(
         duration = nt.duration
     elseif !isnothing(nt.duration)
         duration = nt.duration
-        c = sin(π * duration / (incl_factor_inv) / period)
+        c = sin(π * duration / (period * incl_factor_inv))
         c_sq = c^2
         ecc_sin_omega = ecc*sin_omega
         aor = a_planet / R_star
-        b = √(
-            (aor^2 * c_sq - 1.0) /
-            (
-                c_sq * ecc_sin_omega^2 +
-                2.0*c_sq*ecc_sin_omega +
-                c_sq - ecc^4 + 2.0*ecc^2 - 1.0
-            )
-        ) * (1.0 - ecc^2)
+        num = aor^2 * c_sq - 1.0
+        den = c_sq * ecc_sin_omega^2 + 2.0 * c_sq * ecc_sin_omega + c_sq - ecc^4 + 2.0 * ecc^2 - 1.0
+        b = sqrt(num / den) * (1.0 - ecc) * (1.0 + ecc)
+        #b = √(
+        #    (aor^2 * c_sq - 1.0) /
+        #    (
+        #        c_sq * ecc_sin_omega^2 +
+        #        2.0*c_sq*ecc_sin_omega +
+        #        c_sq - ecc^4 + 2.0*ecc^2 - 1.0
+        #    )
+        #) * (1.0 - ecc^2)
         cos_incl = dcosi_db * b
         incl = acos(cos_incl)
         sin_incl = sin(incl)
