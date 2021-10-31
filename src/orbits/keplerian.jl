@@ -338,11 +338,7 @@ function compute_consistent_inputs(a, aR_star, period, rho_star, R_star, M_star,
         duration = nothing
     end
 
-    if !isnothing(a) && isnothing(M_planet)
-        M_planet = compute_M_planet_nom(G)
-    end
-
-    if !isnothing(period) && isnothing(M_planet)
+    if isnothing(M_planet) && (!isnothing(a) || !isnothing(period))
         M_planet = compute_M_planet_nom(G)
     end
 
