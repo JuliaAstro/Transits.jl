@@ -26,11 +26,11 @@ Keplerian orbit parameterized by the basic observables of a transiting 2-body sy
 * `r`/`RpRs` -- The ratio of the planet radius to star radius.
 * `b` -- The impact parameter, bounded between 0 ≤ b ≤ 1.
 * `ecc`/`e` -- The eccentricity of the closed orbit, bounded between 0 ≤ ecc < 1.
-* `cos_omega`/`cos_ω` -- The cosine of the argument of periapsis.
-* `sin_omega`/`sin_ω` -- The sine of the argument of periapsis.
 * `incl` -- The inclination of the orbital plane relative to the axis perpendicular to the
            reference plane [rad]
 * `omega`/`ω` -- The argument of periapsis [rad].
+* `cos_omega`/`cos_ω` -- The cosine of the argument of periapsis.
+* `sin_omega`/`sin_ω` -- The sine of the argument of periapsis.
 * `Omega`/`Ω` -- The longitude of the ascending node [rad].
 * `M_planet`/`Mp` -- The mass of the planet [M⊙].
 * `M_star`/`Ms` -- The mass of the star [M⊙].
