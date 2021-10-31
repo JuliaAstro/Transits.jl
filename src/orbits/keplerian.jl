@@ -143,9 +143,9 @@ function KeplerianOrbit(nt::NamedTuple{(
     dcosi_db = R_star / (a * incl_factor_inv)
 
     if !isnothing(nt.b)
-        any(!isnothing, (nt.incl, duration)) && throw(ArgumentError(
-            "Only `incl`, `b`, or `duration` can be given"
-        ))
+        if any(!isnothing, (nt.incl, duration))
+            throw(ArgumentError("Only `incl`, `b`, or `duration` can be given"))
+        end
         b = nt.b
         cos_incl = dcosi_db * b
         incl = acos(cos_incl)
