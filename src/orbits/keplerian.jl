@@ -140,7 +140,7 @@ function KeplerianOrbit(nt::NamedTuple{(
     end
 
     # Jacobian for cos(i) -> b
-    dcosi_db = R_star / a * (1.0 / incl_factor_inv)
+    dcosi_db = R_star / (a * incl_factor_inv)
 
     if !isnothing(nt.b)
         any(!isnothing, (nt.incl, duration)) && throw(ArgumentError(
