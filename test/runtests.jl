@@ -5,7 +5,9 @@ using StableRNGs
 using Transits
 using Test
 using JLD2
-#using Unitful, UnitfulAstro
+using Unitful, UnitfulAstro
+
+Unitful.preferunits(u"Rsun,Msun,d"...)
 
 # Numpy version of `isapprox`
 # https://stackoverflow.com/questions/27098844/allclose-how-to-check-if-two-arrays-are-close-in-julia/27100515#27100515
