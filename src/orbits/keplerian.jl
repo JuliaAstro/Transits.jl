@@ -191,6 +191,11 @@ function KeplerianOrbit(nt::NamedTuple{(
     t0, tp = compute_t0_tp(nt.t0, nt.tp; M0=M0, n=n)
     t_ref = tp - t0
 
+    # Sanitize dimensionless units
+    if period isa Quantity
+        r, aR_star, b = NoUnits.((r, aR_star, b))
+    end
+
     return KeplerianOrbit(
         period, t0, tp, t_ref, duration,
         a, a_planet, a_star, R_planet, R_star,
@@ -394,13 +399,13 @@ function compute_consistent_inputs(a, aR_star, period, rho_star, R_star, M_star,
     return a, aR_star, period, rho_star, R_star, M_star, M_planet, duration
 end
 
-stringify_units(value, unit_str) = @sprintf("%.4f %s", value, unit_str)
+stringify_units(value, unit_str) = @sprintf "%.4f %s" value unit_str
 function stringify_units(value::Unitful.AbstractQuantity, unit_str)
     u = upreferred(value)
     return stringify_units(ustrip(u), string(unit(u)))
 end
 stringify_units(value::Nothing, unit) = "$(value)"
-stringify_units(value) = @sprintf("%.4f", value)
+stringify_units(value) = @sprintf "%.4f"  value
 function Base.show(io::IO, ::MIME"text/plain", orbit::KeplerianOrbit)
     print(
         io,

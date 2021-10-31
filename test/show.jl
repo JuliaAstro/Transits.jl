@@ -76,7 +76,7 @@ end
         ω = 0.0,
     )
 
-    @test sprint(show, "text/plain", orbit) === """
+    @test repr("text/plain", orbit) === """
     Keplerian Orbit
      P:      2.0000 d
      t₀:     0.0000 d
