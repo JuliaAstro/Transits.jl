@@ -239,7 +239,7 @@ compute_rho(M, R::Nothing) = nothing
 function compute_aor(duration, period, b; r=nothing)
     r = isnothing(r) ? 0.0 : r
     sin_ϕ, cos_ϕ = sincos(π * duration / period)
-    return √( (1 + r)^2 - (b*cos_ϕ)^2 ) / sin_ϕ
+    return √((1 + r)^2 - (b*cos_ϕ)^2) / sin_ϕ
 end
 
 # Planet radius
@@ -372,7 +372,7 @@ function compute_consistent_inputs(a, aR_star, period, rho_star, R_star, M_star,
     if isnothing(rho_star)
         rho_star = 3.0 * M_star / (4.0 * π * R_star^3)
     elseif isnothing(R_star)
-        R_star = ( 3.0 * M_star / (4.0 * π * rho_star) )^(1/3)
+        R_star = cbrt(3.0 * M_star / (4.0 * π * rho_star))
     else
         M_star = 4.0 * π * R_star^3 * rho_star / 3.0
     end
@@ -381,13 +381,13 @@ function compute_consistent_inputs(a, aR_star, period, rho_star, R_star, M_star,
     M_tot = M_star + M_planet
     if isnothing(a)
         if isnothing(aR_star)
-            a = ( G * M_tot * period^2 / (4.0 * π^2) )^(1/3)
+            a = cbrt(G * M_tot * period^2 / (4.0 * π^2))
             aR_star = a / R_star
         else
             a = aR_star * R_star
         end
     else
-        period = 2.0 * π * a^(3/2) / (√(G * M_tot))
+        period = 2.0 * π * sqrt(a^3 / (G * M_tot))
         aR_star = a / R_star
     end
 
