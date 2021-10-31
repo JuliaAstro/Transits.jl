@@ -228,14 +228,6 @@ end
     Ms => M_star,
 ]
 
-# `M_planet` << `M_star` approxs
-#compute_rho_star(aR_star, period, G_nom) = (3.0 * π / (G_nom * period^2)) * aR_star^3
-#compute_rho_star(aR_star, period, G::typeof(G_unit)) = (3.0 * π / (G * period^2)) * aR_star^3
-#compute_rho_star(a, period, R_star, G) = compute_rho_star(compute_aR_star(a, R_star), period, G)
-#compute_aR_star(a, R_star) = a / R_star
-#compute_aR_star(rho_star, period, G_nom) = cbrt(G_nom * period^2 * rho_star / (3.0 * π))
-#compute_aR_star(rho_star, period, G::typeof(G_unit)) = cbrt(G * period^2 * rho_star / (3.0 * π))
-
 # Spherical density
 compute_rho(M, R) = 0.75 * M / (π*R^3)
 compute_rho(M, R::Nothing) = nothing
