@@ -8,6 +8,9 @@ Unitful.preferunits(u"Msun,Rsun,d"...)
 const G_unit = Unitful.G
 const G_nom = ustrip(u"Rsun^3/Msun/d^2", G_unit)
 
+# Helpers
+include("kepler_helpers.jl")
+
 """
     KeplerianOrbit(; kwargs...)
 
@@ -108,8 +111,8 @@ function KeplerianOrbit(nt::NamedTuple{(
     rho_planet = compute_rho(M_planet, R_planet)
 
     n = 2.0 * π / period
-    a_star = a * M_planet / M_tot
-    a_planet = -a * M_star / M_tot
+    a_star = compute_a_X(a, M_planet, M_tot)
+    a_planet = -compute_a_X(a, M_star, M_tot)
 
     # Omega
     Omega = nt.Omega
@@ -133,8 +136,8 @@ function KeplerianOrbit(nt::NamedTuple{(
             cos_omega, sin_omega = nt.cos_omega, nt.sin_omega
             omega = atan(sin_omega, cos_omega)
         end
-        E_0 = 2.0 * atan(√(1.0 - ecc) * cos_omega, √(1.0 + ecc) * (1.0 + sin_omega))
-        M0 = E_0 - ecc * sin(E_0)
+        E0 = compute_E0(ecc, cos_omega, sin_omega)
+        M0 = compute_M0(ecc, E0)
 
         incl_factor_inv = compute_incl_factor_inv(ecc, sin_omega)
     end
@@ -157,7 +160,7 @@ function KeplerianOrbit(nt::NamedTuple{(
         ))
         incl = nt.incl
         sin_incl, cos_incl = sincos(incl)
-        b = cos_incl / dcosi_db
+        b = compute_b(cos_incl, dcosi_db)
         duration = nt.duration
     elseif !isnothing(nt.duration)
         duration = nt.duration
@@ -222,7 +225,6 @@ end
     Ms => M_star,
 ]
 
-
 # Finds the position `r` of the planet along its orbit after rotating
 # through the true anomaly `ν`, then transforms this from the
 # orbital plan to the equatorial plane
@@ -246,7 +248,7 @@ relative_position(orbit::KeplerianOrbit, t) = _position(orbit, -orbit.aR_star, t
 
 # Returns sin(ν), cos(ν)
 function compute_true_anomaly(orbit::KeplerianOrbit, t)
-    M = (t - orbit.t0 - orbit.t_ref) * orbit.n
+    M = compute_M(t, orbit.t0, orbit.t_ref, orbit.n)
     if isnothing(orbit.ecc) || iszero(orbit.ecc)
         return sincos(M)
     else
@@ -286,59 +288,7 @@ function flip(orbit::KeplerianOrbit, R_planet)
     end
 end
 
-#########
-# Helpers
-#########
-compute_R_star(rho_star, M_star) = cbrt(3.0 * M_star / (4.0 * π * rho_star))
-compute_R_star_nom(G::Real) = 1.0
-compute_R_star_nom(G) = 1.0u"Rsun"
-compute_M_star(rho_star, R_star) = 4.0 * π * R_star^3 * rho_star / 3.0
-compute_M_planet_nom(G::Real) = 0.0
-compute_M_planet_nom(G) = 0.0u"Msun"
-compute_M_tot(m1, m2) = m1 + m2
-compute_M_tot(a, G, period) = 4.0 * π^2 * a^3 / (G * period^2)
-compute_a(aR_star, R_star) = R_star * aR_star
-compute_a(M_tot, period, G) = cbrt(G * M_tot * period^2 / (4.0 * π^2))
-compute_period(M_tot, a, G) = 2.0 * π * sqrt(a^3 / (G * M_tot))
-compute_rho_star(M_star, R_star) = 3.0 * M_star / (4.0 * π * R_star^3)
 
-# Spherical density
-compute_rho(M, R) = 0.75 * M / (π*R^3)
-compute_rho(M, R::Nothing) = nothing
-
-# Semi-major axis / star radius ratio, assuming circular orbit
-function compute_aor(duration, period, b; r=nothing)
-    r = isnothing(r) ? 0.0 : r
-    sin_ϕ, cos_ϕ = sincos(π * duration / period)
-    return √((1 + r)^2 - (b*cos_ϕ)^2) / sin_ϕ
-end
-
-# Impact radius
-function compute_b(a_planet, R_star, duration, period, incl_factor_inv, ecc, sin_omega)
-    c = sin(π * duration / (period * incl_factor_inv))
-    c_sq = c^2
-    ecc_sin_omega = ecc*sin_omega
-    aor = a_planet / R_star
-    num = aor^2 * c_sq - 1.0
-    den = c_sq * ecc_sin_omega^2 + 2.0 * c_sq * ecc_sin_omega + c_sq - ecc^4 + 2.0 * ecc^2 - 1.0
-    return sqrt(num / den) * (1.0 - ecc) * (1.0 + ecc)
-end
-
-# Inclination factor
-compute_incl_factor_inv(ecc, sin_omega) = (1.0 - ecc)*(1.0 + ecc) / (1.0 + ecc * sin_omega)
-
-# Jacobian for cos(i) -> b
-compute_dcosi_db(a, R_star, incl_factor_inv) = R_star / (a * incl_factor_inv)
-
-# Planet radius
-compute_R_planet(R_star, r, R_planet) = R_planet
-compute_R_planet(R_star, r, R_planet::Nothing) = iszero(r) ? zero(R_star) : R_star * r
-
-# Transit times
-compute_t0_tp(t0::Nothing, tp; M0, n) = (tp + M0/n, tp)
-compute_t0_tp(t0, tp::Nothing; M0, n) = (t0, t0 - M0/n)
-compute_t0_tp(t0::Nothing, tp::Nothing; kwargs...) = throw(ArgumentError("Please specify either `t0` or `tp`"))
-compute_t0_tp(t0, tp; kwargs...) = throw(ArgumentError("Please only specify one of `t0` or `tp`"))
 function compute_consistent_inputs(a, aR_star, period, rho_star, R_star, M_star, M_planet, G, ecc, duration, b, r)
     if isnothing(a) && isnothing(period)
         throw(ArgumentError("At least `a` or `P` must be specified"))
