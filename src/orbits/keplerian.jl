@@ -181,7 +181,7 @@ function KeplerianOrbit(nt::NamedTuple{(
     t_ref = tp - t0
 
     # Sanitize dimensionless units
-    if period isa Quantity
+    if period isa AbstractQuantity
         r, aR_star, b = NoUnits.((r, aR_star, b))
     end
 
