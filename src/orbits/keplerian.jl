@@ -4,6 +4,7 @@ using KeywordCalls
 using Rotations
 
 # Domain specific unit conversions / constants/ fallbacks
+ENV["UNITFUL_FANCY_EXPONENTS"] = false
 Unitful.preferunits(u"Msun,Rsun,d"...)
 const G_unit = Unitful.G
 const G_nom = ustrip(u"Rsun^3/Msun/d^2", G_unit)
