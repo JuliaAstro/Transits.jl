@@ -5,7 +5,6 @@ using KeywordCalls
 using Rotations
 
 # Domain specific unit conversions / constants/ fallbacks
-ENV["UNITFUL_FANCY_EXPONENTS"] = false
 Unitful.preferunits(u"Msun,Rsun,d"...)
 const G_unit = Unitful.G
 const G_nom = ustrip(u"Rsun^3/Msun/d^2", G_unit)
@@ -375,7 +374,7 @@ stringify_units(value::Nothing, unit) = "$(value)"
 stringify_units(value) = @sprintf "%.4f"  value
 function Base.show(io::IO, ::MIME"text/plain", orbit::KeplerianOrbit)
     print(
-        io,
+        IOContext(io, :fancy_exponent => false),
         """
         Keplerian Orbit
          P:      $(stringify_units(orbit.period, "d"))
