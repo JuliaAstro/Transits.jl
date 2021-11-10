@@ -122,8 +122,8 @@ end
         @test median(b_aR_star.times) ≤ 500 # ns
     else
         # TODO: investigate performance regression
-        @test median(b_rho_star.times) ≤ 10_000 # ns
-        @test median(b_aR_star.times) ≤ 10_000 # ns
+        @test median(b_rho_star.times) ≤ 20_000 # ns
+        @test median(b_aR_star.times) ≤ 20_000 # ns
     end
 end
 
