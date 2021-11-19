@@ -136,31 +136,11 @@ end
     @test orbit.omega == atan(orbit.sin_omega/orbit.cos_omega)
 
     orbit = KeplerianOrbit(
-        period = 0.9,
-        t_0 = 0.0,
-        duration = 0.02,
-        R_star = 1.0,
-        M_star = 1.0,
-        r = 0.0001,
-        ecc = 0.01,
-        omega = 0.0,
+        aR_star = 1.0,
+        period = 2.0,
+        t0 = 0.0,
     );
-    ecc = orbit.ecc
-    sin_omega = orbit.sin_omega
-    incl_factor_inv  = (1.0 - ecc^2) / (1.0 + ecc * sin_omega)
-    c = sin(π * orbit.duration / (incl_factor_inv) / orbit.period)
-    c_sq = c^2
-    ecc_sin_omega = ecc*sin_omega
-    aor = orbit.a_planet / orbit.R_star
-    @test orbit.b == √(
-        (aor^2 * c_sq - 1.0) /
-        (
-            c_sq * ecc_sin_omega^2 +
-            2.0*c_sq*ecc_sin_omega +
-            c_sq - ecc^4 + 2.0*ecc^2 - 1.0
-        )
-    ) * (1.0 - ecc^2)
-    @test orbit.sin_incl == sin(orbit.incl)
+    @test iszero(orbit.b)
 
     orbit = KeplerianOrbit(
         period=2.0, t_0=0.0, M_star=1.0, R_star=1.0,
