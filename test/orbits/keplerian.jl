@@ -62,7 +62,7 @@ as_matrix(pos) = reinterpret(reshape, Float64, pos) |> permutedims
 
     @test sum(m) > 0
     @test allclose(r_Transits, r_batman, atol=2e-5)
-    @test all(z[m] .> 0)
+    @test all(>(0), z[m])
     no_transit = @. (z[!(m)] < 0) | (r[!(m)] > 2)
     @test all(no_transit)
 end
