@@ -55,7 +55,7 @@ as_matrix(pos) = reinterpret(reshape, Float64, pos) |> permutedims
 
     # Compare
     m = sky_coords["m"]
-    r = @. √(x^2 + y^2)
+    r = hypot.(x, y)
     r_Transits = r[m]
     r_batman = sky_coords["r_batman"][m]
 
