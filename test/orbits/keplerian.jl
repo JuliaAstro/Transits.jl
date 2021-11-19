@@ -45,12 +45,13 @@ as_matrix(pos) = reinterpret(reshape, Float64, pos) |> permutedims
     x = Matrix{Float64}(undef, length(sky_coords["t"]), length(sky_coords["t0"]))
     y = similar(x)
     z = similar(x)
-    for (orbit, x_i, y_i, z_i) in zip(orbits, eachcol(x), eachcol(y), eachcol(z))
-        pos = relative_position.(orbit, t) |> as_matrix
-        a, b, c = eachcol(pos)
-        x_i .= a
-        y_i .= b
-        z_i .= c
+    for (col, orbit) in enumerate(orbits)
+        for (row, _t) in enumerate(t)
+            pos = relative_position(orbit, _t)
+            x[row, col] = pos[1]
+            y[row, col] = pos[2]
+            z[row, col] = pos[3]
+        end
     end
 
     # Compare
