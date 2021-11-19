@@ -4,7 +4,6 @@ using QuadGK
 using StableRNGs
 using Transits
 using Test
-using JLD2
 using Unitful, UnitfulAstro
 
 Unitful.preferunits(u"Rsun,Msun,d"...)

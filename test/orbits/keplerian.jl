@@ -5,6 +5,14 @@ using Transits.Orbits: KeplerianOrbit, flip,
                        _star_position, _planet_position,
                        stringify_units
 
+# Setup python env
+import Pkg
+ENV["PYTHON"] = ""
+Pkg.build("PyCall")
+using PyCall, Conda
+Conda.add(["batman-package"]; channel="conda-forge")
+
+# Constants
 const G_nom = 2942.2062175044193 # Rsun^3/Msun/d^2
 const MsunRsun_to_gcc = (1.0u"Msun/Rsun^3" |> u"g/cm^3").val
 
@@ -24,7 +32,49 @@ as_matrix(pos) = reinterpret(reshape, Float64, pos) |> permutedims
 
 @testset "KeplerianOrbit: sky coords" begin
     # Comparison coords from `batman`
-    sky_coords = load("./python_code/test_data/KeplerianOrbit_sky_coords.jld2")
+    py"""
+    import numpy as np
+    from batman import _rsky
+
+    def sky_coords():
+        t = np.linspace(-100, 100, 1_000)
+
+        t0, period, a, e, omega, incl = (
+            x.flatten()
+            for x in np.meshgrid(
+                np.linspace(-5.0, 5.0, 2),
+                np.exp(np.linspace(np.log(5.0), np.log(50.0), 3)),
+                np.linspace(50.0, 100.0, 2),
+                np.linspace(0.0, 0.9, 5),
+                np.linspace(-np.pi, np.pi, 3),
+                np.arccos(np.linspace(0, 1, 5)[:-1]),
+            )
+        )
+
+        r_batman = np.empty((len(t), len(t0)))
+
+        for i in range(len(t0)):
+            r_batman[:, i] = _rsky._rsky(
+                t, t0[i], period[i], a[i], incl[i], e[i], omega[i], 1, 1
+            )
+
+        m = r_batman < 100.0
+
+        return {
+            "m_sum" : m.sum().item(), # Save native Int format
+            "r_batman" : r_batman,
+            "m" : m,
+            "t" : t,
+            "t0" : t0,
+            "period" : period,
+            "a" : a,
+            "e" : e,
+            "omega" : omega,
+            "incl" : incl,
+        }
+
+    """
+    sky_coords = py"sky_coords"()
 
     # Create comparison orbits from Transits.jl
     orbits = [
@@ -32,7 +82,7 @@ as_matrix(pos) = reinterpret(reshape, Float64, pos) |> permutedims
             aR_star = sky_coords["a"][i],
             P = sky_coords["period"][i],
             incl = sky_coords["incl"][i],
-            t_0 = sky_coords["t0"][i],
+            t0 = sky_coords["t0"][i],
             ecc = sky_coords["e"][i],
             Omega = 0.0,
             omega = sky_coords["omega"][i],
@@ -73,7 +123,7 @@ end
         R_star = 0.5,
         period = 2.0,
         ecc = 0.0,
-        t_0 = 0.0,
+        t0 = 0.0,
         incl = π / 2.0,
         Omega = 0.0,
         omega = 0.0,
@@ -84,7 +134,7 @@ end
         R_star = 0.5u"Rsun",
         period = 2.0u"d",
         ecc = 0.0,
-        t_0 = 0.0u"d",
+        t0 = 0.0u"d",
         incl = 90.0u"°",
         Omega = 0.0u"°",
         omega = 0.0u"°",
@@ -94,7 +144,7 @@ end
         aR_star = 7.5,
         P = 2.0,
         incl = π / 2.0,
-        t_0 = 0.0,
+        t0 = 0.0,
         ecc = 0.0,
         Omega = 0.0,
         omega = 0.0,
@@ -104,7 +154,7 @@ end
         aR_star = 7.5,
         P = 2.0u"d",
         incl = 90.0u"°",
-        t_0 = 0.0u"d",
+        t0 = 0.0u"d",
         ecc = 0.0,
         Omega = 0.0u"°",
         omega = 0.0u"°",
@@ -131,7 +181,7 @@ end
 @testset "KeplerianOrbit: orbital elements" begin
     orbit = KeplerianOrbit(
         cos_omega=√(2)/2, sin_omega=√(2)/2,
-        period=2.0, t_0=0.0, b=0.01, M_star=1.0, R_star=1.0, ecc=0.0,
+        period=2.0, t0=0.0, b=0.01, M_star=1.0, R_star=1.0, ecc=0.0,
     )
     @test orbit.omega == atan(orbit.sin_omega/orbit.cos_omega)
 
@@ -143,7 +193,7 @@ end
     @test iszero(orbit.b)
 
     orbit = KeplerianOrbit(
-        period=2.0, t_0=0.0, M_star=1.0, R_star=1.0,
+        period=2.0, t0=0.0, M_star=1.0, R_star=1.0,
         ecc=0.01, omega=0.1, r=0.01,
     )
     @test isnothing(orbit.duration)
@@ -152,22 +202,22 @@ end
 @testset "KeplerianOrbit: valid inputs" begin
     @test_throws ArgumentError("`b` must also be provided for a circular orbit if `duration given`") KeplerianOrbit(
         duration=0.01,
-        period=2.0, t_0=0.0, R_star=1.0
+        period=2.0, t0=0.0, R_star=1.0
     )
     @test_throws ArgumentError("`r` must also be provided if `duration` given") KeplerianOrbit(
         duration=0.01, b=0.0,
-        period=2.0, t_0=0.0, R_star=1.0
+        period=2.0, t0=0.0, R_star=1.0
     )
     #@test_throws ArgumentError("Only `ω`, or `cos_ω` and `sin_ω` can be provided") KeplerianOrbit(
     #    omega=0.0, cos_omega=1.0, sin_omega=0.0,
-    #    period=2.0, t_0=0.0, b=0.0, M_star=1.0, R_star=1.0, ecc=0.0,
+    #    period=2.0, t0=0.0, b=0.0, M_star=1.0, R_star=1.0, ecc=0.0,
     #)
     #@test_throws ArgumentError("`ω` must also be provided if `ecc` specified") KeplerianOrbit(
-    #    rho_star=2.0, R_star=0.5, period=2.0, t_0=0.0, incl=π/2.0, Omega=0.0, ecc=0.0,
+    #    rho_star=2.0, R_star=0.5, period=2.0, t0=0.0, incl=π/2.0, Omega=0.0, ecc=0.0,
     #)
     @test_throws ArgumentError("Only `incl`, `b`, or `duration` can be given") KeplerianOrbit(
         incl=π/2.0, b=0.0, duration=1.0,
-        period=2.0, t_0=0.0, R_star=1.0, r=0.01,
+        period=2.0, t0=0.0, R_star=1.0, r=0.01,
     )
     @test_throws ArgumentError("Please specify either `t0` or `tp`") KeplerianOrbit(
         b=0.0, period=2.0, R_star=1.0, M_star=1.0,
@@ -180,44 +230,44 @@ end
     )
     @test_throws ArgumentError("If both `a` and `P` are given, `rho_star` or `M_star` cannot be defined") KeplerianOrbit(
         rho_star=2.0,
-        R_star=0.5, a=7.5, period=2.0, t_0=0.0, incl=π/2.0, Omega=0.0, omega=0.0, ecc=0.0,
+        R_star=0.5, a=7.5, period=2.0, t0=0.0, incl=π/2.0, Omega=0.0, omega=0.0, ecc=0.0,
     )
     @test_throws ArgumentError("If both `a` and `P` are given, `rho_star` or `M_star` cannot be defined") KeplerianOrbit(
         M_star=1.0,
-        R_star=0.5, a=7.5, period=2.0, t_0=0.0, incl=π/2.0, Omega=0.0, omega=0.0, ecc=0.0,
+        R_star=0.5, a=7.5, period=2.0, t0=0.0, incl=π/2.0, Omega=0.0, omega=0.0, ecc=0.0,
     )
     @test_throws ArgumentError("Must provide exactly two of: `rho_star`, `R_star`, or `M_star` if rho_star not implied") KeplerianOrbit(
         R_star=0.5,
-        period=2.0, t_0=0.0, incl=π/2.0, Omega=0.0, omega=0.0, ecc=0.0,
+        period=2.0, t0=0.0, incl=π/2.0, Omega=0.0, omega=0.0, ecc=0.0,
     )
     @test_throws ArgumentError("Must provide exactly two of: `rho_star`, `R_star`, or `M_star` if rho_star not implied") KeplerianOrbit(
         M_star=0.5,
-        period=2.0, t_0=0.0, incl=π/2.0, Omega=0.0, omega=0.0, ecc=0.0,
+        period=2.0, t0=0.0, incl=π/2.0, Omega=0.0, omega=0.0, ecc=0.0,
     )
     @test_throws ArgumentError("Must provide exactly two of: `rho_star`, `R_star`, or `M_star` if rho_star not implied") KeplerianOrbit(
         M_star=0.5, R_star=0.5, rho_star=0.5,
-        period=2.0, t_0=0.0, incl=π/2.0, Omega=0.0, omega=0.0, ecc=0.0,
+        period=2.0, t0=0.0, incl=π/2.0, Omega=0.0, omega=0.0, ecc=0.0,
     )
 end
 
 @testset "KeplerianOrbit: implied inputs" begin
     # R_star ≡ 1.0 R⊙ if not specified
     orbit_no_R_star = KeplerianOrbit(
-        rho_star=2.0, period=2.0, t_0=0.0,
+        rho_star=2.0, period=2.0, t0=0.0,
         incl=π/2.0, Omega=0.0, omega=0.0, ecc=0.0
     )
     @test orbit_no_R_star.R_star == one(orbit_no_R_star.a)
 
     # Compute M_tot if `a` and `period` given
     orbit_a_period = KeplerianOrbit(
-        a=1.0, period=1.0, t_0=0.0,
+        a=1.0, period=1.0, t0=0.0,
         incl=π/2.0, Omega=0.0, omega=0.0, ecc=0.0
     )
     @test orbit_a_period.M_planet + orbit_a_period.M_star == 4.0 * π^2 / G_nom
 
     # Compute `R_star` from `M_star`
     orbit_M_star = KeplerianOrbit(
-        M_star=4.0*π, rho_star = 1.0, period = 2.0, t_0 = 0.0,
+        M_star=4.0*π, rho_star = 1.0, period = 2.0, t0 = 0.0,
         incl = π / 2.0, Omega = 0.0, omega = 0.0, ecc = 0.0
     )
     @test orbit_M_star.R_star == 3.0^(1/3)
@@ -229,14 +279,40 @@ end
         R_star = 0.189,
         M_star = 0.151,
         period =  0.4626413,
-        t_0 = 0.2,
+        t0 = 0.2,
         b = 0.5,
         ecc = 0.1,
         omega = 0.1,
     )
 
     # Comparison coords from `batman`
-    small_star = load("./python_code/test_data/KeplerianOrbit_small_star.jld2")
+    py"""
+    import numpy as np
+    from batman import _rsky
+
+    def small_star(period, t0, aR_star, incl, ecc, omega):
+        t = np.linspace(0, period, 500)
+        r_batman = _rsky._rsky(
+            t,
+            t0,
+            period,
+            aR_star,
+            incl,
+            ecc,
+            omega,
+            1,
+            1
+        )
+
+        m = r_batman < 100.0
+
+        return {
+            "t": t,
+            "r_batman": r_batman,
+            "m": m,
+        }
+    """
+    small_star = py"small_star"(orbit.period, orbit.t0, orbit.aR_star, orbit.incl, orbit.ecc, orbit.omega)
 
     # Compare
     t = small_star["t"]
@@ -253,21 +329,21 @@ end
         R_star = 0.189,
         M_star = 0.151,
         P = 0.4626413,
-        t_0 = 0.2,
+        t0 = 0.2,
         b = 0.5,
         ecc = 0.8,
         omega = 0.1,
     )
 
     pos = relative_position.(orbit, orbit.t0)
-    @test allclose(hypot(pos[1], pos[2]), orbit.b)
+    @test hypot(pos[1], pos[2]) ≈ orbit.b
 end
 
 @testset "KeplerianOrbit: flip" begin
     orbit = KeplerianOrbit(
         M_star = 1.3,
         R_star = 1.1,
-        t_0 = 0.5,
+        t0 = 0.5,
         period = 100.0,
         ecc = 0.3,
         incl = 0.25*π,
@@ -301,7 +377,7 @@ end
         M_planet = 0.1,
         R_star = 1.0,
         P = 100.0,
-        t_0 = 0.5,
+        t0 = 0.5,
         incl = 45.0,
         ecc = 0.0,
         omega = 0.5,
@@ -332,11 +408,11 @@ end
 
     for orbit in [
         KeplerianOrbit(
-            period=period, t_0=0.0, b=b, a=R_star * aor, R_star=R_star
+            period=period, t0=0.0, b=b, a=R_star * aor, R_star=R_star
         ),
         KeplerianOrbit(
             period = period,
-            t_0 = 0.0,
+            t0 = 0.0,
             b = b,
             duration = duration,
             R_star = R_star,
@@ -359,15 +435,15 @@ end
 end
 
 @testset "KeplerianOrbit: unit conversions" begin
-    orbit = KeplerianOrbit(a=12.0, t_0=0.0, b=0.0, R_star=1.0, M_star=1.0, M_planet=0.01, r=0.01)
+    orbit = KeplerianOrbit(a=12.0, t0=0.0, b=0.0, R_star=1.0, M_star=1.0, M_planet=0.01, r=0.01)
     rho_planet_1 = orbit.rho_planet*u"Msun/Rsun^3" |> u"g/cm^3"
     rho_planet_2 = orbit.rho_planet * MsunRsun_to_gcc
     @test rho_planet_1.val == rho_planet_2
 
-    orbit = KeplerianOrbit(a=12.0u"Rsun", t_0=0.0u"d", b=0.0, R_star=1.0u"Rsun", M_star=1.0u"Msun")
+    orbit = KeplerianOrbit(a=12.0u"Rsun", t0=0.0u"d", b=0.0, R_star=1.0u"Rsun", M_star=1.0u"Msun")
     @test isnan(orbit.rho_planet)
 
-    orbit = KeplerianOrbit(a=12.0u"Rsun", t_0=0.0u"d", b=0.0, R_star=1.0u"Rsun", M_planet=0.01u"Msun", M_star=1.0u"Msun", r=0.01)
+    orbit = KeplerianOrbit(a=12.0u"Rsun", t0=0.0u"d", b=0.0, R_star=1.0u"Rsun", M_planet=0.01u"Msun", M_star=1.0u"Msun", r=0.01)
     rho_planet = orbit.rho_planet |> u"g/cm^3"
     rho_star = orbit.rho_star |> u"g/cm^3"
     @test rho_planet.val == orbit.rho_planet.val*MsunRsun_to_gcc
@@ -375,12 +451,12 @@ end
 end
 
 @testset "KeplerianOrbit: aliased kwargs" begin
-    orbit_standard_1 = KeplerianOrbit(a=12.0, t_0=0.0, b=0.0, R_star=1.0, M_star=1.0, M_planet=0.01, r=0.01)
+    orbit_standard_1 = KeplerianOrbit(a=12.0, t0=0.0, b=0.0, R_star=1.0, M_star=1.0, M_planet=0.01, r=0.01)
     orbit_kwarg_alias_1 = KeplerianOrbit(a=12.0, t0=0.0, b=0.0, Rs=1.0, Ms=1.0, Mp=0.01, RpRs=0.01)
     @test orbit_standard_1 === orbit_kwarg_alias_1
 
     orbit_standard_2 = KeplerianOrbit(
-        rho_star = 2.0, R_star = 0.5, period = 2.0, ecc = 0.0, t_0 = 0.0,
+        rho_star = 2.0, R_star = 0.5, period = 2.0, ecc = 0.0, t0 = 0.0,
         incl = π / 2.0, Omega = 0.0, omega = 0.0,
     )
     orbit_kwarg_alias_2 = KeplerianOrbit(

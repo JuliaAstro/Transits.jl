@@ -1,5 +1,10 @@
-using PyCall
-using JLD2
+# Setup python env
+import Pkg
+ENV["PYTHON"] = ""
+Pkg.build("PyCall")
+using PyCall, Conda
+Conda.add(["batman-package"]; channel="conda-forge")
+
 using Transits.Orbits: KeplerianOrbit
 
 py"""
