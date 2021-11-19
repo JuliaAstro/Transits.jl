@@ -279,7 +279,7 @@ end
     )
 
     pos = relative_position.(orbit, orbit.t0)
-    @test allclose((√(pos[1]^2 + pos[2]^2)), orbit.b)
+    @test allclose(hypot(pos[1], pos[2]), orbit.b)
 end
 
 @testset "KeplerianOrbit: flip" begin
@@ -364,11 +364,11 @@ end
         ]
 
         x, y, z = _planet_position(orbit, R_star, 0.5*duration)
-        @test allclose(√(x^2 + y^2), 1.0 + r)
+        @test allclose(hypot(x, y), 1.0 + r)
         x, y, z = _planet_position(orbit, R_star, -0.5*duration)
-        @test allclose(√(x^2 + y^2), 1.0 + r)
+        @test allclose(hypot(x, y), 1.0 + r)
         x, y, z = _planet_position(orbit, R_star, period + 0.5*duration)
-        @test allclose(√(x^2 + y^2), 1.0 + r)
+        @test allclose(hypot(x, y), 1.0 + r)
     end
 end
 
