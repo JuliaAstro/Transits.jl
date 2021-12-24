@@ -78,7 +78,7 @@ end
 
     orbit_unit = KeplerianOrbit(
         ρ_star = 1.0u"g/cm^3",
-        R_star = cbrt(3.0/(4.0*π))u"Rsun",
+        R_star = cbrt(3.0 / (4.0 * π))u"Rsun",
         period = 2.0u"d",
         ecc = 0.0,
         t_0 = 0.0u"d",
