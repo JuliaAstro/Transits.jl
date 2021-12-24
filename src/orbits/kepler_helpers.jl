@@ -43,7 +43,7 @@ end
 compute_b(cos_incl, dcosi_db) = cos_incl / dcosi_db
 
 # Inclination factor
-compute_incl_factor_inv(ecc, sin_omega) = (1.0 - ecc)*(1.0 + ecc) / (1.0 + ecc * sin_omega)
+compute_incl_factor_inv(ecc, sin_omega) = (1.0 - ecc) * (1.0 + ecc) / (1.0 + ecc * sin_omega)
 
 # Jacobian for cos(i) -> b
 compute_dcosi_db(a, R_star, incl_factor_inv) = R_star / (a * incl_factor_inv)
