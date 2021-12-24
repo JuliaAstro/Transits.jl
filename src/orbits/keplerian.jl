@@ -170,7 +170,7 @@ function KeplerianOrbit(nt::NamedTuple{(
         incl = acos(cos_incl)
         sin_incl = sin(incl)
     else
-        incl = 0.5*π
+        incl = 0.5 * π
         cos_incl = 0.0
         sin_incl = 1.0
         b = 0.0
