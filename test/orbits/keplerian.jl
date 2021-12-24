@@ -166,7 +166,7 @@ end
     @test median(b_aR_star_units.times) ≤ 100_000   # ns
     @test b_aR_star_units.allocs ≤ 500
 
-    if Base.VERSION ≥ v"1.6"
+    if Base.VERSION < v"1.7"
         @test b_rho_star.allocs == b_rho_star.memory == 0
         @test median(b_rho_star.times) ≤ 500 # ns
         @test b_aR_star.allocs == b_aR_star.memory == 0
