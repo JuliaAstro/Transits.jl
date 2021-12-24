@@ -183,7 +183,7 @@ end
         cos_omega=√(2)/2, sin_omega=√(2)/2,
         period=2.0, t0=0.0, b=0.01, M_star=1.0, R_star=1.0, ecc=0.0,
     )
-    @test orbit.omega == atan(orbit.sin_omega/orbit.cos_omega)
+    @test orbit.omega == atan(orbit.sin_omega, orbit.cos_omega)
 
     orbit = KeplerianOrbit(
         aR_star = 1.0,
