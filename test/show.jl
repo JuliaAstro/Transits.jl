@@ -67,7 +67,7 @@ end
 @testset "KeplerianOrbit" begin
     orbit = KeplerianOrbit(
         ρ_star = 1.0,
-        R_star = cbrt(3.0/(4.0*π)),
+        R_star = cbrt(3.0 / (4.0 * π)),
         period = 2.0,
         ecc = 0.0,
         t_0 = 0.0,
