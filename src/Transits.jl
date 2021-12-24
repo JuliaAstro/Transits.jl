@@ -2,6 +2,7 @@ module Transits
 
 using ChainRulesCore
 using Reexport
+using StaticArrays
 
 export AbstractLimbDark,
        PolynomialLimbDark,

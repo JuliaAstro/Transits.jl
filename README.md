@@ -1,6 +1,6 @@
 # Transits.jl
 
-[![Build Status](https://github.com/juliaastro/Transits.jl/workflows/CI/badge.svg)](https://github.com/juliaastro/Transits.jl/actions)
+[![Build Status](https://github.com/juliaastro/Transits.jl/workflows/CI/badge.svg?branch=main)](https://github.com/juliaastro/Transits.jl/actions)
 [![PkgEval](https://juliaci.github.io/NanosoldierReports/pkgeval_badges/T/Transits.svg)](https://juliaci.github.io/NanosoldierReports/pkgeval_badges/report.html)
 [![Coverage](https://codecov.io/gh/juliaastro/Transits.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/juliaastro/Transits.jl)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)

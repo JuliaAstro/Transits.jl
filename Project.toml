@@ -1,12 +1,12 @@
 name = "Transits"
 uuid = "2e59a628-7bac-4d38-8059-3a73ba0928ab"
 authors = ["Miles Lucas <mdlucas@hawaii.edu> and contributors"]
-version = "0.3.6"
+version = "0.3.7"
 
 [deps]
-AstroLib = "c7932e45-9af1-51e7-9da9-f004cd3a462b"
 Bijectors = "76274a88-744f-5084-9051-94815aaf08c4"
 ChainRulesCore = "d360d2e6-b24c-11e9-a2a3-2a2ae2dbcce4"
+ConcreteStructs = "2569d6c7-a4a2-43d3-a901-331e8e4be471"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 FastGaussQuadrature = "442a2c76-b920-505d-bb47-c5924d526838"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
@@ -17,9 +17,9 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 StatsFuns = "4c63d2b9-4356-54db-8cca-17b64c39e42c"
 
 [compat]
-AstroLib = "0.4"
 Bijectors = "0.8, 0.9"
 ChainRulesCore = "1"
+ConcreteStructs = "0.2"
 Distributions = "0.22, 0.23, 0.24, 0.25"
 FastGaussQuadrature = "0.4"
 Reexport = "0.2, 1"
