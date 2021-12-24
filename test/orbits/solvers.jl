@@ -41,7 +41,7 @@ end
 #     (E_solver,    E_user,
 #     sin_ν_solver, sin_ν_user,
 #     cos_ν_solver, cos_ν_user)
-compute_summary(Es, eccs) = eachrow(hcat(_compute_vals.(Es, eccs)...))
+compute_summary(Es, eccs) = eachrow(mapreduce(_compute_vals, hcat, Es, eccs))
 
 function test_vals(summary)
     (E_solver,     E_user,
