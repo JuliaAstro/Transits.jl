@@ -27,7 +27,7 @@ compute_rho(M, R::Nothing) = nothing
 function compute_aor(duration, period, b; r=nothing)
     r = isnothing(r) ? 0.0 : r
     sin_ϕ, cos_ϕ = sincos(π * duration / period)
-    return √((1 + r)^2 - (b*cos_ϕ)^2) / sin_ϕ
+    return sqrt((1 + r)^2 - (b * cos_ϕ)^2) / sin_ϕ
 end
 
 # Impact radius
