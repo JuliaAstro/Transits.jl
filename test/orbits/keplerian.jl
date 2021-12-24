@@ -346,7 +346,7 @@ end
         t0 = 0.5,
         period = 100.0,
         ecc = 0.3,
-        incl = 0.25*π,
+        incl = 0.25 * π,
         omega = 0.5,
         Omega = 1.0,
         M_planet = 0.1,
