@@ -53,7 +53,7 @@ compute_R_planet(R_star, r, R_planet) = R_planet
 compute_R_planet(R_star, r, R_planet::Nothing) = iszero(r) ? zero(R_star) : R_star * r
 
 # Transit times
-compute_t0_tp(t0::Nothing, tp; M0, n) = (tp + M0/n, tp)
-compute_t0_tp(t0, tp::Nothing; M0, n) = (t0, t0 - M0/n)
+compute_t0_tp(t0::Nothing, tp; M0, n) = (tp + M0 / n, tp)
+compute_t0_tp(t0, tp::Nothing; M0, n) = (t0, t0 - M0 / n)
 compute_t0_tp(t0::Nothing, tp::Nothing; kwargs...) = throw(ArgumentError("Please specify either `t0` or `tp`"))
 compute_t0_tp(t0, tp; kwargs...) = throw(ArgumentError("Please only specify one of `t0` or `tp`"))
