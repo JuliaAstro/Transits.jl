@@ -407,17 +407,17 @@ end
     aor = compute_aor(duration, period, b, r=r)
 
     for orbit in [
-        KeplerianOrbit(
-            period=period, t0=0.0, b=b, a=R_star * aor, R_star=R_star
-        ),
-        KeplerianOrbit(
-            period = period,
-            t0 = 0.0,
-            b = b,
-            duration = duration,
-            R_star = R_star,
-            r = r,
-        ),
+            KeplerianOrbit(
+                period=period, t0=0.0, b=b, a=R_star * aor, R_star=R_star
+            ),
+            KeplerianOrbit(
+                period = period,
+                t0 = 0.0,
+                b = b,
+                duration = duration,
+                R_star = R_star,
+                r = r,
+            ),
         ]
 
         x, y, z = _planet_position(orbit, R_star, 0.5*duration)
