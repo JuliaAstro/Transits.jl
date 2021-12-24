@@ -14,7 +14,7 @@ Conda.add(["batman-package"]; channel="conda-forge")
 
 # Constants
 const G_nom = 2942.2062175044193 # Rsun^3/Msun/d^2
-const MsunRsun_to_gcc = (1.0u"Msun/Rsun^3" |> u"g/cm^3").val
+const MsunRsun_to_gcc = ustrip(u"g/cm^3", 1.0u"Msun/Rsun^3")
 
 function compute_r(orbit, t)
     pos = relative_position.(orbit, t)
