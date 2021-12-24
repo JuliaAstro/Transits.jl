@@ -11,7 +11,11 @@ compute_a(M_tot, period, G) = cbrt(G * M_tot * period^2 / (4.0 * π^2))
 compute_a_X(a, m, M) = a * m / M
 compute_period(M_tot, a, G) = 2.0 * π * sqrt(a^3 / (G * M_tot))
 compute_rho_star(M_star, R_star) = 3.0 * M_star / (4.0 * π * R_star^3)
-compute_E0(ecc, cos_omega, sin_omega) = 2.0 * atan(√(1.0 - ecc) * cos_omega, √(1.0 + ecc) * (1.0 + sin_omega))
+function compute_E0(ecc, cos_omega, sin_omega)
+    y = sqrt(1.0 - ecc) * cos_omega
+    x = sqrt(1.0 + ecc) * (1.0 + sin_omega)
+    return 2.0 * atan(y, x)
+end
 compute_M0(ecc, E0) = E0 - ecc * sin(E0)
 compute_M(t, t0, t_ref, n) = (t - t0 - t_ref) * n
 
