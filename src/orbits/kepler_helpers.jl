@@ -20,7 +20,7 @@ compute_M0(ecc, E0) = E0 - ecc * sin(E0)
 compute_M(t, t0, t_ref, n) = (t - t0 - t_ref) * n
 
 # Spherical density
-compute_rho(M, R) = 0.75 * M / (π*R^3)
+compute_rho(M, R) = 0.75 * M / (π * R^3)
 compute_rho(M, R::Nothing) = nothing
 
 # Semi-major axis / star radius ratio, assuming circular orbit
