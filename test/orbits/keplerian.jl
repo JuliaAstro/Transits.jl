@@ -1,7 +1,7 @@
 using BenchmarkTools
 using Unitful, UnitfulAstro
 using Transits.Orbits: KeplerianOrbit, flip,
-                       relative_position, compute_aor,
+                       relative_position, compute_aor, compute_rho, compute_b,
                        _star_position, _planet_position,
                        stringify_units
 
@@ -191,7 +191,7 @@ end
         aR_star = 1.0,
         period = 2.0,
         t0 = 0.0,
-    );
+    )
     @test iszero(orbit.b)
 
     orbit = KeplerianOrbit(
@@ -429,6 +429,14 @@ end
         x, y, z = _planet_position(orbit, R_star, period + 0.5*duration)
         @test allclose(hypot(x, y), 1.0 + r)
     end
+end
+
+@testset "KeplerianOrbit: compute_rho" begin
+    @test isnothing(compute_rho(0.0, nothing))
+end
+
+@testset "KeplerianOrbit: compute_b" begin
+    @test iszero(compute_b(-1.0, 1.0, 10.0, 2.0, 10.0, 1.0, 0.0))
 end
 
 @testset "KeplerianOrbit: stringify_units" begin
