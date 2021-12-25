@@ -333,7 +333,7 @@ function compute_consistent_inputs(a, aR_star, period, rho_star, R_star, M_star,
         isnothing(rho_star) && (M_star = oneunit(M_planet))
     end
 
-    if !implied_rho_star && sum(isnothing, (rho_star, R_star, M_star)) ≠ 1
+    if !implied_rho_star && count(isnothing, (rho_star, R_star, M_star)) ≠ 1
         throw(ArgumentError(
             "Must provide exactly two of: `rho_star`, `R_star`, or `M_star` if rho_star not implied"
         ))
