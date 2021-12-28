@@ -23,7 +23,7 @@ Flexible photometric transit curves with limb darkening. The goals of this packa
 
 in some order of importance
 
-- [ ] Finish writing `KeplerOrbit` (help wanted)
+- [x] ~Finish writing `KeplerOrbit` (help wanted)~
 - [x] ~Gradients using ChainRulesCore~
 - [x] ~Gradient tests using ChainRulesTestUtils~
 - [x] ~Kipping prior distributions (with gradients) (help wanted)~
