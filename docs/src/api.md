@@ -74,6 +74,7 @@ For the most granular support for gradients and jacobians, peer into the depths 
 
 ```@docs
 SimpleOrbit
+KeplerianOrbit
 Orbits.relative_position
 ```
 
