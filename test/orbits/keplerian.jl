@@ -6,11 +6,8 @@ using Transits.Orbits: KeplerianOrbit, flip,
                        stringify_units
 
 # Setup python env
-import Pkg
-ENV["PYTHON"] = ""
-Pkg.build("PyCall")
-using PyCall, Conda
-Conda.add(["batman-package"]; channel="conda-forge")
+using PythonCall, CondaPkg
+CondaPkg.add("batman-package")
 
 # Constants
 const G_nom = 2942.2062175044193 # Rsun^3/Msun/d^2
@@ -32,49 +29,46 @@ as_matrix(pos) = reinterpret(reshape, Float64, pos) |> permutedims
 
 @testset "KeplerianOrbit: sky coords" begin
     # Comparison coords from `batman`
-    py"""
+    @pyexec """
     import numpy as np
     from batman import _rsky
 
-    def sky_coords():
-        t = np.linspace(-100, 100, 1_000)
+    t = np.linspace(-100, 100, 1_000)
 
-        t0, period, a, e, omega, incl = (
-            x.flatten()
-            for x in np.meshgrid(
-                np.linspace(-5.0, 5.0, 2),
-                np.exp(np.linspace(np.log(5.0), np.log(50.0), 3)),
-                np.linspace(50.0, 100.0, 2),
-                np.linspace(0.0, 0.9, 5),
-                np.linspace(-np.pi, np.pi, 3),
-                np.arccos(np.linspace(0, 1, 5)[:-1]),
-            )
+    t0, period, a, e, omega, incl = (
+        x.flatten()
+        for x in np.meshgrid(
+            np.linspace(-5.0, 5.0, 2),
+            np.exp(np.linspace(np.log(5.0), np.log(50.0), 3)),
+            np.linspace(50.0, 100.0, 2),
+            np.linspace(0.0, 0.9, 5),
+            np.linspace(-np.pi, np.pi, 3),
+            np.arccos(np.linspace(0, 1, 5)[:-1]),
+        )
+    )
+
+    r_batman = np.empty((len(t), len(t0)))
+
+    for i in range(len(t0)):
+        r_batman[:, i] = _rsky._rsky(
+            t, t0[i], period[i], a[i], incl[i], e[i], omega[i], 1, 1
         )
 
-        r_batman = np.empty((len(t), len(t0)))
+    m = r_batman < 100.0
 
-        for i in range(len(t0)):
-            r_batman[:, i] = _rsky._rsky(
-                t, t0[i], period[i], a[i], incl[i], e[i], omega[i], 1, 1
-            )
-
-        m = r_batman < 100.0
-
-        return {
-            "m_sum" : m.sum().item(), # Save native Int format
-            "r_batman" : r_batman,
-            "m" : m,
-            "t" : t,
-            "t0" : t0,
-            "period" : period,
-            "a" : a,
-            "e" : e,
-            "omega" : omega,
-            "incl" : incl,
-        }
-
-    """
-    sky_coords = py"sky_coords"()
+    sky_coords = {
+        "m_sum" : m.sum().item(), # Save native Int format
+        "r_batman" : r_batman,
+        "m" : m,
+        "t" : t,
+        "t0" : t0,
+        "period" : period,
+        "a" : a,
+        "e" : e,
+        "omega" : omega,
+        "incl" : incl,
+    }
+    """ => sky_coords::Dict
 
     # Create comparison orbits from Transits.jl
     orbits = [
@@ -288,7 +282,8 @@ end
     )
 
     # Comparison coords from `batman`
-    py"""
+    @pyexec """
+    global np, _rsky, small_star
     import numpy as np
     from batman import _rsky
 
@@ -314,7 +309,8 @@ end
             "m": m,
         }
     """
-    small_star = py"small_star"(orbit.period, orbit.t0, orbit.aR_star, orbit.incl, orbit.ecc, orbit.omega)
+    small_star_py = @pyeval("small_star")(orbit.period, orbit.t0, orbit.aR_star, orbit.incl, orbit.ecc, orbit.omega)
+    small_star = pyconvert(Dict{String, Vector}, small_star_py)
 
     # Compare
     t = small_star["t"]

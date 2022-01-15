@@ -6,3 +6,4 @@ Manifest.toml
 
 dev
 test/output
+.CondaPkg
