@@ -32,13 +32,13 @@ end
     xs = rand(Kipping13(), N)
     for x in eachcol(xs)
         y = 𝔅(x)
-        xi = inv(𝔅)(y)
+        xi = inverse(𝔅)(y)
         @test xi ≈ x
     end
 
     ys = 2 .* randn(2, N)
     @test all(eachcol(ys)) do y
-        u1, u2 = inv(𝔅)(y)
+        u1, u2 = inverse(𝔅)(y)
 
         u1 + u2 ≤ 1 &&
         u1 + 2 * u2 ≥ 0 &&

@@ -22,7 +22,6 @@ rng = StableRNG(2752)
 @testset "Transits" begin
     include("Mn_integral.jl")
     include("distributions.jl")
-    include("distributions.jl")
     include("elliptic.jl")
     include("grads.jl")
     include("orbits/keplerian.jl")
