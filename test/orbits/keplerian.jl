@@ -7,7 +7,6 @@ using Transits.Orbits: KeplerianOrbit, flip,
 
 # Setup python env
 using PythonCall, CondaPkg
-CondaPkg.add("batman-package")
 
 # Constants
 const G_nom = 2942.2062175044193 # Rsun^3/Msun/d^2
