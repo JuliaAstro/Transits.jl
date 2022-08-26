@@ -6,7 +6,7 @@ setup = quote
 end
 
 DocMeta.setdocmeta!(Transits, :DocTestSetup, setup; recursive = true)
-
+include("pages.jl")
 makedocs(;
     modules=[Transits],
     authors="Miles Lucas <mdlucas@hawaii.edu> and contributors",
@@ -17,13 +17,7 @@ makedocs(;
         canonical="https://juliaastro.github.io/Transits.jl",
         assets=String[],
     ),
-    pages=[
-        "Home" => "index.md",
-        "Introduction" => "introduction.md",
-        "Getting Started" => "gettingstarted.md",
-        "Benchmarks" => "bench.md",
-        "API/Reference" => "api.md"
-    ],
+    pages = pages
 )
 
 deploydocs(;
