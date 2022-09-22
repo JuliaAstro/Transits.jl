@@ -253,7 +253,7 @@ function compute_true_anomaly(orbit::KeplerianOrbit, t)
     if isnothing(orbit.ecc) || iszero(orbit.ecc)
         return sincos(M)
     else
-        E = kepler_solver(M, orbit.ecc)
+        E = kepler_solver(uconvert(NoUnits, M), orbit.ecc)
         return sincos(trueanom(E, orbit.ecc))
     end
 end
