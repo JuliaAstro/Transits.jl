@@ -123,14 +123,12 @@ function compute(ld::PolynomialLimbDark, b::S, r) where S
     fourbr = 4 * br
     fourbrinv = inv(fourbr)
     sqbr = sqrt(br)
-    sqbrinv = inv(sqbr)
     onembpr2 = (1 - r - b) * (1 + b + r)
     sqarea = sqarea_triangle(one(T), r, b)
     k2 = max(zero(T), onembmr2 * fourbrinv)
     k = sqrt(k2)
     omemr2 = (1 - r) * (1 + r)
     onemr2mb2 = omemr2 - b2
-    onemr2pb2 = omemr2 + b2
     if k2 ≥ 1
         if k2 > 2
             kc2 = 1 - inv(k2)
