@@ -70,14 +70,6 @@ gradr([0.1, 0.1, 0.4, 0.26])
 
 For the most granular support for gradients and jacobians, peer into the depths of `polynomial/poly-grad.jl` and `polynomial/quad-grad.jl`. These functions are not part of the public API and are not guaranteed any stability according to [semantic versioning](https://semver.org/).
 
-### Orbits
-
-```@docs
-SimpleOrbit
-KeplerianOrbit
-Orbits.relative_position
-```
-
 ### Distributions
 
 ```@docs

@@ -1,7 +1,8 @@
 module Transits
 
 using ChainRulesCore
-using Reexport
+using Orbits
+using Orbits: AbstractOrbit
 using StaticArrays
 
 export AbstractLimbDark,
@@ -10,13 +11,8 @@ export AbstractLimbDark,
        IntegratedLimbDark,
        SecondaryLimbDark,
        compute,
-       Orbits,
        # distributions
        Kipping13
-
-include("orbits/Orbits.jl")
-@reexport using .Orbits
-using .Orbits: AbstractOrbit
 
 """
     AbstractLimbDark
@@ -81,10 +77,10 @@ julia> ld(orbit, 0u"d", 0.1)
 ```
 """
 function compute(ld::AbstractLimbDark, orbit::AbstractOrbit, t, r)
-    coords = Orbits.relative_position(orbit, t)
+    x, y, z = Orbits.relative_position(orbit, t)
     # make sure los is in front of star
-    if coords[3] > 0
-        μ = sqrt(coords[1]^2 + coords[2]^2)
+    if z > 0
+        μ = sqrt(x^2 + y^2)
         return compute(ld, μ, r)
     else
         return one(eltype(coords))
