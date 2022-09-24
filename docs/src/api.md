@@ -41,7 +41,7 @@ grad([0.1, 0.1, 0.4, 0.26])
 To help demonstrate the logic behind these chain rules, here we derive a simple gradient function manually.
 
 ```jldoctest grads
-using ChainRules
+using ChainRulesCore
 
 u_n = [0.4, 0.26]
 μ = 0.1

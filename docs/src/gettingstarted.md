@@ -4,6 +4,7 @@
 ## Usage
 
 ```julia
+using Orbits
 using Transits
 
 orbit = SimpleOrbit(period=3, duration=1)
