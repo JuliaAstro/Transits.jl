@@ -5,7 +5,7 @@ setup = quote
     using Transits
 end
 
-DocMeta.setdocmeta!(Transits, :DocTestSetup, setup; recursive = true)
+DocMeta.setdocmeta!(Transits, :DocTestSetup, setup; recursive=true)
 include("pages.jl")
 makedocs(;
     modules=[Transits],
@@ -17,11 +17,7 @@ makedocs(;
         canonical="https://juliaastro.github.io/Transits.jl",
         assets=String[],
     ),
-    pages = pages
+    pages=pages,
 )
 
-deploydocs(;
-    repo="github.com/JuliaAstro/Transits.jl",
-    push_preview=true,
-    devbranch="main"
-)
+deploydocs(; repo="github.com/JuliaAstro/Transits.jl", push_preview=true, devbranch="main")

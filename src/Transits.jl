@@ -7,13 +7,13 @@ using StaticArrays
 using Unitful
 
 export AbstractLimbDark,
-       PolynomialLimbDark,
-       QuadLimbDark,
-       IntegratedLimbDark,
-       SecondaryLimbDark,
-       compute,
-       # distributions
-       Kipping13
+    PolynomialLimbDark,
+    QuadLimbDark,
+    IntegratedLimbDark,
+    SecondaryLimbDark,
+    compute,
+    # distributions
+    Kipping13
 
 """
     AbstractLimbDark

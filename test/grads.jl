@@ -51,7 +51,7 @@ function finite_diff(b_, r_, u_n_, law=PolynomialLimbDark; diff=big(1e-18))
     else
         dfdb = (f₊ - f) / diff
     end
-    
+
     return Float64.([dfdb, dfdr])
 end
 
@@ -74,9 +74,11 @@ function test_compute_grad(b, r, u_n, law=PolynomialLimbDark)
     end
 end
 
-logspace(start, stop, N) = 10 .^range(log10(start), log10(stop), length=N)
+logspace(start, stop, N) = 10 .^ range(log10(start), log10(stop); length=N)
 
-test_coeffs = [[0.0], [1.0], [2.0, -1.0], [3.0, -3.0, 1.0], fill(0.1, 4), fill(0.1, 5), fill(0.1, 10)]
+test_coeffs = [
+    [0.0], [1.0], [2.0, -1.0], [3.0, -3.0, 1.0], fill(0.1, 4), fill(0.1, 5), fill(0.1, 10)
+]
 test_names = ["uniform", "linear", "quadratic", "cubic", "quartic", "quintic", "10th order"]
 
 @testset "`compute` grads - $name" for (name, u_n) in zip(test_names, test_coeffs)
@@ -85,21 +87,24 @@ test_names = ["uniform", "linear", "quadratic", "cubic", "quartic", "quintic", "
     nb = 50
     ϵ, δ = 1e-9, 1e-3
     for r in rs
-        bs = unique(abs.([
-            range(0, ϵ, length=nb);
-            range(ϵ, δ, length=nb);
-            range(δ, r - δ, length=nb);
-            -logspace(δ, ϵ, nb) .+ r;
-            range(r - ϵ, r + ϵ, length=nb);
-            logspace(ϵ, δ, nb) .+ r;
-            range(r + δ, 1 - r - δ, length=nb);
-            -logspace(δ, ϵ, nb) .+ (1 - r);
-            range(1 - r - ϵ, 1 - r + ϵ, length=nb);
-            logspace(ϵ, δ, nb) .+ (1 - r);
-            range(1 - r + δ, 1 + r - δ, length=nb);
-            -logspace(δ, ϵ, nb) .+ (1 + r);
-            range(1 + r - ϵ, 1 + r - 1e-13, length=nb)
-        ]))
+        bs = unique(
+            abs,
+            [
+                range(0, ϵ; length=nb)
+                range(ϵ, δ; length=nb)
+                range(δ, r - δ; length=nb)
+                -logspace(δ, ϵ, nb) .+ r
+                range(r - ϵ, r + ϵ; length=nb)
+                logspace(ϵ, δ, nb) .+ r
+                range(r + δ, 1 - r - δ; length=nb)
+                -logspace(δ, ϵ, nb) .+ (1 - r)
+                range(1 - r - ϵ, 1 - r + ϵ; length=nb)
+                logspace(ϵ, δ, nb) .+ (1 - r)
+                range(1 - r + δ, 1 + r - δ; length=nb)
+                -logspace(δ, ϵ, nb) .+ (1 + r)
+                range(1 + r - ϵ, 1 + r - 1e-13; length=nb)
+            ],
+        )
         test_compute_grad.(bs, r, (u_n,), PolynomialLimbDark)
         if length(u_n) < 3
             test_compute_grad.(bs, r, (u_n,), QuadLimbDark)
@@ -108,17 +113,20 @@ test_names = ["uniform", "linear", "quadratic", "cubic", "quartic", "quintic", "
 
     rs = [1, 1.000001, 2, 10, 100]
     for r in rs
-        bs = unique(abs.([
-            r - 1 + 1e-13;
-            logspace(ϵ, δ, nb) .+ (r - 1);
-            range(r - 1 + δ, r - δ, length=nb);
-            -logspace(δ, ϵ, nb) .+ r;
-            range(r - ϵ, r + ϵ, length=nb);
-            logspace(ϵ, δ, nb) .+ r;
-            range(r + δ, r + 1 - δ, length=nb);
-            -logspace(δ, ϵ, nb) .+ (r + 1);
-            r + 1 - 1e-13
-        ]))
+        bs = unique(
+            abs,
+            [
+                r - 1 + 1e-13
+                logspace(ϵ, δ, nb) .+ (r - 1)
+                range(r - 1 + δ, r - δ; length=nb)
+                -logspace(δ, ϵ, nb) .+ r
+                range(r - ϵ, r + ϵ; length=nb)
+                logspace(ϵ, δ, nb) .+ r
+                range(r + δ, r + 1 - δ; length=nb)
+                -logspace(δ, ϵ, nb) .+ (r + 1)
+                r + 1 - 1e-13
+            ],
+        )
         test_compute_grad.(bs, r, (u_n,), PolynomialLimbDark)
         if length(u_n) < 3
             test_compute_grad.(bs, r, (u_n,), QuadLimbDark)
@@ -135,7 +143,7 @@ end
 
     jac_numerical = FiniteDifferences.jacobian(central_fdm(5, 1), compute_gn, un_full)[1]'
 
-    @test jac_analytical ≈ jac_numerical atol=1e-8
+    @test jac_analytical ≈ jac_numerical atol = 1e-8
 end
 
 @testset "frule, rrule comparison - $name" for (name, u_n) in zip(test_names, test_coeffs)
@@ -174,8 +182,8 @@ end
             grad_rev = @inferred gradr(X)
             grad_for = @inferred gradf(X)
             grad_FD = ForwardDiff.gradient(primal, X)
-            @test grad_rev ≈ grad_for atol=1e-7
-            @test grad_rev ≈ grad_FD atol=1e-7
+            @test grad_rev ≈ grad_for atol = 1e-7
+            @test grad_rev ≈ grad_FD atol = 1e-7
         end
 
         test_grads([0.3, 0.2, u_n...])
@@ -218,8 +226,8 @@ end
                 grad_rev = @inferred gradr(X)
                 grad_for = @inferred gradf(X)
                 grad_FD = ForwardDiff.gradient(primal, X)
-                @test grad_rev ≈ grad_for atol=1e-7
-                @test grad_rev ≈ grad_FD atol=1e-7
+                @test grad_rev ≈ grad_for atol = 1e-7
+                @test grad_rev ≈ grad_FD atol = 1e-7
             end
 
             test_grads([0.3, 0.2, u_n...])

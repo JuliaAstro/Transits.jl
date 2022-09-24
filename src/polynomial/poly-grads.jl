@@ -1,7 +1,7 @@
 import ChainRulesCore: frule, rrule
 using LinearAlgebra
 
-function compute_gn_jac(u_n::AbstractVector{T}) where T
+function compute_gn_jac(u_n::AbstractVector{T}) where {T}
     n = length(u_n) - 1
     g_n = zero(u_n)
     # using `similar` in case u_n is e.g., `CuArray`
@@ -32,14 +32,16 @@ function compute_gn_jac(u_n::AbstractVector{T}) where T
         else
             g_n[begin + j] = a_n[begin + j] / (j + 2) + g_n[begin + j + 2]
             for i in 1:n
-                dgdu[begin + i, begin + j] = dadu[begin + i, begin + j] / (j + 2) + dgdu[begin + i, begin + j + 2]
+                dgdu[begin + i, begin + j] =
+                    dadu[begin + i, begin + j] / (j + 2) + dgdu[begin + i, begin + j + 2]
             end
         end
     end
     if n ≥ 3
         g_n[begin + 1] = a_n[begin + 1] + 3 * g_n[begin + 3]
         for i in 1:n
-            dgdu[begin + i, begin + 1] = dadu[begin + i, begin + 1] + 3 * dgdu[begin + i, begin + 3]
+            dgdu[begin + i, begin + 1] =
+                dadu[begin + i, begin + 1] + 3 * dgdu[begin + i, begin + 3]
         end
     elseif n ≥ 1
         g_n[begin + 1] = a_n[begin + 1]
@@ -62,7 +64,7 @@ function compute_gn_jac(u_n::AbstractVector{T}) where T
     return g_n, dgdu
 end
 
-function compute_uniform_grad(b::T, r; r2, b2, sqarea, fourbrinv) where T
+function compute_uniform_grad(b::T, r; r2, b2, sqarea, fourbrinv) where {T}
     if b ≤ 1 - r
         flux = π * (1 - r2)
         kap0 = convert(T, π)
@@ -82,8 +84,22 @@ function compute_uniform_grad(b::T, r; r2, b2, sqarea, fourbrinv) where T
     return (flux, kap0, kite_area2, kck), ∇s0
 end
 
-
-function compute_linear_grad(b::T, r; k2, kc, kc2, onembmr2, onembpr2, onembmr2inv, sqonembmr2, r2=r^2, b2=b^2, br=b * r, fourbr=4 * br, sqbr=sqrt(br)) where T
+function compute_linear_grad(
+    b::T,
+    r;
+    k2,
+    kc,
+    kc2,
+    onembmr2,
+    onembpr2,
+    onembmr2inv,
+    sqonembmr2,
+    r2=r^2,
+    b2=b^2,
+    br=b * r,
+    fourbr=4 * br,
+    sqbr=sqrt(br),
+) where {T}
     if iszero(b) # case 10
         Λ1 = -2 * π * sqrt(1 - r2)^3
         Eofk = 0.5 * π
@@ -101,7 +117,7 @@ function compute_linear_grad(b::T, r; k2, kc, kc2, onembmr2, onembpr2, onembmr2i
             Eofk = cel(m, one(T), one(T), 1 - m)
             Em1mKdm = cel(m, one(T), one(T), zero(T))
             Λ1 = π + 2 / 3 * ((2 * m - 3) * Eofk - m * Em1mKdm)
-                # + (b - r) * 4 * r * (Eofk - 2 * Em1mKdm)
+            # + (b - r) * 4 * r * (Eofk - 2 * Em1mKdm)
             ∇s1 = SA[-4 / 3 * r * (Eofk - 2 * Em1mKdm), -4 * r * Eofk]
         else # case 7
             m = 4 * r2
@@ -114,18 +130,39 @@ function compute_linear_grad(b::T, r; k2, kc, kc2, onembmr2, onembpr2, onembmr2i
         end
     else
         if b + r > 1 # case 2, case 8
-            Πofk, Eofk, Em1mKdm = cel(k2, kc, (b - r)^2 * kc2, zero(T), one(T), one(T), 3 * kc2 * (b - r) * (b + r), kc2, zero(T))
-            Λ1 = onembmr2 * (Πofk + (-3 + 6 * r2 + 2 * br) * Em1mKdm - fourbr * Eofk) / (3 * sqbr)
-            ∇s1 = SA[2 * r * onembmr2 * (-Em1mKdm + 2 * Eofk) / (sqbr * 3), -2 * r * onembmr2 * Em1mKdm / sqbr]
+            Πofk, Eofk, Em1mKdm = cel(
+                k2,
+                kc,
+                (b - r)^2 * kc2,
+                zero(T),
+                one(T),
+                one(T),
+                3 * kc2 * (b - r) * (b + r),
+                kc2,
+                zero(T),
+            )
+            Λ1 =
+                onembmr2 * (Πofk + (-3 + 6 * r2 + 2 * br) * Em1mKdm - fourbr * Eofk) /
+                (3 * sqbr)
+            ∇s1 = SA[
+                2 * r * onembmr2 * (-Em1mKdm + 2 * Eofk) / (sqbr * 3),
+                -2 * r * onembmr2 * Em1mKdm / sqbr,
+            ]
         elseif b + r < 1 # case 3 case 9
             bmrdbpr = (b - r) / (b + r)
             μ = 3 * bmrdbpr * onembmr2inv
             p = bmrdbpr^2 * onembpr2 * onembmr2inv
-            Πofk, Eofk, Em1mKdm = cel(inv(k2), kc, p, 1 + μ, one(T), one(T), p + μ, kc2, zero(T))
+            Πofk, Eofk, Em1mKdm = cel(
+                inv(k2), kc, p, 1 + μ, one(T), one(T), p + μ, kc2, zero(T)
+            )
             Λ1 = 2 * sqonembmr2 * (onembpr2 * Πofk - (4 - 7 * r2 - b2) * Eofk) / 3
-            ∇s1 = SA[-4 / 3 * r * sqonembmr2 * (Eofk - 2 * Em1mKdm), -4 * r * sqonembmr2 * Eofk]
+            ∇s1 = SA[
+                -4 / 3 * r * sqonembmr2 * (Eofk - 2 * Em1mKdm), -4 * r * sqonembmr2 * Eofk
+            ]
         else # case 4
-            Λ1 = 2 * acos(1 - 2 * r) - 2 * π * (r > 0.5) - (4 / 3 * (3 + 2 * r - 8 * r2) + 8 * (r + b - 1) * r) * sqrt(r * (1 - r))
+            Λ1 =
+                2 * acos(1 - 2 * r) - 2 * π * (r > 0.5) -
+                (4 / 3 * (3 + 2 * r - 8 * r2) + 8 * (r + b - 1) * r) * sqrt(r * (1 - r))
             Eofk = one(T)
             Em1mKdm = one(T)
             g = -8 * r * sqrt(r * (1 - r))
@@ -147,15 +184,17 @@ function compute_quadratic_grad(b, r; s0, r2, b2, kap0, kite_area2, k2, ∇s0)
     else
         Πmkap1 = atan(kite_area2, (r - 1) * (r + 1) - b2)
         four_pi_eta = 2 * (-Πmkap1 + η2 * kap0 - 0.25 * kite_area2 * (1 + 5 * r2 + b2))
-        ∇η = SA[2 / b * (4 * b2 * r2 * kap0 - (1 + r2pb2) * kite_area2),
-                8 * r * (r2pb2 * kap0 - kite_area2)]
+        ∇η = SA[
+            2 / b * (4 * b2 * r2 * kap0 - (1 + r2pb2) * kite_area2),
+            8 * r * (r2pb2 * kap0 - kite_area2),
+        ]
     end
     s2 = 2 * s0 + four_pi_eta
     ∇s2 = 2 * ∇s0 + ∇η
-    return  s2, ∇s2
+    return s2, ∇s2
 end
 
-function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
+function compute_grad(ld::PolynomialLimbDark, b::S, r) where {S}
     T = float(S)
     bcut = 1e-3
     n = ld.n_max
@@ -187,7 +226,7 @@ function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
             dfdr = ld.g_n[begin] * facd + ld.g_n[begin + 1] * facd * sqrt1mr2
         end
         fac = 2 * r2 * onemr2
-        for i in 2:ld.n_max
+        for i in 2:(ld.n_max)
             flux -= ld.g_n[begin + i] * fac
             dfdr += ld.g_n[begin + i] * facd * (2 * onemr2 - i * r2)
             dfdg[begin + i] -= fac
@@ -247,7 +286,22 @@ function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
     end
 
     ## compute linear term
-    (s1, Eofk, Em1mKdm), ∇s1 = compute_linear_grad(b, r; k2, kc, kc2, r2, b2, br, fourbr, sqbr, onembmr2, onembpr2, onembmr2inv, sqonembmr2)
+    (s1, Eofk, Em1mKdm), ∇s1 = compute_linear_grad(
+        b,
+        r;
+        k2,
+        kc,
+        kc2,
+        r2,
+        b2,
+        br,
+        fourbr,
+        sqbr,
+        onembmr2,
+        onembpr2,
+        onembmr2inv,
+        sqonembmr2,
+    )
 
     flux += ld.g_n[begin + 1] * s1
     ∇flux += ld.g_n[begin + 1] * ∇s1
@@ -274,32 +328,82 @@ function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
 
     ## higher order (N > 3) terms require solving Mn and Nn integrals
     if k2 < 0.5 && ld.n_max > 3
-        downwardM!(ld.Mn, ld.Mn_coeff; n_max=ld.n_max, sqonembmr2, sqbr, onemr2mb2, k, k2, sqarea, kap0, Eofk, Em1mKdm, kite_area2)
+        downwardM!(
+            ld.Mn,
+            ld.Mn_coeff;
+            n_max=ld.n_max,
+            sqonembmr2,
+            sqbr,
+            onemr2mb2,
+            k,
+            k2,
+            sqarea,
+            kap0,
+            Eofk,
+            Em1mKdm,
+            kite_area2,
+        )
         if b < bcut
-            Nn_lower!(ld.Nn, ld.Nn_coeff; Mn=ld.Mn, n_max=ld.n_max, onembpr2, sqonembmr2, kap0, kc, k2, sqbr, k, Eofk, Em1mKdm)
+            Nn_lower!(
+                ld.Nn,
+                ld.Nn_coeff;
+                Mn=ld.Mn,
+                n_max=ld.n_max,
+                onembpr2,
+                sqonembmr2,
+                kap0,
+                kc,
+                k2,
+                sqbr,
+                k,
+                Eofk,
+                Em1mKdm,
+            )
         end
     else
-        upwardM!(ld.Mn; sqbr, n_max=ld.n_max, sqonembmr2, onemr2mb2, sqarea, k2, kap0, Eofk, Em1mKdm, kite_area2)
+        upwardM!(
+            ld.Mn;
+            sqbr,
+            n_max=ld.n_max,
+            sqonembmr2,
+            onemr2mb2,
+            sqarea,
+            k2,
+            kap0,
+            Eofk,
+            Em1mKdm,
+            kite_area2,
+        )
         if b < bcut
-            Nn_raise!(ld.Nn, ld.Mn; n_max=ld.n_max, onembpr2, kap0, kc, k2, sqbr, k, Eofk, Em1mKdm)
+            Nn_raise!(
+                ld.Nn, ld.Mn; n_max=ld.n_max, onembpr2, kap0, kc, k2, sqbr, k, Eofk, Em1mKdm
+            )
         end
     end
 
     # compute remaining terms
-    for n in 3:ld.n_max
-        pofgn_M = 2 * r2 * ld.Mn[begin + n] - n / (n + 2) *
-                       (onemr2mb2 * ld.Mn[begin + n] + sqarea * ld.Mn[begin + n - 2])
+    for n in 3:(ld.n_max)
+        pofgn_M =
+            2 * r2 * ld.Mn[begin + n] -
+            n / (n + 2) * (onemr2mb2 * ld.Mn[begin + n] + sqarea * ld.Mn[begin + n - 2])
         flux -= ld.g_n[begin + n] * pofgn_M
         dfdg[begin + n] = -pofgn_M
         dpdr_M = 2 * r * ((n + 2) * ld.Mn[begin + n] - n * ld.Mn[begin + n - 2])
 
         if b < bcut
-            dpdb_M = n * (ld.Mn[begin + n - 2] * (2 * r^3 + b^3 - b - 3 * r2 * b) + b * ld.Mn[begin + n] - 4 * r^3 * ld.Nn[begin + n - 2])
+            dpdb_M =
+                n * (
+                    ld.Mn[begin + n - 2] * (2 * r^3 + b^3 - b - 3 * r2 * b) +
+                    b * ld.Mn[begin + n] - 4 * r^3 * ld.Nn[begin + n - 2]
+                )
         else
-            dpdb_M = n / b * ((ld.Mn[begin + n] - ld.Mn[begin + n - 2]) * (r2 + b2) + (b2 - r2)^2 * ld.Mn[begin + n - 2])
+            dpdb_M =
+                n / b * (
+                    (ld.Mn[begin + n] - ld.Mn[begin + n - 2]) * (r2 + b2) +
+                    (b2 - r2)^2 * ld.Mn[begin + n - 2]
+                )
         end
         ∇flux -= ld.g_n[begin + n] * SA[dpdb_M, dpdr_M]
-
     end
     dfdg[begin] -= flux * ld.norm * π
     dfdg[begin + 1] -= flux * ld.norm * π * 2 / 3
@@ -307,16 +411,18 @@ function compute_grad(ld::PolynomialLimbDark, b::S, r) where S
     return flux * ld.norm, dfdg * ld.norm, dfdb, dfdr
 end
 
-function frule((_, Δld, Δb, Δr), ::typeof(compute), ld::LD, b, r) where {LD <: PolynomialLimbDark}
+function frule(
+    (_, Δld, Δb, Δr), ::typeof(compute), ld::LD, b, r
+) where {LD<:PolynomialLimbDark}
     f, dfdg, dfdb, dfdr = compute_grad(ld, b, r)
     ∂g_n = dot(dfdg, Δld.g_n)
     return f, ∂g_n + dfdb * Δb + dfdr * Δr
 end
 
-function rrule(::typeof(compute), ld::LD, b, r) where {LD <: PolynomialLimbDark}
+function rrule(::typeof(compute), ld::LD, b, r) where {LD<:PolynomialLimbDark}
     f, dfdg, dfdb, dfdr = compute_grad(ld, b, r)
     function compute_pullback(Δf)
-        ∂ld = Tangent{LD}(g_n=dfdg * Δf)
+        ∂ld = Tangent{LD}(; g_n=dfdg * Δf)
         ∂b = dfdb * Δf
         ∂r = dfdr * Δf
         return NoTangent(), ∂ld, ∂b, ∂r
@@ -324,7 +430,9 @@ function rrule(::typeof(compute), ld::LD, b, r) where {LD <: PolynomialLimbDark}
     return f, compute_pullback
 end
 
-function frule((_, Δu_n), ::Type{<:PolynomialLimbDark}, u::AbstractVector{S}; maxiter=100) where S
+function frule(
+    (_, Δu_n), ::Type{<:PolynomialLimbDark}, u::AbstractVector{S}; maxiter=100
+) where {S}
     T = float(S)
     # add constant u_0 term
     n_max = length(u)
@@ -347,13 +455,12 @@ function frule((_, Δu_n), ::Type{<:PolynomialLimbDark}, u::AbstractVector{S}; m
     Nn = similar(g_n)
 
     Ω = PolynomialLimbDark(n_max, u_n, g_n, Mn_coeff, Nn_coeff, norm, Mn, Nn)
-    ∂g_n = @views ∇g_n[begin + 1:end, :]' * Δu_n
-    ∂Ω = Tangent{typeof(Ω)}(g_n=∂g_n)
+    ∂g_n = @views ∇g_n[(begin + 1):end, :]' * Δu_n
+    ∂Ω = Tangent{typeof(Ω)}(; g_n=∂g_n)
     return Ω, ∂Ω
 end
 
-
-function rrule(::Type{<:PolynomialLimbDark}, u::AbstractVector{S}; maxiter=100) where S
+function rrule(::Type{<:PolynomialLimbDark}, u::AbstractVector{S}; maxiter=100) where {S}
     T = float(S)
     # add constant u_0 term
     n_max = length(u)
@@ -376,7 +483,7 @@ function rrule(::Type{<:PolynomialLimbDark}, u::AbstractVector{S}; maxiter=100) 
     Nn = similar(g_n)
 
     Ω = PolynomialLimbDark(n_max, u_n, g_n, Mn_coeff, Nn_coeff, norm, Mn, Nn)
-    ∂g_n = @view ∇g_n[begin + 1:end, :]
+    ∂g_n = @view ∇g_n[(begin + 1):end, :]
 
     proj = ProjectTo(u)
 

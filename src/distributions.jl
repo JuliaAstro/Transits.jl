@@ -36,7 +36,7 @@ struct Kipping13 <: MultivariateDistribution{Continuous} end
 
 Base.length(::Kipping13) = 2
 
-function _rand!(rng::AbstractRNG, ::Kipping13, x::AbstractVector{T}) where T
+function _rand!(rng::AbstractRNG, ::Kipping13, x::AbstractVector{T}) where {T}
     q1, q2 = rand(rng, T, 2)
     sqrtq1 = sqrt(q1)
     twoq2 = 2 * q2

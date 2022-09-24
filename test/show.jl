@@ -31,7 +31,8 @@ end
 @testset "SecondaryLimbDark" begin
     ld = SecondaryLimbDark(u)
 
-    @test sprint(show, ld) == "SecondaryLimbDark(PolynomialLimbDark, PolynomialLimbDark, 1.0)"
+    @test sprint(show, ld) ==
+        "SecondaryLimbDark(PolynomialLimbDark, PolynomialLimbDark, 1.0)"
 
     @test sprint(show, "text/plain", ld) == """
     SecondaryLimbDark

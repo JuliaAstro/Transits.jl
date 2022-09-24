@@ -21,7 +21,6 @@ using HypothesisTests
         t = ApproximateOneSampleKSTest(q, Uniform(0, 1))
         @test t.δ < 0.05
     end
-
 end
 
 @testset "Kipping13Transform" begin
@@ -40,8 +39,6 @@ end
     @test all(eachcol(ys)) do y
         u1, u2 = inverse(𝔅)(y)
 
-        u1 + u2 ≤ 1 &&
-        u1 + 2 * u2 ≥ 0 &&
-        u1 ≥ 0
+        u1 + u2 ≤ 1 && u1 + 2 * u2 ≥ 0 && u1 ≥ 0
     end
 end

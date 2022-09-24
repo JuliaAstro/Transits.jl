@@ -1,7 +1,7 @@
 
 using FastGaussQuadrature
 
-struct IntegratedLimbDark{LD <: AbstractLimbDark,WT,NT} <: AbstractLimbDark
+struct IntegratedLimbDark{LD<:AbstractLimbDark,WT,NT} <: AbstractLimbDark
     driver::LD
     order::Int
     nodes::NT
@@ -58,8 +58,9 @@ function IntegratedLimbDark(u::AbstractVector; kwargs...)
     return IntegratedLimbDark(driver; kwargs...)
 end
 
-compute(ld::IntegratedLimbDark, orbit::AbstractOrbit, t, r; texp=nothing) =
-    compute(ld, orbit, t, r, texp)
+function compute(ld::IntegratedLimbDark, orbit::AbstractOrbit, t, r; texp=nothing)
+    return compute(ld, orbit, t, r, texp)
+end
 
 function compute(ld::IntegratedLimbDark, orbit::AbstractOrbit, t, r, texp)
     # perform change of interval
@@ -72,17 +73,18 @@ function compute(ld::IntegratedLimbDark, orbit::AbstractOrbit, t, r, texp)
     return 0.5 * flux
 end
 
-compute(ld::IntegratedLimbDark, orbit::AbstractOrbit, t, r, ::Nothing) =
-    compute(ld.driver, orbit, t, r)
+function compute(ld::IntegratedLimbDark, orbit::AbstractOrbit, t, r, ::Nothing)
+    return compute(ld.driver, orbit, t, r)
+end
 
-function Base.show(io::IO, ld::IntegratedLimbDark{L1}) where L1
+function Base.show(io::IO, ld::IntegratedLimbDark{L1}) where {L1}
     N = length(ld.nodes)
     np = L1.name.name
-    print(io, "IntegratedLimbDark($np, $N)")
+    return print(io, "IntegratedLimbDark($np, $N)")
 end
 
 function Base.show(io::IO, ::MIME"text/plain", ld::IntegratedLimbDark)
     p = ld.driver
     N = length(ld.nodes)
-    print(io, "IntegratedLimbDark\n driver: $p\n N: $N")
+    return print(io, "IntegratedLimbDark\n driver: $p\n N: $N")
 end

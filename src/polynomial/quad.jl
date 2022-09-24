@@ -1,7 +1,7 @@
 
 using StaticArrays
 
-struct QuadLimbDark{T,VT <: StaticVector{3,T}} <: AbstractLimbDark
+struct QuadLimbDark{T,VT<:StaticVector{3,T}} <: AbstractLimbDark
     n_max::Int
     u_n::VT
     g_n::VT
@@ -52,7 +52,7 @@ ld.(b, r)
 
 See references for [`PolynomialLimbDark`](@ref)
 """
-function QuadLimbDark(u::AbstractVector{T}) where T
+function QuadLimbDark(u::AbstractVector{T}) where {T}
     n_max = length(u)
     # add constant u_0 term
     if n_max == 0
@@ -74,7 +74,7 @@ function QuadLimbDark(u::AbstractVector{T}) where T
     return QuadLimbDark(n_max, u_n, g_n, norm)
 end
 
-function compute(ld::QuadLimbDark, b::S, r) where S
+function compute(ld::QuadLimbDark, b::S, r) where {S}
     T = float(S)
     ## check for trivial cases
     if b ≥ 1 + r || iszero(r)
@@ -141,7 +141,9 @@ function compute(ld::QuadLimbDark, b::S, r) where S
     end
 
     ## compute linear term
-    s1, Eofk, Em1mKdm = compute_linear(b, r; k2, kc, kc2, r2, b2, br, fourbr, sqbr, onembmr2, onembpr2, onembmr2inv)
+    s1, Eofk, Em1mKdm = compute_linear(
+        b, r; k2, kc, kc2, r2, b2, br, fourbr, sqbr, onembmr2, onembpr2, onembmr2inv
+    )
 
     flux += ld.g_n[begin + 1] * s1
 
@@ -156,7 +158,7 @@ function compute(ld::QuadLimbDark, b::S, r) where S
     return flux * ld.norm
 end
 
-function compute_gn(u_n::StaticVector{3,T}) where T
+function compute_gn(u_n::StaticVector{3,T}) where {T}
     g_0 = 1 - u_n[begin + 1] - 1.5 * u_n[begin + 2]
     g_1 = u_n[begin + 1] + 2 * u_n[begin + 2]
     g_2 = -0.25 * u_n[begin + 2]
@@ -164,11 +166,11 @@ function compute_gn(u_n::StaticVector{3,T}) where T
 end
 
 function Base.show(io::IO, ld::QuadLimbDark)
-    print(io, "QuadLimbDark(", ld.u_n, ")")
+    return print(io, "QuadLimbDark(", ld.u_n, ")")
 end
 function Base.show(io::IO, ::MIME"text/plain", ld::QuadLimbDark)
-    print(io, "QuadLimbDark\n u_n: ", ld.u_n)
+    return print(io, "QuadLimbDark\n u_n: ", ld.u_n)
 end
 function Base.show(io::IO, ::MIME"text/html", ld::QuadLimbDark)
-    print(io, "QuadLimbDark\n u<sub>n</sub>: ", ld.u_n)
+    return print(io, "QuadLimbDark\n u<sub>n</sub>: ", ld.u_n)
 end

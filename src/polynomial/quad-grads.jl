@@ -1,8 +1,7 @@
 import ChainRulesCore: frule, rrule
 using LinearAlgebra
 
-
-function compute_grad(ld::QuadLimbDark, b::S, r) where S
+function compute_grad(ld::QuadLimbDark, b::S, r) where {S}
     T = float(S)
     bcut = 1e-3
     dfdg1 = zero(T)
@@ -40,9 +39,9 @@ function compute_grad(ld::QuadLimbDark, b::S, r) where S
             dfdr += ld.g_n[begin + 2] * facd * 2 * (onemr2 - r2)
         end
         dfdr *= π * ld.norm
-        dfdg = SA[(onemr2 - flux) * π * ld.norm,
-                  2 / 3 * (sqrt1mr2^3 - flux) * π * ld.norm,
-                  -fac]
+        dfdg = SA[
+            (onemr2 - flux) * π * ld.norm, 2 / 3 * (sqrt1mr2^3 - flux) * π * ld.norm, -fac
+        ]
         return flux * π * ld.norm, dfdg * ld.norm, zero(T), dfdr
     end
 
@@ -93,7 +92,22 @@ function compute_grad(ld::QuadLimbDark, b::S, r) where S
     end
 
     ## compute linear term
-    (s1, Eofk, Em1mKdm), ∇s1 = compute_linear_grad(b, r; k2, kc, kc2, r2, b2, br, fourbr, sqbr, onembmr2, onembpr2, onembmr2inv, sqonembmr2)
+    (s1, Eofk, Em1mKdm), ∇s1 = compute_linear_grad(
+        b,
+        r;
+        k2,
+        kc,
+        kc2,
+        r2,
+        b2,
+        br,
+        fourbr,
+        sqbr,
+        onembmr2,
+        onembpr2,
+        onembmr2inv,
+        sqonembmr2,
+    )
 
     flux += ld.g_n[begin + 1] * s1
     ∇flux += ld.g_n[begin + 1] * ∇s1
@@ -122,16 +136,16 @@ end
 
 ####
 
-function frule((_, Δld, Δb, Δr), ::typeof(compute), ld::LD, b, r) where {LD <: QuadLimbDark}
+function frule((_, Δld, Δb, Δr), ::typeof(compute), ld::LD, b, r) where {LD<:QuadLimbDark}
     f, dfdg, dfdb, dfdr = compute_grad(ld, b, r)
     ∂g_n = dot(dfdg, Δld.g_n)
     return f, ∂g_n + dfdb * Δb + dfdr * Δr
 end
 
-function rrule(::typeof(compute), ld::LD, b, r) where {LD <: QuadLimbDark}
+function rrule(::typeof(compute), ld::LD, b, r) where {LD<:QuadLimbDark}
     f, dfdg, dfdb, dfdr = compute_grad(ld, b, r)
     function compute_pullback(Δf)
-        ∂ld = Tangent{LD}(g_n=dfdg * Δf)
+        ∂ld = Tangent{LD}(; g_n=dfdg * Δf)
         ∂b = dfdb * Δf
         ∂r = dfdr * Δf
         return NoTangent(), ∂ld, ∂b, ∂r
@@ -139,12 +153,14 @@ function rrule(::typeof(compute), ld::LD, b, r) where {LD <: QuadLimbDark}
     return f, compute_pullback
 end
 
-function frule((_, Δu_n), ::Type{<:QuadLimbDark}, u_n::AbstractVector{T}) where T
+function frule((_, Δu_n), ::Type{<:QuadLimbDark}, u_n::AbstractVector{T}) where {T}
     Ω = QuadLimbDark(u_n)
-    ∇g_n = SA[-one(T) -1.5
-               one(T)  2.0
-              zero(T) -0.25]
-    
+    ∇g_n = SA[
+        -one(T) -1.5
+        one(T) 2.0
+        zero(T) -0.25
+    ]
+
     # calculate flux normalization factor, which only depends on first two terms
     N = length(u_n)
     if N == 0
@@ -155,21 +171,21 @@ function frule((_, Δu_n), ::Type{<:QuadLimbDark}, u_n::AbstractVector{T}) where
         Δu_n_full = SA[Δu_n[begin], Δu_n[begin + 1]]
         ∂g_n = ∇g_n * Δu_n_full
     end
-    ∂Ω = Tangent{typeof(Ω)}(g_n=∂g_n)
+    ∂Ω = Tangent{typeof(Ω)}(; g_n=∂g_n)
     return Ω, ∂Ω
 end
 
-
-function rrule(::Type{<:QuadLimbDark}, u_n::AbstractVector{T}; maxiter=100) where T
+function rrule(::Type{<:QuadLimbDark}, u_n::AbstractVector{T}; maxiter=100) where {T}
     Ω = QuadLimbDark(u_n)
-    ∇g_n = SA[-one(T)  one(T) zero(T)
-                 -1.5     2.0  -0.25]
+    ∇g_n = SA[
+        -one(T) one(T) zero(T)
+        -1.5 2.0 -0.25
+    ]
     N = length(u_n)
     proj = ProjectTo(u_n)
     function QuadLimbDark_pullback(Δld)
-        ∂u = @view(∇g_n[begin:begin+N-1, :]) * Δld.g_n
+        ∂u = @view(∇g_n[begin:(begin + N - 1), :]) * Δld.g_n
         return NoTangent(), proj(∂u)
     end
     return Ω, QuadLimbDark_pullback
 end
-

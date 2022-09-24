@@ -7,13 +7,12 @@ using Statistics
 using StatsPlots, ColorSchemes
 using ProgressLogging
 
-
 N_pts = [100, 316, 1000, 3160, 10000, 31600, 100000]
 N_us = [1 2 3 5 8 13 21 34 55 90 144]
 
 function benchmark(N_u, N_pts; r=0.1)
     u = ones(N_u) ./ N_u
-    b = [sqrt(((i - N_pts/2) * 2/N_pts * (1 + 2 * r))^2) for i in 1:N_pts]
+    b = [sqrt(((i - N_pts / 2) * 2 / N_pts * (1 + 2 * r))^2) for i in 1:N_pts]
 
     ld = PolynomialLimbDark(u)
     output = similar(b)
@@ -35,7 +34,7 @@ labels = reduce(hcat, "uₙ: $N" for N in N_us)
 
 plot(
     N_pts,
-    vals,
+    vals;
     scale=:log10,
     ls=:solid,
     m=:o,
@@ -44,13 +43,12 @@ plot(
     lab=labels,
     xlabel="number of points",
     ylabel="timing [s]",
-    leg=:topleft
+    leg=:topleft,
 )
-
 
 function benchmark_limbdark(N_u, N_pts; r=0.1)
     u = ones(N_u) ./ N_u
-    b = [sqrt(((i - N_pts/2) * 2/N_pts * (1 + 2 * r))^2) for i in 1:N_pts]
+    b = [sqrt(((i - N_pts / 2) * 2 / N_pts * (1 + 2 * r))^2) for i in 1:N_pts]
 
     trans = Limbdark.transit_init(r, b[1], u, true)
     output = similar(b)
@@ -71,7 +69,7 @@ end
 
 plot(
     N_pts,
-    vals_limbdark ./ vals,
+    vals_limbdark ./ vals;
     xscale=:log10,
     ls=:solid,
     m=:o,
@@ -79,13 +77,13 @@ plot(
     palette=palette(:plasma, length(N_us) + 2),
     lab=labels,
     xlabel="number of points",
-    ylabel="relative speedup (times faster) - Limbdark.jl"
+    ylabel="relative speedup (times faster) - Limbdark.jl",
 )
 
-tmed = median(vals ./ vals[:, 1], dims=1)
+tmed = median(vals ./ vals[:, 1]; dims=1)
 plot(
-    N_us |> vec,
-    tmed |> vec,
+    vec(N_us),
+    vec(tmed);
     scale=:log10,
     ls=:solid,
     m=:o,
@@ -94,17 +92,16 @@ plot(
     xlabel="number of limb-darkening coefficients",
     ylabel="relative timing",
     ylims=(0.8, 10),
-    leg=:topleft
+    leg=:topleft,
 )
 plot!(
-    N_us |> vec, 
-    median(vals_limbdark ./ vals_limbdark[:, 1], dims=1) |> vec,
+    vec(N_us),
+    vec(median(vals_limbdark ./ vals_limbdark[:, 1]; dims=1));
     lab="Limbdark.jl",
     c=2,
     ls=:solid,
     m=:o,
-    msw=0
+    msw=0,
 )
-plot!(N_us |> vec, n -> n^(0.2), ls=:dash, c=:gray, lab=L"N^{0.2}")
-plot!(N_us |> vec, n -> tmed[end] * n / N_us[1, end], ls=:dash, c=:gray, lab=L"N^1")
-
+plot!(vec(N_us), n -> n^(0.2); ls=:dash, c=:gray, lab=L"N^{0.2}")
+plot!(vec(N_us), n -> tmed[end] * n / N_us[1, end]; ls=:dash, c=:gray, lab=L"N^1")
