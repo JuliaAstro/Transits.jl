@@ -87,24 +87,22 @@ test_names = ["uniform", "linear", "quadratic", "cubic", "quartic", "quintic", "
     nb = 50
     ϵ, δ = 1e-9, 1e-3
     for r in rs
-        bs = unique(
-            abs,
-            [
-                range(0, ϵ; length=nb)
-                range(ϵ, δ; length=nb)
-                range(δ, r - δ; length=nb)
-                -logspace(δ, ϵ, nb) .+ r
-                range(r - ϵ, r + ϵ; length=nb)
-                logspace(ϵ, δ, nb) .+ r
-                range(r + δ, 1 - r - δ; length=nb)
-                -logspace(δ, ϵ, nb) .+ (1 - r)
-                range(1 - r - ϵ, 1 - r + ϵ; length=nb)
-                logspace(ϵ, δ, nb) .+ (1 - r)
-                range(1 - r + δ, 1 + r - δ; length=nb)
-                -logspace(δ, ϵ, nb) .+ (1 + r)
-                range(1 + r - ϵ, 1 + r - 1e-13; length=nb)
-            ],
-        )
+        ranges = [
+            range(0, ϵ; length=nb)
+            range(ϵ, δ; length=nb)
+            range(δ, r - δ; length=nb)
+            -logspace(δ, ϵ, nb) .+ r
+            range(r - ϵ, r + ϵ; length=nb)
+            logspace(ϵ, δ, nb) .+ r
+            range(r + δ, 1 - r - δ; length=nb)
+            -logspace(δ, ϵ, nb) .+ (1 - r)
+            range(1 - r - ϵ, 1 - r + ϵ; length=nb)
+            logspace(ϵ, δ, nb) .+ (1 - r)
+            range(1 - r + δ, 1 + r - δ; length=nb)
+            -logspace(δ, ϵ, nb) .+ (1 + r)
+            range(1 + r - ϵ, 1 + r - 1e-13; length=nb)
+        ]
+        bs = unique(abs.(ranges))
         test_compute_grad.(bs, r, (u_n,), PolynomialLimbDark)
         if length(u_n) < 3
             test_compute_grad.(bs, r, (u_n,), QuadLimbDark)
@@ -113,20 +111,18 @@ test_names = ["uniform", "linear", "quadratic", "cubic", "quartic", "quintic", "
 
     rs = [1, 1.000001, 2, 10, 100]
     for r in rs
-        bs = unique(
-            abs,
-            [
-                r - 1 + 1e-13
-                logspace(ϵ, δ, nb) .+ (r - 1)
-                range(r - 1 + δ, r - δ; length=nb)
-                -logspace(δ, ϵ, nb) .+ r
-                range(r - ϵ, r + ϵ; length=nb)
-                logspace(ϵ, δ, nb) .+ r
-                range(r + δ, r + 1 - δ; length=nb)
-                -logspace(δ, ϵ, nb) .+ (r + 1)
-                r + 1 - 1e-13
-            ],
-        )
+        ranges = [
+            r - 1 + 1e-13
+            logspace(ϵ, δ, nb) .+ (r - 1)
+            range(r - 1 + δ, r - δ; length=nb)
+            -logspace(δ, ϵ, nb) .+ r
+            range(r - ϵ, r + ϵ; length=nb)
+            logspace(ϵ, δ, nb) .+ r
+            range(r + δ, r + 1 - δ; length=nb)
+            -logspace(δ, ϵ, nb) .+ (r + 1)
+            r + 1 - 1e-13
+        ]
+        bs = unique(abs.(ranges))
         test_compute_grad.(bs, r, (u_n,), PolynomialLimbDark)
         if length(u_n) < 3
             test_compute_grad.(bs, r, (u_n,), QuadLimbDark)
