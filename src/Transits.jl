@@ -4,6 +4,7 @@ using ChainRulesCore
 using Orbits
 using Orbits: AbstractOrbit
 using StaticArrays
+using Unitful
 
 export AbstractLimbDark,
        PolynomialLimbDark,
@@ -77,13 +78,15 @@ julia> ld(orbit, 0u"d", 0.1)
 ```
 """
 function compute(ld::AbstractLimbDark, orbit::AbstractOrbit, t, r)
-    x, y, z = Orbits.relative_position(orbit, t)
+    coords = Orbits.relative_position(orbit, t)
+    # strip units, if necessary (e.g., KeplerianOrbit)
+    x, y, z = ustrip.(coords)
     # make sure los is in front of star
     if z > 0
         μ = sqrt(x^2 + y^2)
         return compute(ld, μ, r)
     else
-        return one(eltype(coords))
+        return one(Base.promote_typeof(x, y, z))
     end
 end
 

@@ -1,9 +1,10 @@
 using ChainRulesCore
 using ChainRulesTestUtils
+using Orbits
 using QuadGK
 using StableRNGs
-using Transits
 using Test
+using Transits
 using Unitful, UnitfulAstro
 
 Unitful.preferunits(u"Rsun,Msun,d"...)
@@ -24,9 +25,6 @@ rng = StableRNG(2752)
     include("distributions.jl")
     include("elliptic.jl")
     include("grads.jl")
-    include("orbits/keplerian.jl")
-    include("orbits/simple.jl")
-    include("orbits/solvers.jl")
     include("poly.jl")
     include("show.jl")
 end

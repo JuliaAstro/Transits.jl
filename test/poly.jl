@@ -145,3 +145,33 @@ end
         @test ld1.(orbit, t, r; texp) ≈ ld2.(orbit, t, r; texp)
     end
 end
+
+@testset "Keplerian orbits" begin
+    ld = PolynomialLimbDark([0.4, 0.26])
+
+    unitless = KeplerianOrbit(
+        period = 40.57,
+        ecc = 0.42,
+        Omega = 318.6,
+        tp = 1972.12,
+        incl = 54.7,
+        a = 4785.3256,
+        omega = 72.6
+    )
+
+    f = compute(ld, unitless, unitless.tp, 0.1)
+
+    unitful = KeplerianOrbit(;
+        period = 40.57u"yr",
+        ecc = 0.42,
+        Omega = 318.6u"°",
+        tp = 1972.12u"yr",
+        incl = 54.7u"°",
+        a = 22.254u"AU",
+        omega = 72.6u"°",
+    )
+
+    f_unit = compute(ld, unitful, unitful.tp, 0.1)
+
+    @test f ≈ f_unit
+end
