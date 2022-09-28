@@ -1,6 +1,5 @@
 
-
-struct SecondaryLimbDark{LD1 <: AbstractLimbDark,LD2 <: AbstractLimbDark,T} <: AbstractLimbDark
+struct SecondaryLimbDark{LD1<:AbstractLimbDark,LD2<:AbstractLimbDark,T} <: AbstractLimbDark
     primary_driver::LD1
     secondary_driver::LD2
     brightness_ratio::T
@@ -25,6 +24,7 @@ where $f_p$ is to the primary flux, $f_s$ is to the secondary flux, and $\eta$ i
 
 # Examples
 ```jldoctest second
+using Orbits
 # equal size and limb darkening
 r = 1.0
 u = [0.4, 0.26]
@@ -41,7 +41,9 @@ fp ≈ brightness_ratio * fs
 true
 ```
 """
-function SecondaryLimbDark(driver1::AbstractLimbDark, driver2::AbstractLimbDark; brightness_ratio=1.0)
+function SecondaryLimbDark(
+    driver1::AbstractLimbDark, driver2::AbstractLimbDark; brightness_ratio=1.0
+)
     return SecondaryLimbDark(driver1, driver2, brightness_ratio)
 end
 
@@ -63,12 +65,12 @@ function Base.show(io::IO, ld::SecondaryLimbDark{L1,L2}) where {L1,L2}
     r = ld.brightness_ratio
     np = L1.name.name
     ns = L2.name.name
-    print(io, "SecondaryLimbDark($np, $ns, $r)")
+    return print(io, "SecondaryLimbDark($np, $ns, $r)")
 end
 
 function Base.show(io::IO, ::MIME"text/plain", ld::SecondaryLimbDark)
     p = ld.primary_driver
     s = ld.secondary_driver
     r = ld.brightness_ratio
-    print(io, "SecondaryLimbDark\n primary: $p\n secondary: $s\n ratio: $r")
+    return print(io, "SecondaryLimbDark\n primary: $p\n secondary: $s\n ratio: $r")
 end

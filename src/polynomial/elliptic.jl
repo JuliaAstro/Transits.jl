@@ -37,7 +37,7 @@ function cel(k2, kc, p, a, b)
         pinv = inv(p)
         b = -q * ginv^2 * pinv + a * p
     end
-# Compute recursion:
+    # Compute recursion:
     f = a
     a += b * pinv
     g = ee * pinv
@@ -46,7 +46,8 @@ function cel(k2, kc, p, a, b)
     p += g
     g = m
     m += kc
-    iter = 0; itmax = 50
+    iter = 0
+    itmax = 50
     while abs(g - kc) > g * ca && iter < itmax
         kc = sqrt(ee)
         kc += kc
@@ -139,9 +140,9 @@ function cel(k2, kc, p, a1, a2, a3, b1, b2, b3)
         b1 += b1
         b2 += b2
         b3 += b3
-        p  += g
+        p += g
         p1 += g1
-        g  = m
+        g = m
         m += kc
         iter += 1
     end

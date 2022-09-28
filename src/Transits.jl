@@ -1,22 +1,19 @@
 module Transits
 
 using ChainRulesCore
-using Reexport
+using Orbits
+using Orbits: AbstractOrbit
 using StaticArrays
+using Unitful
 
 export AbstractLimbDark,
-       PolynomialLimbDark,
-       QuadLimbDark,
-       IntegratedLimbDark,
-       SecondaryLimbDark,
-       compute,
-       Orbits,
-       # distributions
-       Kipping13
-
-include("orbits/Orbits.jl")
-@reexport using .Orbits
-using .Orbits: AbstractOrbit
+    PolynomialLimbDark,
+    QuadLimbDark,
+    IntegratedLimbDark,
+    SecondaryLimbDark,
+    compute,
+    # distributions
+    Kipping13
 
 """
     AbstractLimbDark
@@ -59,6 +56,8 @@ Compute the relative flux by calculating the impact parameter at time `t` from t
 
 # Examples
 ```jldoctest orb
+julia> using Orbits
+
 julia> ld = PolynomialLimbDark([0.4, 0.26]);
 
 julia> orbit = SimpleOrbit(period=3, duration=1);
@@ -82,12 +81,14 @@ julia> ld(orbit, 0u"d", 0.1)
 """
 function compute(ld::AbstractLimbDark, orbit::AbstractOrbit, t, r)
     coords = Orbits.relative_position(orbit, t)
+    # strip units, if necessary (e.g., KeplerianOrbit)
+    x, y, z = ustrip.(coords)
     # make sure los is in front of star
-    if coords[3] > 0
-        μ = sqrt(coords[1]^2 + coords[2]^2)
+    if z > 0
+        μ = sqrt(x^2 + y^2)
         return compute(ld, μ, r)
     else
-        return one(eltype(coords))
+        return one(Base.promote_typeof(x, y, z))
     end
 end
 

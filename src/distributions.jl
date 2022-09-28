@@ -13,17 +13,17 @@ A non-informative prior for two-parameter limb-darkening coefficients using *tri
 # Examples
 
 ```jldoctest
-julia> using Random; rng = Random.seed!(10);
+julia> using StableRNGs; rng = StableRNG(10);
 
 julia> rand(rng, Kipping13())
 2-element Vector{Float64}:
- 0.24716310305467298
- 0.08836997249298882
+  0.3361047299132651
+ -0.025681638815114587
 
 julia> rand(rng, Kipping13(), 5)
 2×5 Matrix{Float64}:
- 0.0664907  0.124817   1.00732    0.806902  0.74165
- 0.520411   0.222718  -0.389412  -0.314755  0.0768429
+ 0.0621057   0.992689   1.77965    0.784055  0.186386
+ 0.0659477  -0.236613  -0.795884  -0.187791  0.592194
 ```
 
 # References
@@ -36,7 +36,7 @@ struct Kipping13 <: MultivariateDistribution{Continuous} end
 
 Base.length(::Kipping13) = 2
 
-function _rand!(rng::AbstractRNG, ::Kipping13, x::AbstractVector{T}) where T
+function _rand!(rng::AbstractRNG, ::Kipping13, x::AbstractVector{T}) where {T}
     q1, q2 = rand(rng, T, 2)
     sqrtq1 = sqrt(q1)
     twoq2 = 2 * q2
