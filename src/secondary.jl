@@ -24,6 +24,7 @@ where $f_p$ is to the primary flux, $f_s$ is to the secondary flux, and $\eta$ i
 
 # Examples
 ```jldoctest second
+using Orbits
 # equal size and limb darkening
 r = 1.0
 u = [0.4, 0.26]

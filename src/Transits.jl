@@ -56,6 +56,8 @@ Compute the relative flux by calculating the impact parameter at time `t` from t
 
 # Examples
 ```jldoctest orb
+julia> using Orbits
+
 julia> ld = PolynomialLimbDark([0.4, 0.26]);
 
 julia> orbit = SimpleOrbit(period=3, duration=1);
