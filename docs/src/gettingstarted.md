@@ -31,7 +31,7 @@ texp = [0.1 0.2 0.3]
 # no extra calculations made
 flux = @. ld(orbit, t, 0.2)
 # use quadrature to find time-averaged flux for each t
-flux_int = @. ld(orbit, t, 0.2, texp) 
+flux_int = @. ld(orbit, t, 0.2, texp)
 ```
 
 ![](assets/integrated.png)

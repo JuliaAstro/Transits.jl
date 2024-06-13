@@ -1,10 +1,16 @@
 using Documenter
 using Orbits
 using Transits
+using DocumenterCitations
 
 setup = quote
     using Transits
 end
+
+bib = CitationBibliography(
+    joinpath(@__DIR__, "src", "refs.bib");
+    style=:authoryear
+)
 
 DocMeta.setdocmeta!(Transits, :DocTestSetup, setup; recursive=true)
 
@@ -22,6 +28,7 @@ makedocs(;
     ),
     pages=pages,
     warnonly=[:missing_docs],
+    plugins=[bib],
 )
 
 deploydocs(; repo="github.com/JuliaAstro/Transits.jl", push_preview=true, devbranch="main")
