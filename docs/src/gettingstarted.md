@@ -65,7 +65,7 @@ flux = @. ld(orbit, t, 0.1)
 
 ## Gradients
 
-Gradients are provided in the form of [chain rules](https://github.com/JuliaDiff/ChinaRules.jl). The easiest way to access them is using an automatic differentiation (AD) library like [ForwardDiff.jl](https://github.com/JuliaDiff/ForwardDiff.jl) or [Zygote.jl](https://github.com/FluxML/Zygote.jl).
+Gradients are provided in the form of [chain rules](https://github.com/JuliaDiff/ChainRules.jl). The easiest way to access them is using an automatic differentiation (AD) library like [ForwardDiff.jl](https://github.com/JuliaDiff/ForwardDiff.jl) or [Zygote.jl](https://github.com/FluxML/Zygote.jl).
 
 ```julia
 using Zygote
