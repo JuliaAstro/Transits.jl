@@ -21,6 +21,7 @@ makedocs(;
         assets=String[],
     ),
     pages=pages,
+    warnonly=[:missing_docs],
 )
 
 deploydocs(; repo="github.com/JuliaAstro/Transits.jl", push_preview=true, devbranch="main")
