@@ -1,6 +1,7 @@
 using Documenter
 using Orbits
 using Transits
+using Documenter.Remotes: GitHub
 using DocumenterCitations
 
 setup = quote
@@ -19,7 +20,7 @@ include("pages.jl")
 makedocs(;
     modules=[Transits, Orbits],
     authors="Miles Lucas <mdlucas@hawaii.edu> and contributors",
-    repo="https://github.com/juliaastro/Transits.jl/blob/{commit}{path}#L{line}",
+    repo=GitHub("JuliaAstro/Transits.jl"),
     sitename="Transits.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
