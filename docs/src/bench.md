@@ -1,6 +1,6 @@
 # Benchmarks
 
-Transits.jl aims to be at least as fast as similar tools. [Limbdark.jl](https://github.com/rodluger/Limbdark.jl) is also written in Julia and [Agol et al. (2020)](https://ui.adsabs.harvard.edu/abs/2020AJ....159..123A/abstract) showed it outperforms starry, PyTransit, and batman in both runtime speed and numerical accuracy. The following benchmarks are works in progress, but they already show a marginal improvement on the Limbdark.jl implementation.
+Transits.jl aims to be at least as fast as similar tools. [Limbdark.jl](https://github.com/rodluger/Limbdark.jl) is also written in Julia and [ALFM2020](@citet) showed it outperforms starry, PyTransit, and batman in both runtime speed and numerical accuracy. The following benchmarks are works in progress, but they already show a marginal improvement on the Limbdark.jl implementation.
 
 ## Setup
 
@@ -21,3 +21,8 @@ The code can be found in `bench/`. You'll need to set up the environment yoursel
 
 ![](https://raw.githubusercontent.com/JuliaAstro/Transits.jl/main/bench/coeff_relative_timing.png)
 
+## References
+
+```@bibliography
+Pages = ["bench.md"]
+```

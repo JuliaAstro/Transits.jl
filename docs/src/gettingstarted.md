@@ -31,7 +31,7 @@ texp = [0.1 0.2 0.3]
 # no extra calculations made
 flux = @. ld(orbit, t, 0.2)
 # use quadrature to find time-averaged flux for each t
-flux_int = @. ld(orbit, t, 0.2, texp) 
+flux_int = @. ld(orbit, t, 0.2, texp)
 ```
 
 ![](assets/integrated.png)
@@ -65,7 +65,7 @@ flux = @. ld(orbit, t, 0.1)
 
 ## Gradients
 
-Gradients are provided in the form of [chain rules](https://github.com/JuliaDiff/ChinaRules.jl). The easiest way to access them is using an automatic differentiation (AD) library like [ForwardDiff.jl](https://github.com/JuliaDiff/ForwardDiff.jl) or [Zygote.jl](https://github.com/FluxML/Zygote.jl).
+Gradients are provided in the form of [chain rules](https://github.com/JuliaDiff/ChainRules.jl). The easiest way to access them is using an automatic differentiation (AD) library like [ForwardDiff.jl](https://github.com/JuliaDiff/ForwardDiff.jl) or [Zygote.jl](https://github.com/FluxML/Zygote.jl).
 
 ```julia
 using Zygote

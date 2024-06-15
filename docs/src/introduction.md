@@ -5,14 +5,13 @@
 Transit light curves are an essential tool used for the detection of
 [exoplanets](https://en.wikipedia.org/wiki/Exoplanet). To date, there have been over 4,300
 confirmed planets discovered in over 3,400 different star systems, with an additional
-2,400 candidates currently awaiting follow-up analysis and validation[^1]. Since the first
-confirmed discovery of an exoplanet -- as part of a multi-planetary system in 1992[^2],
-and the first exoplanet discovered around a Sun-like star shortly after in 1995[^3] --
+2,400 candidates currently awaiting follow-up analysis and validation.[^1] Since the first
+confirmed discovery of an exoplanet -- as part of a multi-planetary system in 1992 [WF1992](@cite),
+and the first exoplanet discovered around a Sun-like star shortly after in 1995 [MQ1995](@cite) --
 there has been an explosion in new discoveries, thanks in large part to the successful
 [Kepler/K2](https://www.nasa.gov/mission_pages/kepler/main/index.html) and
 [TESS](https://tess.mit.edu/) space missions. The large majority of these planets have
-been detected via the [transit
-method](https://exoplanets.nasa.gov/faq/31/whats-a-transit/):
+been detected via the [transit method](https://exoplanets.nasa.gov/faq/31/whats-a-transit/):
 
 ![](https://exoplanetarchive.ipac.caltech.edu/exoplanetplots/exo_dischist_cumulative_cb.png)
 [Exoplanet Archive](https://exoplanetarchive.ipac.caltech.edu)
@@ -54,8 +53,9 @@ impact parameter, $R_*$ is the radius of its star, and $\rho_*$ is the stellar
 density.
 
 ### Limb darkening
-Not shown above is an added dimension that `Transits.jl` excels in, [limb
-darkening](https://en.wikipedia.org/wiki/Limb_darkening#:~:text=Limb%20darkening%20is%20an%20optical,construct%20models%20with%20such%20gradients), demonstrated in the schematic below:
+Not shown above is an added dimension that `Transits.jl` excels in,
+[limb darkening](https://en.wikipedia.org/wiki/Limb_darkening),
+demonstrated in the schematic below:
 
 ![](https://user-images.githubusercontent.com/25312320/108404912-712f1c00-71ee-11eb-968e-b34001fe7a55.jpg)
 
@@ -82,24 +82,29 @@ spectrum*, which is filled with information about the planet's atmosphere and it
 summarized below:
 
 ![Text here!](https://user-images.githubusercontent.com/25312320/108021680-124e8480-6fed-11eb-8eaf-bbf9b0df217b.jpg)
-[Benneke & Seager (2012)](https://ui.adsabs.harvard.edu/abs/2012ApJ...753..100B/abstract)
+[BS2012](@citet)
 
 ![](https://s3.amazonaws.com/aasie/images/0004-637X/853/2/122/apjaaa08cf1_hr.jpg)
-[Rackham, Apai, & Giampapa (2018)](https://ui.adsabs.harvard.edu/abs/2018ApJ...853..122R/abstract)
+[RAG2018](@citet)
 
-Performing forward
-modeling (see, e.g., [Kempton et al. 2016](https://ui.adsabs.harvard.edu/abs/2017PASP..129d4402K/abstract), [Goyal et al. 2017](https://ui.adsabs.harvard.edu/abs/2018MNRAS.474.5158G/abstract)) and
-retrievals (see, e.g., [Barstow et al. 2020](https://ui.adsabs.harvard.edu/abs/2020MNRAS.493.4884B/abstract) and references therein) using these
-frameworks then allows us to explore exoplanetary atmospheres in never before seen detail.
+Performing forward modeling (see, e.g., [KLOASC2017](@citet),
+[GMSDTAECSBNMCH2018](@citet)) and retrievals (see, e.g., [BCGLRW2020](@citet)
+and references therein) using these frameworks then allows us to explore
+exoplanetary atmospheres in never before seen detail.
 
 ## Summary
 The detection and characterization of exoplanets through their transit light curves is a relatively new technique
 in the field of astronomy, with recent advances only being made possible through novel
-uses of large, ground-based telescopes and soon in the future with planned [ELTs](https://en.wikipedia.org/wiki/Extremely_large_telescope) and space based
+uses of large, ground-based telescopes and soon in the future with planned
+[ELTs](https://en.wikipedia.org/wiki/Extremely_large_telescope) and space based
 missions like [JWST](https://www.jwst.nasa.gov/). Studies using these observing facilities
-will require the fast and precise computation of transit light curves, which [`Transits.jl`](https://github.com/JuliaAstro/Transits.jl)
+will require the fast and precise computation of transit light curves, which
+[`Transits.jl`](https://github.com/JuliaAstro/Transits.jl)
 aims to provide.
 
+## Footnotes and references
 [^1]: https://exoplanetarchive.ipac.caltech.edu/
-[^2]: https://ui.adsabs.harvard.edu/abs/1992Natur.355..145W/abstract
-[^3]: https://ui.adsabs.harvard.edu/abs/1995Natur.378..355M/abstract
+
+```@bibliography
+Pages = ["introduction.md"]
+```
