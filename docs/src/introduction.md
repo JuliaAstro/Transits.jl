@@ -24,7 +24,7 @@ function of time defines the *white light curve* as seen in the schematic below:
 
 ![](https://upload.wikimedia.org/wikipedia/commons/1/10/Theoretical_Transiting_Exoplanet_Light_Curve.jpg)
 
-["How Do You Find an Exoplanet?" by John Asher Johnson](https://www.google.com/books/edition/How_Do_You_Find_an_Exoplanet/-DNJCgAAQBAJ?hl=en)
+["How Do You Find an Exoplanet?" by John Asher Johnson](@cite Johnson2015)
 
 Even just starting with a simple single planet system in a circular orbit, there is
 already a wealth of information encoded in this diagram. These observations give us
