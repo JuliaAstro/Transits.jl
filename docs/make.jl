@@ -2,19 +2,14 @@ using Documenter
 using Orbits
 using Transits
 using Documenter.Remotes: GitHub
-using DocumenterCitations
 
 setup = quote
     using Transits
 end
 
-bib = CitationBibliography(
-    joinpath(@__DIR__, "src", "refs.bib");
-    style=:authoryear
-)
-
 DocMeta.setdocmeta!(Transits, :DocTestSetup, setup; recursive=true)
 
+# gives us `pages` and `bib`
 include("pages.jl")
 
 makedocs(;
