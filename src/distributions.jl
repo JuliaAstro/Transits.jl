@@ -47,7 +47,7 @@ end
 
 _logpdf(::Kipping13, x::AbstractArray{T}) where {T} = zero(T)
 
-struct Kipping13Transform <: Bijector{1} end
+struct Kipping13Transform <: Bijector end
 
 function (::Kipping13Transform)(x::AbstractVector)
     usum = sum(x)
