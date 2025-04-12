@@ -1,7 +1,7 @@
 name = "Transits"
 uuid = "2e59a628-7bac-4d38-8059-3a73ba0928ab"
 authors = ["Miles Lucas <mdlucas@hawaii.edu> and contributors"]
-version = "0.4.0"
+version = "0.4.1"
 
 [deps]
 AstroLib = "c7932e45-9af1-51e7-9da9-f004cd3a462b"
