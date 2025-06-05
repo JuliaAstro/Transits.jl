@@ -19,7 +19,7 @@ makedocs(;
     sitename="Transits.jl",
     format=Documenter.HTML(;
         prettyurls=get(ENV, "CI", "false") == "true",
-        canonical="https://juliaastro.github.io/Transits.jl",
+        canonical="https://juliaastro.org/Transits/stable/",
         assets=String[],
     ),
     pages=pages,
@@ -27,4 +27,9 @@ makedocs(;
     plugins=[bib],
 )
 
-deploydocs(; repo="github.com/JuliaAstro/Transits.jl", push_preview=true, devbranch="main")
+deploydocs(;
+    repo = "github.com/JuliaAstro/Transits.jl",
+    push_preview = true,
+    devbranch = "main",
+    versions = ["stable" => "v^", "v#.#"], # Restrict to minor releases
+)
