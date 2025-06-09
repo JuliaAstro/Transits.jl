@@ -1,12 +1,12 @@
 # Transits.jl
 
-[![Build Status](https://github.com/juliaastro/Transits.jl/workflows/CI/badge.svg?branch=main)](https://github.com/juliaastro/Transits.jl/actions)
-[![PkgEval](https://juliaci.github.io/NanosoldierReports/pkgeval_badges/T/Transits.svg)](https://juliaci.github.io/NanosoldierReports/pkgeval_badges/report.html)
-[![Coverage](https://codecov.io/gh/juliaastro/Transits.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/juliaastro/Transits.jl)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliaastro.org/Transits/stable)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://juliaastro.org/Transits.jl/dev)
 
-[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliaastro.github.io/Transits.jl/stable)
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://juliaastro.github.io/Transits.jl/dev)
+[![CI](https://github.com/JuliaAstro/Transits.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/JuliaAstro/Transits.jl/actions/workflows/ci.yml)
+[![PkgEval](https://juliaci.github.io/NanosoldierReports/pkgeval_badges/T/Transits.svg)](https://juliaci.github.io/NanosoldierReports/pkgeval_badges/report.html)
+[![codecov](https://codecov.io/gh/juliaastro/Transits.jl/graph/badge.svg?token=8kQPWHAWdW)](https://codecov.io/gh/juliaastro/Transits.jl)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4544094.svg)](https://doi.org/10.5281/zenodo.4544094)
 
 Flexible photometric transit curves with limb darkening. The goals of this package are, in this order
