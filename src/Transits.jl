@@ -1,8 +1,7 @@
 module Transits
 
 using ChainRulesCore
-using Orbits
-using Orbits: AbstractOrbit
+using PlanetOrbits: AbstractOrbit, orbitsolve, posx, posy, posz
 using StaticArrays
 using Unitful
 
@@ -80,9 +79,10 @@ julia> ld(orbit, 0u"d", 0.1)
 ```
 """
 function compute(ld::AbstractLimbDark, orbit::AbstractOrbit, t, r)
-    coords = Orbits.relative_position(orbit, t)
+    sol = orbitsolve(orbit, t)
+    coords = -posy(sol), -posx(sol), posz(sol)
     # strip units, if necessary (e.g., KeplerianOrbit)
-    x, y, z = ustrip.(coords)
+    x, y, z = ustrip.(coords) .* 215.03215567054764
     # make sure los is in front of star
     if z > 0
         μ = sqrt(x^2 + y^2)
