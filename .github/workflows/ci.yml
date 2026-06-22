@@ -76,13 +76,6 @@ jobs:
         with:
           version: '1'
       - uses: julia-actions/cache@v3
-      - name: Instantiate docs environment
-        shell: julia --project=docs --color=yes -e {0}
-        run: |
-            using Pkg
-            Pkg.develop(PackageSpec(path=pwd()))
-            Pkg.instantiate()
-      - run: julia --project=docs --color=yes docs/make.jl
-        env:
+      - uses: julia-actions/julia-docdeploy@v1
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
