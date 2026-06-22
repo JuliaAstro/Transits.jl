@@ -62,8 +62,11 @@ jobs:
           version: '1'
       - uses: julia-actions/cache@v3
       - uses: julia-actions/julia-buildpkg@v1
-      - run: julia -e 'using Pkg; Pkg.add("Aqua")'
-      - run: julia --project=@. -e 'using Aqua, Transits; Aqua.test_all(Transits, ambiguities=false)'
+      - name: Install Aqua
+        shell: julia --color=yes {0}
+        run: using Pkg; Pkg.add("Aqua")
+      - run: using Aqua, Transits; Aqua.test_all(Transits, ambiguities=false)
+        shell: julia --project=@. --color=yes {0}
   docs:
     name: Documentation
     runs-on: ubuntu-latest
@@ -73,12 +76,13 @@ jobs:
         with:
           version: '1'
       - uses: julia-actions/cache@v3
-      - run: |
-          julia --project=docs -e '
+      - name: Instantiate docs environment
+        shell: julia --project=docs --color=yes -e {0}
+        run: |
             using Pkg
             Pkg.develop(PackageSpec(path=pwd()))
-            Pkg.instantiate()'
-      - run: julia --project=docs docs/make.jl
+            Pkg.instantiate()
+      - run: julia --project=docs --color=yes docs/make.jl
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
