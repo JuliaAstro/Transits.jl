@@ -136,7 +136,9 @@ end
 
 ####
 
-function frule((_, Δld, Δb, Δr), ::typeof(compute), ld::LD, b, r) where {LD<:QuadLimbDark}
+function frule(
+    (_, Δld, Δb, Δr)::Tuple, ::typeof(compute), ld::LD, b, r
+) where {LD<:QuadLimbDark}
     f, dfdg, dfdb, dfdr = compute_grad(ld, b, r)
     ∂g_n = dot(dfdg, Δld.g_n)
     return f, ∂g_n + dfdb * Δb + dfdr * Δr
@@ -153,7 +155,7 @@ function rrule(::typeof(compute), ld::LD, b, r) where {LD<:QuadLimbDark}
     return f, compute_pullback
 end
 
-function frule((_, Δu_n), ::Type{<:QuadLimbDark}, u_n::AbstractVector{T}) where {T}
+function frule((_, Δu_n)::Tuple, ::Type{<:QuadLimbDark}, u_n::AbstractVector{T}) where {T}
     Ω = QuadLimbDark(u_n)
     ∇g_n = SA[
         -one(T) -1.5
