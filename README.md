@@ -3,7 +3,7 @@
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliaastro.org/Transits/stable)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://juliaastro.org/Transits.jl/dev)
 
-[![CI](https://github.com/JuliaAstro/Transits.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/JuliaAstro/Transits.jl/actions/workflows/ci.yml)
+[![Test](https://github.com/JuliaAstro/Transits.jl/actions/workflows/Test.yml/badge.svg)](https://github.com/JuliaAstro/Transits.jl/actions/workflows/Test.yml)
 [![PkgEval](https://juliaci.github.io/NanosoldierReports/pkgeval_badges/T/Transits.svg)](https://juliaci.github.io/NanosoldierReports/pkgeval_badges/report.html)
 [![codecov](https://codecov.io/gh/juliaastro/Transits.jl/graph/badge.svg?token=8kQPWHAWdW)](https://codecov.io/gh/juliaastro/Transits.jl)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
