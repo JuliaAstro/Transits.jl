@@ -412,7 +412,7 @@ function compute_grad(ld::PolynomialLimbDark, b::S, r) where {S}
 end
 
 function frule(
-    (_, Δld, Δb, Δr), ::typeof(compute), ld::LD, b, r
+    (_, Δld, Δb, Δr)::Tuple, ::typeof(compute), ld::LD, b, r
 ) where {LD<:PolynomialLimbDark}
     f, dfdg, dfdb, dfdr = compute_grad(ld, b, r)
     ∂g_n = dot(dfdg, Δld.g_n)
@@ -431,7 +431,7 @@ function rrule(::typeof(compute), ld::LD, b, r) where {LD<:PolynomialLimbDark}
 end
 
 function frule(
-    (_, Δu_n), ::Type{<:PolynomialLimbDark}, u::AbstractVector{S}; maxiter=100
+    (_, Δu_n)::Tuple, ::Type{<:PolynomialLimbDark}, u::AbstractVector{S}; maxiter=100
 ) where {S}
     T = float(S)
     # add constant u_0 term
