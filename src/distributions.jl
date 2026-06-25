@@ -1,10 +1,3 @@
-using Random: AbstractRNG
-using Bijectors
-import Bijectors: logabsdetjac, bijector
-using Distributions: MultivariateDistribution, Continuous
-import Distributions: _rand!, _logpdf
-using StatsFuns
-
 """
     Kipping13()
 

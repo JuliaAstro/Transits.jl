@@ -1,6 +1,3 @@
-
-using StaticArrays
-
 struct QuadLimbDark{T,VT<:StaticVector{3,T}} <: AbstractLimbDark
     n_max::Int
     u_n::VT

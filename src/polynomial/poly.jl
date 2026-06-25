@@ -1,7 +1,3 @@
-
-using SpecialFunctions: loggamma
-using LinearAlgebra: dot
-
 struct PolynomialLimbDark{
     T,VT<:AbstractVector{T},MT<:AbstractMatrix{T},AT<:AbstractArray{T}
 } <: AbstractLimbDark

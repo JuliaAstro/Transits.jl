@@ -1,10 +1,25 @@
 module Transits
 
-using ChainRulesCore
-using Orbits
-using Orbits: AbstractOrbit
-using StaticArrays
-using Unitful
+using Orbits: Orbits
+using StaticArrays: @SVector, SA, StaticVector
+using Unitful: ustrip
+
+# polynomial
+using ChainRulesCore: NoTangent, ProjectTo, Tangent
+import ChainRulesCore: frule, rrule
+using LinearAlgebra: dot
+using SpecialFunctions: loggamma
+
+# distributions.jl
+using Random: AbstractRNG
+using Bijectors: Bijector, Inverse
+import Bijectors: logabsdetjac, bijector
+using Distributions: MultivariateDistribution, Continuous
+import Distributions: _rand!, _logpdf
+using StatsFuns: logistic, softplus
+
+# integrated.jl
+using FastGaussQuadrature: gausslegendre, gausslobatto, gaussradau
 
 export AbstractLimbDark,
     PolynomialLimbDark,
@@ -50,7 +65,7 @@ Compute the relative flux for the given impact parameter `b` and radius ratio `r
 function compute end
 
 """
-    compute(::AbstractLimbDark, orbit::AbstractOrbit, t, r)
+    compute(::AbstractLimbDark, orbit::Orbits.AbstractOrbit, t, r)
 
 Compute the relative flux by calculating the impact parameter at time `t` from the given orbit. The time needs to be compatible with the period of the orbit, nominally in days.
 
@@ -79,7 +94,7 @@ julia> ld(orbit, 0u"d", 0.1)
 0.9878664434953113
 ```
 """
-function compute(ld::AbstractLimbDark, orbit::AbstractOrbit, t, r)
+function compute(ld::AbstractLimbDark, orbit::Orbits.AbstractOrbit, t, r)
     coords = Orbits.relative_position(orbit, t)
     # strip units, if necessary (e.g., KeplerianOrbit)
     x, y, z = ustrip.(coords)
