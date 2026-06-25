@@ -1,6 +1,3 @@
-import ChainRulesCore: frule, rrule
-using LinearAlgebra
-
 function compute_gn_jac(u_n::AbstractVector{T}) where {T}
     n = length(u_n) - 1
     g_n = zero(u_n)

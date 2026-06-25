@@ -1,6 +1,3 @@
-
-using FastGaussQuadrature
-
 struct IntegratedLimbDark{LD<:AbstractLimbDark,WT,NT} <: AbstractLimbDark
     driver::LD
     order::Int
@@ -58,11 +55,11 @@ function IntegratedLimbDark(u::AbstractVector; kwargs...)
     return IntegratedLimbDark(driver; kwargs...)
 end
 
-function compute(ld::IntegratedLimbDark, orbit::AbstractOrbit, t, r; texp=nothing)
+function compute(ld::IntegratedLimbDark, orbit::Orbits.AbstractOrbit, t, r; texp=nothing)
     return compute(ld, orbit, t, r, texp)
 end
 
-function compute(ld::IntegratedLimbDark, orbit::AbstractOrbit, t, r, texp)
+function compute(ld::IntegratedLimbDark, orbit::Orbits.AbstractOrbit, t, r, texp)
     # perform change of interval
     half_texp = 0.5 * texp
     # perform quadrature
@@ -73,7 +70,7 @@ function compute(ld::IntegratedLimbDark, orbit::AbstractOrbit, t, r, texp)
     return 0.5 * flux
 end
 
-function compute(ld::IntegratedLimbDark, orbit::AbstractOrbit, t, r, ::Nothing)
+function compute(ld::IntegratedLimbDark, orbit::Orbits.AbstractOrbit, t, r, ::Nothing)
     return compute(ld.driver, orbit, t, r)
 end
 

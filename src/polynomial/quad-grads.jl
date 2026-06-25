@@ -1,6 +1,3 @@
-import ChainRulesCore: frule, rrule
-using LinearAlgebra
-
 function compute_grad(ld::QuadLimbDark, b::S, r) where {S}
     T = float(S)
     bcut = 1e-3
