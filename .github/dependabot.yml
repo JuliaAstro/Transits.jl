@@ -6,11 +6,12 @@ updates:
     schedule:
       interval: "weekly"
   - package-ecosystem: "julia"
-    directories: ["/", "/docs", "/test"] # Location of Julia projects
+    directory: "/" # Location of julia project
     schedule:
       interval: "weekly"
+    groups: # Group all julia package updates into a single PR
+      all-julia-packages:
+        patterns:
+          - "*"
     ignore:
       - dependency-name: "Transits" # Ignore package itself
-    groups:
-      per-dependency:
-        group-by: dependency-name
