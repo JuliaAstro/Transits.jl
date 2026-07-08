@@ -9,6 +9,10 @@ Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [compat]
+ChainRulesCore = "1.26.1"
 Documenter = "1"
 DocumenterCitations = "1"
+Orbits = "0.1.1"
+StableRNGs = "1.0.4"
 Unitful = "1"
+Zygote = "0.7.11"
